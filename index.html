@@ -1,11 +1,24 @@
 <!doctype html>
 <html lang="en">
   <head>
+    <script>
+      // Apply the saved/preferred theme before any CSS paints, to avoid a flash.
+      // Keep in sync with src/theme/themes.js.
+      (function () {
+        var ids = ['navy', 'midnight', 'aurum'];
+        var t = null;
+        try { t = localStorage.getItem('xt-theme'); } catch (e) { /* storage blocked */ }
+        if (ids.indexOf(t) < 0) {
+          t = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'midnight' : 'navy';
+        }
+        document.documentElement.setAttribute('data-theme', t);
+      })();
+    </script>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>XionTechs — Get IT Done</title>
-    <meta name="description" content="XionTechs delivers consumer-centric technology solutions: product engineering, AI-driven analytics, custom app development, and cloud computing." />
+    <meta name="description" content="XionTechs builds AI agents and smart connected platforms for businesses — from a first pilot to connected operations at scale." />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />

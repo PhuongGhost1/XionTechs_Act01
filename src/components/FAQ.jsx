@@ -24,7 +24,7 @@ export default function FAQ() {
                   className={`ml-4 h-4 w-4 shrink-0 text-accent transition-transform duration-300 group-hover:scale-110 ${isOpen ? 'rotate-45' : ''}`}
                 />
               </button>
-              {isOpen && <p className="pb-5 text-sm text-ink/60">{f.a}</p>}
+              {isOpen && <p className="pb-5 text-sm text-muted">{f.a}</p>}
             </div>
           )
         })}

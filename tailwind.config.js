@@ -1,19 +1,27 @@
 /** @type {import('tailwindcss').Config} */
+const token = (name) => `rgb(var(--${name}) / <alpha-value>)`
+
 export default {
   content: ['./index.html', './src/**/*.{js,jsx}'],
   theme: {
     extend: {
       colors: {
-        ink: '#101826',
-        paper: '#f8f9fb',
-        // Sampled directly from public/XionTechs-Logo_s.png (the navy in the wordmark) —
-        // used for buttons, links, and icon accents.
-        accent: '#183860',
-        accentHover: '#122c4c',
-        accentSoft: '#e5ebf3',
-        // Deeper near-black navy (same hue family, darkened) for full-bleed dark sections.
-        navy: '#0a1a2e',
-        line: '#e2e5eb',
+        // All values resolve to CSS variables defined per data-theme in src/index.css.
+        paper: token('bg'),
+        surface: token('surface'),
+        ink: token('ink'),
+        muted: token('muted'),
+        line: token('line'),
+        primary: token('primary'),
+        primaryHover: token('primary-hover'),
+        primarySoft: token('primary-soft'),
+        primaryInk: token('primary-ink'),
+        accent: token('accent'),
+        navy: token('navy'),
+        navyInk: token('navy-ink'),
+        // Temporary aliases so not-yet-rewritten components keep styling. Removed in Task 12.
+        accentHover: token('primary-hover'),
+        accentSoft: token('primary-soft'),
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],

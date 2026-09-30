@@ -13,7 +13,7 @@ export default function IconBadge({ icon, size = 'md', className = '' }) {
 
   return (
     <span
-      className={`inline-flex shrink-0 items-center justify-center rounded-xl bg-accentSoft text-accent transition-all duration-300 ease-out group-hover:-translate-y-0.5 group-hover:rotate-6 group-hover:scale-110 group-hover:bg-accent group-hover:text-paper ${sizes[size]} ${className}`}
+      className={`inline-flex shrink-0 items-center justify-center rounded-xl bg-primarySoft text-primary transition-all duration-300 ease-out group-hover:-translate-y-0.5 group-hover:rotate-6 group-hover:scale-110 group-hover:bg-primary group-hover:text-primaryInk ${sizes[size]} ${className}`}
     >
       <Icon className={iconSizes[size]} strokeWidth={1.75} />
     </span>

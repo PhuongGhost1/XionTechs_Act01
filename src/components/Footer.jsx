@@ -3,7 +3,7 @@ import SocialIcon from './SocialIcon'
 
 export default function Footer() {
   return (
-    <footer className="border-t border-line bg-navy text-paper/60">
+    <footer className="theme-fade border-t border-line bg-navy text-navyInk/60">
       <div className="mx-auto grid max-w-6xl grid-cols-1 gap-10 px-6 py-16 sm:grid-cols-2 lg:grid-cols-4">
         <div>
           <img src={company.logo} alt={company.name} className="h-8 w-auto brightness-0 invert" />
@@ -15,7 +15,7 @@ export default function Footer() {
                 href={s.href}
                 target="_blank"
                 rel="noreferrer"
-                className="flex h-9 w-9 items-center justify-center rounded-full border border-paper/20 text-paper/70 transition-all duration-300 hover:-translate-y-0.5 hover:scale-110 hover:border-accent hover:bg-accent hover:text-paper"
+                className="flex h-9 w-9 items-center justify-center rounded-full border border-navyInk/20 text-navyInk/70 transition-all duration-300 hover:-translate-y-0.5 hover:scale-110 hover:border-primary hover:bg-primary hover:text-primaryInk"
                 aria-label={s.label}
               >
                 <SocialIcon name={s.icon} />
@@ -25,7 +25,7 @@ export default function Footer() {
         </div>
 
         <div>
-          <h3 className="text-sm font-semibold text-paper">Address</h3>
+          <h3 className="text-sm font-semibold text-navyInk">Address</h3>
           <ul className="mt-4 space-y-2 text-sm">
             <li>{contact.email}</li>
             {contact.phones.map((p) => (
@@ -38,7 +38,7 @@ export default function Footer() {
         </div>
 
         <div>
-          <h3 className="text-sm font-semibold text-paper">Company</h3>
+          <h3 className="text-sm font-semibold text-navyInk">Company</h3>
           <ul className="mt-4 space-y-2 text-sm">
             {footerCompanyLinks.map((l) => (
               <li key={l}>{l}</li>
@@ -47,7 +47,7 @@ export default function Footer() {
         </div>
 
         <div>
-          <h3 className="text-sm font-semibold text-paper">Services</h3>
+          <h3 className="text-sm font-semibold text-navyInk">Services</h3>
           <ul className="mt-4 space-y-2 text-sm">
             {footerServiceLinks.map((l) => (
               <li key={l}>{l}</li>
@@ -56,7 +56,7 @@ export default function Footer() {
         </div>
       </div>
 
-      <div className="border-t border-paper/10 px-6 py-6 text-center text-sm">
+      <div className="border-t border-navyInk/10 px-6 py-6 text-center text-sm">
         &copy; {new Date().getFullYear()} {company.legalName}. All Rights Reserved.
       </div>
     </footer>
