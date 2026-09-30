@@ -5,11 +5,12 @@ import AgentDemo from './components/AgentDemo'
 import WhyUs from './components/WhyUs'
 import Roadmap from './components/Roadmap'
 import CaseStudies from './components/CaseStudies'
-import Testimonials from './components/Testimonials'
 import FAQ from './components/FAQ'
 import Contact from './components/Contact'
 import Footer from './components/Footer'
 
+// Testimonials.jsx is intentionally not rendered: the `testimonials` array is empty until
+// the team supplies real client quotes (see content/TODO.md).
 export default function App() {
   return (
     <div className="min-h-screen">
@@ -21,7 +22,6 @@ export default function App() {
         <WhyUs />
         <Roadmap />
         <CaseStudies />
-        <Testimonials />
         <FAQ />
         <Contact />
       </main>
