@@ -90,3 +90,9 @@ just at the end.
 - lucide-react's current version ships no brand/social glyphs (no `Facebook`,
   `Linkedin` exports) — added a small hand-rolled `SocialIcon` component with simple
   outline marks in the same stroke style rather than pulling in another dependency.
+
+## 2026-09-30 — test infrastructure and content guard (Phuong Hoang + Claude)
+- Added Vitest v2.1.9 as a dev-only dependency with content-guard test that fails on any "lorem" string.
+- Bundle baseline confirmed: `index-*.js` 179.78 kB / **56.02 kB gzip** (unchanged by Vitest installation).
+- Fixed ESLint configuration to properly handle JSX component identifiers: updated `no-unused-vars` rule with patterns for both component names (uppercase letters) and underscore-prefixed parameters.
+- Test: 1/1 passing. Lint and build both pass.
