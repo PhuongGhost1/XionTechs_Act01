@@ -2,8 +2,7 @@ import Nav from './components/Nav'
 import Hero from './components/Hero'
 import Pillars from './components/Pillars'
 import AgentDemo from './components/AgentDemo'
-import WhoWeAre from './components/WhoWeAre'
-import About from './components/About'
+import WhyUs from './components/WhyUs'
 import CaseStudies from './components/CaseStudies'
 import Testimonials from './components/Testimonials'
 import FAQ from './components/FAQ'
@@ -18,8 +17,7 @@ export default function App() {
         <Hero />
         <Pillars />
         <AgentDemo />
-        <WhoWeAre />
-        <About />
+        <WhyUs />
         <CaseStudies />
         <Testimonials />
         <FAQ />
