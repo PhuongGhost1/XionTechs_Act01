@@ -22,7 +22,7 @@ export default function Roadmap() {
           }
         })
       },
-      { threshold: 0.5 },
+      { threshold: 0.15 },
     )
     itemRefs.current.forEach((el) => el && io.observe(el))
     return () => io.disconnect()

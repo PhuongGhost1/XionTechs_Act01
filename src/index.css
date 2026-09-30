@@ -105,13 +105,12 @@ body {
   transform: none;
 }
 
-/* Roadmap stages light up on scroll */
+/* Roadmap stages light up on scroll. Only chrome changes — text keeps full contrast. */
 .roadmap-stage {
-  opacity: 0.55;
-  transition: opacity 500ms ease, border-color 500ms ease, background-color 500ms ease;
+  transition: border-color 500ms ease, background-color 500ms ease, box-shadow 500ms ease;
 }
 .roadmap-stage-on {
-  opacity: 1;
+  box-shadow: 0 10px 30px -12px rgb(var(--primary) / 0.35);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -127,5 +126,5 @@ body {
   }
   .demo-step { opacity: 1; transform: none; transition: none; }
   .demo-connector > span { transition: none; }
-  .roadmap-stage { opacity: 1; transition: none; }
+  .roadmap-stage { transition: none; }
 }
