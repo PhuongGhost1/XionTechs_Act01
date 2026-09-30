@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { Pause, Play, RotateCcw } from 'lucide-react'
-import { agentScenarios } from '../content/site'
+import { agentScenarios, sections } from '../content/site'
 import { iconMap, stepIcons } from './icons'
 
 const STEP_MS = 1200
@@ -76,11 +76,9 @@ export default function AgentDemo() {
 
   return (
     <section id="demo" ref={sectionRef} className="mx-auto max-w-6xl px-6 py-20">
-      <p className="text-xs font-medium uppercase tracking-wide text-accent">Agent demo</p>
-      <h2 className="mt-3 text-3xl md:text-4xl">See what an AI agent does for your business</h2>
-      <p className="mt-3 max-w-xl text-muted">
-        Pick a situation. Watch how an agent takes it from request to result while your team only handles the exceptions.
-      </p>
+      <p className="text-xs font-medium uppercase tracking-wide text-accent">{sections.demo.eyebrow}</p>
+      <h2 className="mt-3 text-3xl md:text-4xl">{sections.demo.title}</h2>
+      <p className="mt-3 max-w-xl text-muted">{sections.demo.intro}</p>
 
       <div role="tablist" aria-label="Agent scenarios" className="mt-10 flex flex-wrap gap-2" onKeyDown={onTabKey}>
         {agentScenarios.map((s, i) => {
@@ -123,7 +121,7 @@ export default function AgentDemo() {
             <div className="flex gap-2">
               <button
                 type="button"
-                onClick={() => setPlaying((p) => !p)}
+                onClick={() => (done ? selectTab(active) : setPlaying((p) => !p))}
                 aria-label={playing ? 'Pause' : 'Play'}
                 className="flex h-9 w-9 items-center justify-center rounded-full border border-line text-ink/70 transition hover:border-primary hover:text-primary"
               >

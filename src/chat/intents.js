@@ -34,7 +34,7 @@ export const intents = [
     chip: 'How does a project start?',
     keywords: ['start', 'begin', 'process', 'roadmap', 'pilot', 'first step', 'work with', 'engage', 'how do we'],
     answer: () => ({
-      text: `It starts with ${roadmap[0].stage}: ${roadmap[0].get} Then a ${roadmap[1].stage}: ${roadmap[1].get}`,
+      text: `Draft engagement model (pending team sign-off): It starts with ${roadmap[0].stage}: ${roadmap[0].get} Then a ${roadmap[1].stage}: ${roadmap[1].get}`,
       actions: [{ type: 'scroll', label: 'See the roadmap', target: 'roadmap' }],
     }),
   },

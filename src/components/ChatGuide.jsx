@@ -11,7 +11,9 @@ const NUDGE_MS = 8000
 function loadHistory() {
   try {
     const raw = sessionStorage.getItem(HISTORY_KEY)
-    return raw ? JSON.parse(raw) : []
+    if (!raw) return []
+    const parsed = JSON.parse(raw)
+    return Array.isArray(parsed) ? parsed.filter((m) => m && (m.from === 'user' || m.from === 'bot') && typeof m.text === 'string') : []
   } catch {
     return []
   }
@@ -42,7 +44,10 @@ function markNudgeSeen() {
 }
 
 function scrollTo(id) {
-  document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  document.getElementById(id)?.scrollIntoView({
+    behavior: window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
+    block: 'start',
+  })
 }
 
 export default function ChatGuide() {
@@ -151,7 +156,7 @@ export default function ChatGuide() {
         <button
           type="button"
           onClick={openPanel}
-          className="theme-fade fixed bottom-[5.5rem] right-6 z-40 rounded-2xl border border-line bg-surface px-4 py-2 text-sm shadow-lg"
+          className="theme-fade fixed bottom-[5.5rem] right-6 z-[60] rounded-2xl border border-line bg-surface px-4 py-2 text-sm shadow-lg"
         >
           {chat.nudge}
         </button>
@@ -164,7 +169,7 @@ export default function ChatGuide() {
         aria-expanded={open}
         aria-controls="chat-guide-panel"
         onClick={() => (open ? close() : openPanel())}
-        className="fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primaryInk shadow-lg transition hover:bg-primaryHover"
+        className="fixed bottom-6 right-6 z-[70] flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primaryInk shadow-lg transition hover:bg-primaryHover"
       >
         {open ? <X className="h-6 w-6" /> : <MessageCircle className="h-6 w-6" />}
       </button>
@@ -175,7 +180,7 @@ export default function ChatGuide() {
           ref={panelRef}
           role="dialog"
           aria-label="Ask XionTechs"
-          className="chat-panel theme-fade fixed z-40 flex flex-col border border-line bg-surface shadow-2xl"
+          className="chat-panel theme-fade fixed z-[60] flex flex-col border border-line bg-surface shadow-2xl"
         >
           <header className="border-b border-line px-4 py-3">
             <p className="font-semibold">Ask XionTechs</p>

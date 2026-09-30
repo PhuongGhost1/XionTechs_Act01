@@ -69,4 +69,8 @@ describe('getAnswer', () => {
     expect((await getAnswer('', { intentId: 'nope' })).id).toBe('fallback')
     expect((await getAnswer('where are you located', { intentId: 'nope' })).id).toBe('offices')
   })
+
+  it('labels the draft roadmap in the start answer', async () => {
+    expect((await getAnswer('', { intentId: 'start' })).text).toMatch(/^Draft engagement model/)
+  })
 })

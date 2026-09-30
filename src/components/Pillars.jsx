@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { ChevronDown } from 'lucide-react'
-import { pillars } from '../content/site'
+import { pillars, sections } from '../content/site'
 import IconBadge from './IconBadge'
 import { iconMap } from './icons'
 
@@ -10,11 +10,9 @@ export default function Pillars() {
   return (
     <section id="solutions" className="theme-fade border-t border-line bg-surface/60">
       <div className="mx-auto max-w-6xl px-6 py-20">
-        <p className="text-xs font-medium uppercase tracking-wide text-accent">Solutions</p>
-        <h2 className="mt-3 text-3xl md:text-4xl">Three ways we get IT done</h2>
-        <p className="mt-3 max-w-xl text-muted">
-          Start with an agent, connect your operations, and lean on a full engineering team when it's time to build.
-        </p>
+        <p className="text-xs font-medium uppercase tracking-wide text-accent">{sections.solutions.eyebrow}</p>
+        <h2 className="mt-3 text-3xl md:text-4xl">{sections.solutions.title}</h2>
+        <p className="mt-3 max-w-xl text-muted">{sections.solutions.intro}</p>
 
         <div className="mt-12 grid grid-cols-1 gap-6 lg:grid-cols-3">
           {pillars.map((p) => {

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { roadmap } from '../content/site'
+import { roadmap, sections } from '../content/site'
 import IconBadge from './IconBadge'
 import { iconMap } from './icons'
 
@@ -31,12 +31,10 @@ export default function Roadmap() {
   return (
     <section id="roadmap" className="theme-fade border-t border-line bg-surface/60">
       <div className="mx-auto max-w-6xl px-6 py-20">
-        <p className="text-xs font-medium uppercase tracking-wide text-accent">How we work</p>
-        <h2 className="mt-3 text-3xl md:text-4xl">From idea to agent, one step at a time</h2>
-        <p className="mt-3 max-w-xl text-muted">
-          Start small and low-risk. Each stage ends with something you can see and a decision you control.
-        </p>
-        <p className="mt-2 text-xs italic text-muted">Draft engagement model — pending team sign-off.</p>
+        <p className="text-xs font-medium uppercase tracking-wide text-accent">{sections.roadmap.eyebrow}</p>
+        <h2 className="mt-3 text-3xl md:text-4xl">{sections.roadmap.title}</h2>
+        <p className="mt-3 max-w-xl text-muted">{sections.roadmap.intro}</p>
+        <p className="mt-2 text-xs italic text-muted">{sections.roadmap.draftNote}</p>
 
         <ol className="mt-12 grid grid-cols-1 gap-8 lg:grid-cols-4 lg:gap-6">
           {roadmap.map((r, i) => {

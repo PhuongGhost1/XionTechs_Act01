@@ -136,6 +136,7 @@ body {
   width: 360px;
   height: 480px;
   border-radius: 1rem;
+  max-height: calc(100dvh - 7rem);
 }
 @media (max-width: 479px) {
   .chat-panel {

@@ -10,7 +10,7 @@ export default function WhyUs() {
   return (
     <section id="why-us" className="theme-fade border-t border-line bg-navy text-navyInk">
       <div className="mx-auto max-w-6xl px-6 py-20">
-        <p className="text-xs font-medium uppercase tracking-wide text-navyInk/50">{whyChooseUs.eyebrow}</p>
+        <p className="text-xs font-medium uppercase tracking-wide text-navyInk/60">{whyChooseUs.eyebrow}</p>
         <h2 className="mt-3 max-w-xl text-3xl md:text-4xl">{whyChooseUs.title}</h2>
         <p className="mt-4 max-w-xl text-navyInk/60">{whyChooseUs.body}</p>
 
@@ -22,7 +22,7 @@ export default function WhyUs() {
                 <IconBadge icon={Icon} size="sm" />
                 <dt className="mt-4 font-display text-3xl">{s.value}</dt>
                 <dd className="mt-1 text-sm font-medium text-navyInk/70">{s.label}</dd>
-                <dd className="mt-2 text-sm text-navyInk/50">{s.desc}</dd>
+                <dd className="mt-2 text-sm text-navyInk/60">{s.desc}</dd>
               </div>
             )
           })}
@@ -30,7 +30,7 @@ export default function WhyUs() {
 
         <div className="mt-16 grid grid-cols-1 gap-12 lg:grid-cols-2">
           <div>
-            <p className="text-xs font-medium uppercase tracking-wide text-navyInk/50">{whoWeAre.eyebrow}</p>
+            <p className="text-xs font-medium uppercase tracking-wide text-navyInk/60">{whoWeAre.eyebrow}</p>
             <h3 className="mt-3 text-2xl">{whoWeAre.title}</h3>
             <p className="mt-4 text-navyInk/60">{whoWeAre.body}</p>
             <ul className="mt-6 space-y-3">

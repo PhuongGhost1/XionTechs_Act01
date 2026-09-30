@@ -350,3 +350,23 @@ export const contact = {
 // testi_2_1.png, a "CTO of Portfolio" title, never actually displayed to visitors). We do not
 // carry it over. This section stays empty/placeholder until the team has real client quotes.
 export const testimonials = []
+
+// PLACEHOLDER: redesign section copy, pending team sign-off.
+export const sections = {
+  solutions: {
+    eyebrow: 'Solutions',
+    title: 'Three ways we get IT done',
+    intro: "Start with an agent, connect your operations, and lean on a full engineering team when it's time to build.",
+  },
+  demo: {
+    eyebrow: 'Agent demo',
+    title: 'See what an AI agent does for your business',
+    intro: 'Pick a situation. Watch how an agent takes it from request to result while your team only handles the exceptions.',
+  },
+  roadmap: {
+    eyebrow: 'How we work',
+    title: 'From idea to agent, one step at a time',
+    intro: 'Start small and low-risk. Each stage ends with something you can see and a decision you control.',
+    draftNote: 'Draft engagement model — pending team sign-off.',
+  },
+}

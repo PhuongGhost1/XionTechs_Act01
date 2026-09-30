@@ -1,8 +1,8 @@
 // Theme registry. Colour values live in src/index.css as CSS variables keyed by
 // data-theme; the swatches here are only for the picker preview.
 export const THEMES = [
-  { id: 'navy', label: 'Classic Navy', swatch: ['#f8f9fb', '#183860', '#b7791f'] },
-  { id: 'midnight', label: 'Midnight', swatch: ['#0a1a2e', '#e5a52a', '#5b8bd0'] },
+  { id: 'navy', label: 'Classic Navy', swatch: ['#f8f9fb', '#183860', '#925e0c'] },
+  { id: 'midnight', label: 'Midnight', swatch: ['#0a1a2e', '#e5a52a', '#6898da'] },
   { id: 'aurum', label: 'Aurum', swatch: ['#fbf7ef', '#e5a52a', '#183860'] },
 ]
 
