@@ -94,6 +94,17 @@ body {
   animation: hero-pulse 2.4s ease-in-out infinite;
 }
 
+/* Agent demo step reveal */
+.demo-step {
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 400ms ease, transform 400ms ease;
+}
+.demo-step-visible {
+  opacity: 1;
+  transform: none;
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
@@ -105,4 +116,6 @@ body {
   .hero-node {
     animation: none;
   }
+  .demo-step { opacity: 1; transform: none; transition: none; }
+  .demo-connector > span { transition: none; }
 }

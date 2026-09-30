@@ -107,3 +107,6 @@ just at the end.
   no-unused-vars errors on JSX component identifiers. Fixed by narrowing
   `argsIgnorePattern` to `^_` and keeping `varsIgnorePattern: '^[A-Z_]'` to ignore
   capitalised component/icon imports that are used in JSX but not visible to core ESLint.
+- Agent demo: three invented scenarios (support, inventory, smart factory) rendered with
+  an always-visible "Illustrative scenario — not a client case study" badge, and a test
+  that fails if any outcome line contains a digit, so no invented metric can slip in.
