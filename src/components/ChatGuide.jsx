@@ -25,6 +25,22 @@ function saveHistory(items) {
   }
 }
 
+function nudgeSeen() {
+  try {
+    return sessionStorage.getItem(NUDGE_KEY) === '1'
+  } catch {
+    return false
+  }
+}
+
+function markNudgeSeen() {
+  try {
+    sessionStorage.setItem(NUDGE_KEY, '1')
+  } catch {
+    /* ignore */
+  }
+}
+
 function scrollTo(id) {
   document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
 }
@@ -39,27 +55,25 @@ export default function ChatGuide() {
   const panelRef = useRef(null)
   const inputRef = useRef(null)
   const logRef = useRef(null)
+  const nudgeTimer = useRef(null)
 
-  // One-time nudge, never auto-open.
+  // One-time nudge, never auto-open. Marked seen when shown or on any interaction.
   useEffect(() => {
-    let seen = false
-    try {
-      seen = sessionStorage.getItem(NUDGE_KEY) === '1'
-    } catch {
-      /* ignore */
-    }
-    if (seen) return
-    const t = setTimeout(() => setNudge(true), NUDGE_MS)
-    return () => clearTimeout(t)
+    if (nudgeSeen()) return
+    nudgeTimer.current = setTimeout(() => {
+      nudgeTimer.current = null
+      if (nudgeSeen()) return
+      markNudgeSeen()
+      setNudge(true)
+    }, NUDGE_MS)
+    return () => clearTimeout(nudgeTimer.current)
   }, [])
 
   function dismissNudge() {
+    clearTimeout(nudgeTimer.current)
+    nudgeTimer.current = null
     setNudge(false)
-    try {
-      sessionStorage.setItem(NUDGE_KEY, '1')
-    } catch {
-      /* ignore */
-    }
+    markNudgeSeen()
   }
 
   // Escape closes; Tab is trapped inside the panel.
@@ -72,11 +86,14 @@ export default function ChatGuide() {
         return
       }
       if (e.key !== 'Tab' || !panelRef.current) return
-      const focusables = panelRef.current.querySelectorAll('button, [href], input, [tabindex]:not([tabindex="-1"])')
+      const focusables = panelRef.current.querySelectorAll('button:not([disabled]), [href], input:not([disabled]), [tabindex]:not([tabindex="-1"])')
       if (!focusables.length) return
       const first = focusables[0]
       const last = focusables[focusables.length - 1]
-      if (e.shiftKey && document.activeElement === first) {
+      if (!panelRef.current.contains(document.activeElement)) {
+        e.preventDefault()
+        first.focus()
+      } else if (e.shiftKey && document.activeElement === first) {
         e.preventDefault()
         last.focus()
       } else if (!e.shiftKey && document.activeElement === last) {
