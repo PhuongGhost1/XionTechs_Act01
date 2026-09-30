@@ -4,8 +4,9 @@
 
 /* Colour tokens as space-separated RGB so Tailwind opacity modifiers (text-ink/60) work.
    Navy #183860 is sampled from the logo wordmark. The gold is an estimate of the logo's
-   "X" gradient; #b7791f is a darkened gold used where gold must pass contrast as text
-   on a light background. */
+   "X" gradient. --accent on navy is a darkened amber (#925e0c, 5.2:1 on paper) so gold
+   passes contrast as text on light backgrounds. --primary-fg is the foreground-safe
+   primary (text-primary uses it); --navy-accent is the gold for text/icons on navy. */
 :root,
 :root[data-theme='navy'] {
   --bg: 248 249 251;
@@ -17,7 +18,9 @@
   --primary-hover: 18 44 76;
   --primary-soft: 229 235 243;
   --primary-ink: 255 255 255;
-  --accent: 183 121 31;
+  --primary-fg: 24 56 96;
+  --accent: 146 94 12;
+  --navy-accent: 229 165 42;
   --navy: 10 26 46;
   --navy-ink: 248 249 251;
   color-scheme: light;
@@ -33,7 +36,9 @@
   --primary-hover: 240 184 74;
   --primary-soft: 46 44 34;
   --primary-ink: 10 26 46;
-  --accent: 91 139 208;
+  --primary-fg: 229 165 42;
+  --accent: 104 152 218;
+  --navy-accent: 229 165 42;
   --navy: 17 37 63;
   --navy-ink: 232 237 245;
   color-scheme: dark;
@@ -49,7 +54,9 @@
   --primary-hover: 208 146 28;
   --primary-soft: 250 236 208;
   --primary-ink: 26 26 26;
+  --primary-fg: 146 94 12;
   --accent: 24 56 96;
+  --navy-accent: 229 165 42;
   --navy: 24 56 96;
   --navy-ink: 251 247 239;
   color-scheme: light;
