@@ -105,6 +105,15 @@ body {
   transform: none;
 }
 
+/* Roadmap stages light up on scroll */
+.roadmap-stage {
+  opacity: 0.55;
+  transition: opacity 500ms ease, border-color 500ms ease, background-color 500ms ease;
+}
+.roadmap-stage-on {
+  opacity: 1;
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
@@ -118,4 +127,5 @@ body {
   }
   .demo-step { opacity: 1; transform: none; transition: none; }
   .demo-connector > span { transition: none; }
+  .roadmap-stage { opacity: 1; transition: none; }
 }

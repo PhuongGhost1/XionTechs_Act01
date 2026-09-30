@@ -3,6 +3,7 @@ import Hero from './components/Hero'
 import Pillars from './components/Pillars'
 import AgentDemo from './components/AgentDemo'
 import WhyUs from './components/WhyUs'
+import Roadmap from './components/Roadmap'
 import CaseStudies from './components/CaseStudies'
 import Testimonials from './components/Testimonials'
 import FAQ from './components/FAQ'
@@ -18,6 +19,7 @@ export default function App() {
         <Pillars />
         <AgentDemo />
         <WhyUs />
+        <Roadmap />
         <CaseStudies />
         <Testimonials />
         <FAQ />
