@@ -13,7 +13,7 @@ export default function Testimonials() {
             </p>
             <p className="mx-auto mt-2 max-w-md text-sm text-ink/50">
               We&rsquo;d rather show nothing than invent a quote. Add real testimonials to{' '}
-              <code className="rounded bg-accentSoft px-1.5 py-0.5">src/content/site.js</code>{' '}
+              <code className="rounded bg-primarySoft px-1.5 py-0.5">src/content/site.js</code>{' '}
               once the team has them.
             </p>
           </div>

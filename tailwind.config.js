@@ -20,9 +20,6 @@ export default {
         navy: token('navy'),
         navyInk: token('navy-ink'),
         navyAccent: token('navy-accent'),
-        // Temporary aliases so not-yet-rewritten components keep styling. Removed in Task 12.
-        accentHover: token('primary-hover'),
-        accentSoft: token('primary-soft'),
       },
       // text-primary uses the foreground-safe variant so gold never becomes low-contrast text.
       textColor: { primary: token('primary-fg') },

@@ -8,10 +8,13 @@ git history must show all three contributing, AI must do substantial work.
 - No Lorem Ipsum, no invented testimonials/stats. Anything not verified real must be
   wrapped and clearly labeled as a placeholder (see `src/content/site.js` and
   `content/TODO.md`), never presented as if real.
-- Start clean — do not reuse the current site's theme/visual identity. Current site is
-  a generic WordPress/Elementor corporate blue-and-white theme; this rebuild is a
-  clean, minimal, light design (off-white paper background, dark ink text, green
-  accent) — see `tailwind.config.js`.
+- Start clean — do not reuse the current site's theme/visual identity. This rebuild
+  has three logo-derived themes — Classic Navy (default light), Midnight (dark),
+  Aurum (warm light) — driven by CSS variables in `src/index.css` and a registry in
+  `src/theme/themes.js`. Never hardcode a hex colour in a component; use the Tailwind
+  token names (`paper surface ink muted line primary primaryHover primarySoft primaryInk
+  accent navy navyInk navyAccent`). `text-primary` resolves to a foreground-safe colour
+  (`--primary-fg`); inside `bg-navy` sections use `text-navyAccent` for accent text.
 - Deliverables required at hand-in: public deploy URL, this git repo with full
   history, this file (context sharing), and `PROMPT_LOG.md` (prompts/decisions,
   including where the AI got it wrong).
@@ -33,8 +36,7 @@ If you add a new section, follow the same pattern.
 - Real client testimonials (the original site's testimonials are unedited
   WordPress theme-demo content, not real clients — do not port them over)
 - Case study details (metrics, client names)
-- Contact email (did not resolve cleanly during initial extraction)
-- Social links (LinkedIn/Facebook URLs)
+- Hero copy, both AI pillars, roadmap framing, CTA band (all redesign copy pending sign-off)
 
 ## Environment gotchas
 - This runs on Windows Git Bash — `lsof` is not available. To free port 5173 (or kill
@@ -58,3 +60,10 @@ If you add a new section, follow the same pattern.
   on git history showing all three teammates actually working.
 - Log meaningful prompts/decisions (including AI mistakes and corrections) in
   `PROMPT_LOG.md` as you go, not retroactively at the end.
+- The chat guide is scripted. Answers come from `src/chat/intents.js`, built from
+  `site.js` exports. If a real AI backend is ever added, change only
+  `src/chat/answerEngine.js`; `ChatGuide.jsx` must not know where answers come from.
+- Agent-demo scenarios in `site.js` are invented and must stay flagged
+  `illustrative: true` with no digits in the outcome line (`npm test` enforces this).
+- Run `npm test` alongside `npm run lint` and `npm run build` before committing.
+- Chat keyword matching is word-bounded at both ends (see `src/chat/answerEngine.js`).
