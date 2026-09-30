@@ -1,6 +1,6 @@
 import Nav from './components/Nav'
 import Hero from './components/Hero'
-import Services from './components/Services'
+import Pillars from './components/Pillars'
 import WhoWeAre from './components/WhoWeAre'
 import About from './components/About'
 import CaseStudies from './components/CaseStudies'
@@ -15,7 +15,7 @@ export default function App() {
       <Nav />
       <main>
         <Hero />
-        <Services />
+        <Pillars />
         <WhoWeAre />
         <About />
         <CaseStudies />
