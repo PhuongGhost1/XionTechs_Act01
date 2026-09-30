@@ -14,7 +14,7 @@ export const intents = [
   {
     id: 'demo',
     chip: 'Show me an agent demo',
-    keywords: ['demo', 'show me', 'example', 'watch', 'see it'],
+    keywords: ['demo', 'example', 'watch', 'see it'],
     answer: () => ({
       text: 'Here is an illustrative walkthrough of an agent handling a request from start to finish — three scenarios to pick from.',
       actions: [{ type: 'scroll', label: 'Watch the agent demo', target: 'demo' }],
@@ -23,7 +23,7 @@ export const intents = [
   {
     id: 'platform',
     chip: 'What is the Smart Agent Platform?',
-    keywords: ['platform', 'iot', 'device', 'sensor', 'smart', 'factory', 'machine'],
+    keywords: ['platform', 'iot', 'device', 'sensor', 'smart', 'factory'],
     answer: () => ({
       text: `${pillar('platform').title}: ${pillar('platform').outcome}`,
       actions: [{ type: 'scroll', label: 'See the platform pillar', target: 'solutions' }],
@@ -41,7 +41,7 @@ export const intents = [
   {
     id: 'offices',
     chip: 'Where are your offices?',
-    keywords: ['office', 'where', 'location', 'located', 'address', 'vietnam', 'dallas', 'time zone'],
+    keywords: ['office', 'where are', 'where is', 'location', 'located', 'address', 'vietnam', 'dallas', 'time zone'],
     answer: () => ({
       text: `We work from ${company.offices.join(', ')}. Addresses: ${contact.addresses.join(' · ')}`,
       actions: [{ type: 'scroll', label: 'Go to contact', target: 'contact' }],
@@ -50,7 +50,7 @@ export const intents = [
   {
     id: 'human',
     chip: 'Talk to a human',
-    keywords: ['human', 'person', 'talk', 'call', 'email', 'phone', 'contact', 'reach', 'speak'],
+    keywords: ['human', 'person', 'talk', 'call', 'email', 'phone', 'contact', 'reach out', 'speak'],
     answer: () => ({
       text: `Happy to connect you. Email ${contact.email} or call ${contact.phones.join(' / ')}.`,
       actions: contactActions(),

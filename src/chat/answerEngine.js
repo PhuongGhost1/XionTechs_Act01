@@ -6,9 +6,10 @@ import { intents, fallback } from './intents'
 const MAX_LEN = 500
 
 function matches(keyword, text) {
-  // Word-boundary at the start so "ai" does not match inside "email".
+  // Word boundaries at both start and end to prevent false positives (e.g. "ai" inside "email" or "air").
+  // Allows simple inflections: plural (s), plural of sibilants (es), past tense (ed), gerund (ing).
   const escaped = keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-  return new RegExp(`(^|[^a-z0-9])${escaped}`, 'i').test(text)
+  return new RegExp(`(^|[^a-z0-9])${escaped}(s|es|ed|ing)?($|[^a-z0-9])`, 'i').test(text)
 }
 
 export async function getAnswer(question, ctx = {}) {

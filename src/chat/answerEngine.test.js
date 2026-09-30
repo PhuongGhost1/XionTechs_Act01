@@ -49,4 +49,24 @@ describe('getAnswer', () => {
     const human = await getAnswer('', { intentId: 'human' })
     expect(human.actions.some((x) => x.type === 'link' && x.href.startsWith('tel:'))).toBe(true)
   })
+
+  it('does not match keywords inside longer unrelated words', async () => {
+    expect((await getAnswer('is the air conditioning included')).id).toBe('fallback')
+    expect((await getAnswer('thoughts on democracy')).id).toBe('fallback')
+    expect((await getAnswer('do you do personalization')).id).toBe('fallback')
+  })
+
+  it('still matches simple inflections', async () => {
+    expect((await getAnswer('any demos available')).id).toBe('demo')
+    expect((await getAnswer('what about sensors')).id).toBe('platform')
+  })
+
+  it('does not route generic "where can I" questions to offices', async () => {
+    expect((await getAnswer('where can I find pricing')).id).toBe('fallback')
+  })
+
+  it('falls through to keyword matching for an unknown intent id', async () => {
+    expect((await getAnswer('', { intentId: 'nope' })).id).toBe('fallback')
+    expect((await getAnswer('where are you located', { intentId: 'nope' })).id).toBe('offices')
+  })
 })
