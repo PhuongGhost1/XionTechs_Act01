@@ -115,9 +115,15 @@ just at the end.
   a real AI backend is added later. Keyword matching is word-bounded at both ends after
   the Task 10 review caught false positives: a test caught "ai" matching inside "email",
   and the review caught prefix-only matches ("air", "democracy").
-- **Plan review findings (caught by code and contrast reviews, not in original plan):**
-  - Contrast: aurum theme gold as text was ~2:1 (failed WCAG), navy×gold accent was 3.46:1; added `--primary-fg` (adjusted text colour) and `--navy-accent` (brighter gold) tokens to ensure all text meets ≥3:1 and UI ≥3:1 in all themes.
-  - Roadmap: unlit opacity-faded states had ~2.3:1 contrast; added explicit muted-colour backgrounds to meet 3:1.
-  - Chat: keyword matching had prefix-only behaviour ("air" matched "AI intent"); Task 10 review caught this; locked down to word-bounded regex at both ends.
-  - Chat: focus trap was leaking when Send button disabled + nudge timer re-showed the dialog; Task 7 fix added focus restoration to SendButton.jsx and nudge timer clear on close.
+- Where the plan itself was wrong (caught by per-task code review, fixed before moving on):
+  contrast — Aurum gold used as text measured ~2:1 and the Classic Navy gold accent 3.46:1,
+  so a foreground-safe `--primary-fg` token (via Tailwind `textColor.primary`) and a
+  `--navy-accent` token for dark sections were added (Task 2); roadmap stages faded unlit
+  cards to 0.55 opacity, dropping text to ~2.3:1, so the highlight now changes only
+  border/background/shadow and the scroll threshold went 0.5 → 0.15 (Task 8); chat keyword
+  matching was prefix-only ("air" hit the AI intent, "democracy" the demo intent), so
+  matching is now word-bounded at both ends with simple inflections (Task 10); the chat
+  panel's focus trap counted the disabled Send button, letting Tab escape while the input
+  was empty, and the nudge timer could still fire after the panel had been opened — both
+  fixed in `ChatGuide.jsx` (Task 11).
 - Final bundle: **64.38 kB gzip** (baseline 56.02 kB + 8.36 kB for redesign). Manual browser checklist: run by controller after this commit (see final report). Remaining placeholders listed in `content/TODO.md`.
