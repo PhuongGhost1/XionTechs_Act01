@@ -1,4 +1,5 @@
-export default function IconBadge({ icon: Icon, size = 'md', className = '' }) {
+export default function IconBadge({ icon, size = 'md', className = '' }) {
+  const Icon = icon
   const sizes = {
     sm: 'h-9 w-9',
     md: 'h-12 w-12',

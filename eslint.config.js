@@ -24,12 +24,13 @@ export default [
       ...js.configs.recommended.rules,
       ...reactHooks.configs.recommended.rules,
       'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
+      // Without eslint-plugin-react, core ESLint can't see JSX usage, so capitalised component/icon imports are ignored by name.
       'no-unused-vars': [
         'error',
         {
-          argsIgnorePattern: '^_|^[A-Z]',
+          argsIgnorePattern: '^_',
           caughtErrorsIgnorePattern: '^_',
-          varsIgnorePattern: '^[A-Z]|^_',
+          varsIgnorePattern: '^[A-Z_]',
         },
       ],
     },

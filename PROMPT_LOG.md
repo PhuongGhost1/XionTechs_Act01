@@ -91,8 +91,19 @@ just at the end.
   `Linkedin` exports) — added a small hand-rolled `SocialIcon` component with simple
   outline marks in the same stroke style rather than pulling in another dependency.
 
-## 2026-09-30 — test infrastructure and content guard (Phuong Hoang + Claude)
-- Added Vitest v2.1.9 as a dev-only dependency with content-guard test that fails on any "lorem" string.
-- Bundle baseline confirmed: `index-*.js` 179.78 kB / **56.02 kB gzip** (unchanged by Vitest installation).
-- Fixed ESLint configuration to properly handle JSX component identifiers: updated `no-unused-vars` rule with patterns for both component names (uppercase letters) and underscore-prefixed parameters.
-- Test: 1/1 passing. Lint and build both pass.
+## 2026-09-30 — redesign brainstorm + plan (Phuong Hoang + Claude)
+- Brainstormed a bolder landing page for business decision-makers: 3 logo-derived
+  themes, a "watch an agent work" section, a scripted chat guide with a swappable
+  answer engine, and an Explore→Pilot→Production→Scale roadmap. Spec at
+  `docs/superpowers/specs/2026-09-30-landing-redesign-design.md`, plan at
+  `docs/superpowers/plans/2026-09-30-landing-redesign.md`.
+- Claude proposed "AI Agentic Development" and "Smart Agent Platform (IoT)" pillars
+  based on the user's description, then flagged that none of the captured site copy
+  mentions them. Decision: ship them as clearly labeled placeholder copy.
+- Bundle baseline before redesign: `index-*.js` 179.78 kB / **56.02 kB gzip**.
+  Budget for the redesign: ≤ 71 kB gzip.
+- Added Vitest (dev only) with a content-guard test that fails on any "lorem" string.
+- Pre-existing ESLint configuration (from create-vite template) was failing with 27
+  no-unused-vars errors on JSX component identifiers. Fixed by narrowing
+  `argsIgnorePattern` to `^_` and keeping `varsIgnorePattern: '^[A-Z_]'` to ignore
+  capitalised component/icon imports that are used in JSX but not visible to core ESLint.
