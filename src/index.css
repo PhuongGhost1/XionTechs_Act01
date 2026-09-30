@@ -128,3 +128,21 @@ body {
   .demo-connector > span { transition: none; }
   .roadmap-stage { transition: none; }
 }
+
+/* Chat guide panel: fixed card on desktop, full screen on small phones */
+.chat-panel {
+  right: 1.5rem;
+  bottom: 5.5rem;
+  width: 360px;
+  height: 480px;
+  border-radius: 1rem;
+}
+@media (max-width: 479px) {
+  .chat-panel {
+    inset: 0;
+    width: auto;
+    height: auto;
+    border-radius: 0;
+    padding-bottom: 5rem;
+  }
+}

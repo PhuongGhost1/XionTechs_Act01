@@ -110,3 +110,8 @@ just at the end.
 - Agent demo: three invented scenarios (support, inventory, smart factory) rendered with
   an always-visible "Illustrative scenario — not a client case study" badge, and a test
   that fails if any outcome line contains a digit, so no invented metric can slip in.
+- Chat guide: scripted, labeled "Guided assistant · answers from this site". Answers are
+  built from `site.js` exports; `src/chat/answerEngine.js` is the only file to change if
+  a real AI backend is added later. Keyword matching is word-bounded at both ends after
+  the Task 10 review caught false positives: a test caught "ai" matching inside "email",
+  and the review caught prefix-only matches ("air", "democracy").
