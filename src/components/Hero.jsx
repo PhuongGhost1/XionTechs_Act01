@@ -1,73 +1,90 @@
-import { company, stats } from '../content/site'
-import IconBadge from './IconBadge'
-import { iconMap } from './icons'
+import { MapPin } from 'lucide-react'
+import { company } from '../content/site'
 
 function Headline() {
   const { heroHeadline, heroHeadlineAccent } = company
   const idx = heroHeadline.indexOf(heroHeadlineAccent)
   if (idx === -1) return heroHeadline
-
-  const before = heroHeadline.slice(0, idx)
-  const after = heroHeadline.slice(idx + heroHeadlineAccent.length)
-
   return (
     <>
-      {before}
+      {heroHeadline.slice(0, idx)}
       <span className="text-accent">{heroHeadlineAccent}</span>
-      {after}
+      {heroHeadline.slice(idx + heroHeadlineAccent.length)}
     </>
+  )
+}
+
+// Nine nodes on two diagonals form an "X", echoing the logo mark. Pure SVG so it re-themes.
+const NODES = [
+  [20, 20], [60, 60], [100, 100], [140, 140], [180, 180],
+  [180, 20], [140, 60], [60, 140], [20, 180],
+]
+
+function NodeX() {
+  return (
+    <svg viewBox="0 0 200 200" className="h-full w-full text-accent" aria-hidden="true">
+      <g stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" opacity="0.6">
+        <line x1="20" y1="20" x2="180" y2="180" />
+        <line x1="180" y1="20" x2="20" y2="180" />
+      </g>
+      {NODES.map(([x, y], i) => (
+        <circle
+          key={i}
+          cx={x}
+          cy={y}
+          r={i === 2 ? 9 : 5}
+          fill="currentColor"
+          className="hero-node"
+          style={{ animationDelay: `${i * 150}ms` }}
+        />
+      ))}
+    </svg>
   )
 }
 
 export default function Hero() {
   return (
-    <section id="top" className="mx-auto max-w-6xl px-6 pb-20 pt-16 md:pt-24">
-      <p className="mb-4 inline-block rounded-full bg-accentSoft px-4 py-1 text-xs font-medium uppercase tracking-wide text-accent">
-        {company.tagline}
-      </p>
+    <section id="top" className="mx-auto grid max-w-6xl grid-cols-1 gap-12 px-6 pb-20 pt-16 md:pt-24 lg:grid-cols-[3fr_2fr] lg:items-center">
+      <div>
+        <p className="mb-4 inline-block rounded-full bg-primarySoft px-4 py-1 text-xs font-medium uppercase tracking-wide text-primary">
+          {company.tagline}
+        </p>
 
-      <h1 className="max-w-3xl text-4xl leading-tight md:text-6xl md:leading-[1.05]">
-        <Headline />
-      </h1>
+        <h1 className="max-w-3xl text-4xl leading-tight md:text-6xl md:leading-[1.05]">
+          <Headline />
+        </h1>
 
-      <div className="mt-8 flex flex-wrap gap-4">
-        <a
-          href="#contact"
-          className="rounded-full bg-accent px-6 py-3 text-sm font-medium text-paper transition hover:bg-accentHover"
-        >
-          Get In Touch
-        </a>
-        <a
-          href="#about"
-          className="rounded-full border border-line px-6 py-3 text-sm font-medium transition hover:border-accent hover:text-accent"
-        >
-          Learn More
-        </a>
+        <p className="mt-6 max-w-xl text-lg text-muted">{company.heroSubline}</p>
+
+        <div className="mt-8 flex flex-wrap gap-4">
+          <a
+            href="#demo"
+            className="rounded-full bg-primary px-6 py-3 text-sm font-medium text-primaryInk transition hover:bg-primaryHover"
+          >
+            See an agent work
+          </a>
+          <a
+            href="#contact"
+            className="rounded-full border border-line px-6 py-3 text-sm font-medium transition hover:border-primary hover:text-primary"
+          >
+            Book a call
+          </a>
+        </div>
+
+        <p className="mt-10 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted">
+          <MapPin className="h-4 w-4 text-accent" strokeWidth={1.75} />
+          {company.offices.map((o, i) => (
+            <span key={o}>
+              {o}
+              {i < company.offices.length - 1 && <span className="ml-3 text-line">·</span>}
+            </span>
+          ))}
+        </p>
       </div>
 
-      <div className="mt-12 flex flex-col items-start justify-between gap-4 rounded-2xl bg-navy px-6 py-5 text-paper sm:flex-row sm:items-center">
-        <p className="text-sm font-medium sm:text-base">{company.promoLine}</p>
-        <a
-          href="#contact"
-          className="shrink-0 rounded-full bg-paper px-5 py-2 text-sm font-medium text-navy transition hover:bg-accentSoft"
-        >
-          Get started now
-        </a>
+      <div className="mx-auto aspect-square w-full max-w-xs lg:max-w-sm">
+        <NodeX />
       </div>
-
-      <dl className="mt-16 grid grid-cols-1 gap-8 border-t border-line pt-10 sm:grid-cols-3">
-        {stats.map((s) => {
-          const Icon = iconMap[s.icon]
-          return (
-            <div key={s.label} className="group">
-              <IconBadge icon={Icon} size="sm" />
-              <dt className="mt-4 font-display text-3xl">{s.value}</dt>
-              <dd className="mt-1 text-sm font-medium text-ink/70">{s.label}</dd>
-              <dd className="mt-2 text-sm text-ink/50">{s.desc}</dd>
-            </div>
-          )
-        })}
-      </dl>
     </section>
   )
 }

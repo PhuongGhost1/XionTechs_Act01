@@ -12,10 +12,19 @@ import {
   Award,
   MapPin,
   Cpu,
-  Search,
-  PenTool,
-  Terminal,
   Rocket,
+  Bot,
+  Wifi,
+  MessageCircle,
+  TrendingUp,
+  Factory,
+  Compass,
+  FlaskConical,
+  Inbox,
+  Brain,
+  Plug,
+  Zap,
+  CheckCircle2,
 } from 'lucide-react'
 
 export const iconMap = {
@@ -30,8 +39,20 @@ export const iconMap = {
   Award,
   MapPin,
   Cpu,
-  Search,
-  PenTool,
-  Terminal,
   Rocket,
+  Bot,
+  Wifi,
+  MessageCircle,
+  TrendingUp,
+  Factory,
+  Compass,
+  FlaskConical,
+  Inbox,
+  Brain,
+  Plug,
+  Zap,
+  CheckCircle2,
 }
+
+// Step icons for the agent demo, in the fixed 5-step order.
+export const stepIcons = [Inbox, Brain, Plug, Zap, CheckCircle2]
