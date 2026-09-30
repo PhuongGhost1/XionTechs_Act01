@@ -25,6 +25,18 @@ to the deployed URL without one of these being resolved.
       expanded in the screenshots. The other two answers weren't captured.
 - [ ] **Team/about photos** — if the new design should show real team photos instead
       of icons, source them.
+- [ ] **Hero headline + subline** — redesign copy in `company.heroHeadline` /
+      `heroSubline` is PLACEHOLDER pending team sign-off.
+- [ ] **AI Agentic Development pillar** — all copy in `pillars[0]` is PLACEHOLDER.
+      Need: what agent work XionTechs actually delivers, 2–4 capability bullets, one
+      outcome sentence.
+- [ ] **Smart Agent Platform (IoT) pillar** — all copy in `pillars[1]` is PLACEHOLDER.
+      Need: what the platform is, protocols/cloud targets, any reference deployment.
+- [ ] **Roadmap (Explore → Pilot → Production → Scale)** — framing in `roadmap` is
+      PLACEHOLDER; confirm it matches how the team actually engages.
+- [ ] **CTA band copy** — `ctaBand` is PLACEHOLDER.
+- [ ] **Chat guide answers** — review `src/chat/intents.js` wording once the pillar
+      copy is real.
 
 Once resolved, edit the corresponding value in `src/content/site.js` and remove the
 `PLACEHOLDER` marker/comment.
