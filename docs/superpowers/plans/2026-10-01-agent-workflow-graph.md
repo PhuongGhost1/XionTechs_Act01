@@ -49,7 +49,7 @@
 | `src/components/AgentDemo.jsx` | tabs, run timer, branch switching, detail panel, hosts RunMonitor (T4) |
 | `src/components/RunMonitor.jsx` | monitoring strip (T5) |
 | `src/components/AzureStrip.jsx` | stack strip (T5) |
-| `src/components/icons.js` | icon map updates (T3) |
+| `src/components/icons.js` | remove old `stepIcons` and its icons (T4) |
 | `src/index.css` | remove chat + demo-step CSS; add monitor row animation |
 | `src/App.jsx` | remove ChatGuide (T1), add AzureStrip (T5) |
 | `CLAUDE.md`, `content/TODO.md`, `PROMPT_LOG.md` | docs (T1, T6) |
