@@ -247,6 +247,7 @@ export const runLog = [
 export const agentJourneys = [
   {
     id: 'support',
+    illustrative: true,
     task: 'Working through the morning support queue',
     stops: [
       { kind: 'resource', label: 'support/inbox', status: 'Reading new tickets' },
@@ -261,6 +262,7 @@ export const agentJourneys = [
   },
   {
     id: 'inventory',
+    illustrative: true,
     task: 'Running the daily stock review',
     stops: [
       { kind: 'resource', label: 'stock/levels', status: 'Reading stock levels' },
@@ -275,6 +277,7 @@ export const agentJourneys = [
   },
   {
     id: 'factory',
+    illustrative: true,
     task: 'Handling a machine health alert',
     stops: [
       { kind: 'resource', label: 'sensors/vibration-feed', status: 'Reading the sensor feed' },

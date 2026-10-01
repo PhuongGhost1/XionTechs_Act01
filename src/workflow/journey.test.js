@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import {
   JOURNEY_VIEW, TAG_H, CHIP, tagWidth, layoutJourney, pathUpTo, cameraX,
-  journeyEvents, journeyTicks, journeyStateAt,
+  travelledLength, totalLength, journeyEvents, journeyTicks, journeyStateAt,
 } from './journey'
 
 const j = {
@@ -20,14 +20,14 @@ describe('layoutJourney', () => {
   const L = layoutJourney(j)
 
   it('places stops left to right on alternating levels', () => {
-    expect(L.points.map((p) => p.x)).toEqual([120, 320, 520, 720, 920])
+    expect(L.points.map((p) => p.x)).toEqual([120, 360, 600, 840, 1080])
     expect(L.points.map((p) => p.y)).toEqual([140, 220, 140, 220, 140])
-    expect(L.width).toBe(1040)
+    expect(L.width).toBe(1200)
     expect(L.height).toBe(JOURNEY_VIEW.h)
   })
 
   it('draws an orthogonal path with a lead-in and lead-out', () => {
-    expect(L.path).toBe('M 0 140 H 120 H 220 V 220 H 320 H 420 V 140 H 520 H 620 V 220 H 720 H 820 V 140 H 920 H 1040')
+    expect(L.path).toBe('M 0 140 H 120 H 240 V 220 H 360 H 480 V 140 H 600 H 720 V 220 H 840 H 960 V 140 H 1080 H 1200')
   })
 
   it('gives every non-compact stop a tag, above on the upper level and below on the lower', () => {
@@ -39,13 +39,19 @@ describe('layoutJourney', () => {
 
   it('cuts the travelled path at the requested stop', () => {
     expect(pathUpTo(L, 0)).toBe('M 0 140 H 120')
-    expect(pathUpTo(L, 2)).toBe('M 0 140 H 120 H 220 V 220 H 320 H 420 V 140 H 520')
+    expect(pathUpTo(L, 2)).toBe('M 0 140 H 120 H 240 V 220 H 360 H 480 V 140 H 600')
+  })
+
+  it('measures the stepped path length to a stop and in total', () => {
+    expect(travelledLength(L, 0)).toBe(120)
+    expect(travelledLength(L, 2)).toBe(760)
+    expect(totalLength(L)).toBe(1520)
   })
 
   it('centres the camera on the stop but never scrolls past the canvas', () => {
     expect(cameraX(L, 0)).toBe(0)
-    expect(cameraX(L, 2)).toBe(520 - 380)
-    expect(cameraX(L, 4)).toBe(1040 - 760)
+    expect(cameraX(L, 2)).toBe(600 - 380)
+    expect(cameraX(L, 4)).toBe(1200 - 760)
   })
 })
 
@@ -63,6 +69,11 @@ describe('journey timeline', () => {
     expect(s.phase).toBe('working')
     expect(s.status).toBe('Two')
     expect(s.done).toBe(false)
+  })
+
+  it('shows the previous stop status while moving to the next one', () => {
+    expect(journeyStateAt(j, 4).status).toBe('Two')
+    expect(journeyStateAt(j, 0).status).toBe('One')
   })
 
   it('lights visited non-compact stops only', () => {

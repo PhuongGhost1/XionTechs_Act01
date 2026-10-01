@@ -189,7 +189,7 @@ export default function AgentDemo() {
               <button
                 type="button"
                 onClick={() => (done ? replay() : setPlaying((p) => !p))}
-                aria-label={playing && !done ? 'Pause animation' : 'Play animation'}
+                aria-label={done ? 'Replay animation' : playing && !done ? 'Pause animation' : 'Play animation'}
                 className={btn}
               >
                 {playing && !done ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}

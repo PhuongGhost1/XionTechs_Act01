@@ -4,10 +4,10 @@
 export const JOURNEY_VIEW = { w: 760, h: 360 }
 export const TAG_H = 24
 export const CHIP = { w: 230, h: 28, dy: 22 } // status chip under the pill; dy = gap below the stop point
-export const PILL = { w: 150, h: 32 }
+export const PILL = { w: 160, h: 32 }
 
 const PAD = 120
-const STEP_X = 200
+const STEP_X = 240
 const LEVELS = [140, 220]
 const TAG_OFFSET = 80
 const CHAR_W = 7.2 // monospace text-xs advance width in viewBox units
@@ -41,6 +41,18 @@ export function pathUpTo(layout, stopIndex) {
     d += ` H ${mid} V ${b.y} H ${b.x}`
   }
   return d
+}
+
+const segmentLength = () => STEP_X + Math.abs(LEVELS[1] - LEVELS[0])
+
+// Length of the stepped path from its left edge to stop `i` (lead-in + i equal segments).
+export function travelledLength(layout, stopIndex) {
+  return PAD + stopIndex * segmentLength()
+}
+
+// Whole path length, including the lead-out.
+export function totalLength(layout) {
+  return travelledLength(layout, layout.points.length - 1) + PAD
 }
 
 export function cameraX(layout, stopIndex) {
@@ -105,7 +117,7 @@ export function journeyStateAt(journey, tick) {
     ringFill,
     compacting: stop.kind === 'compact' && ev.phase === 'working',
     lit,
-    status: stop.status,
+    status: ev.phase === 'moving' && ev.stop > 0 ? journey.stops[ev.stop - 1].status : stop.status,
     done: false,
   }
 }

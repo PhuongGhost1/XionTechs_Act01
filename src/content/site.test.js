@@ -121,6 +121,10 @@ describe('site content rules', () => {
       expect(site.agentJourneys.map((x) => x.id)).toEqual(site.workflows.map((w) => w.id))
     })
 
+    it('flags every journey as illustrative', () => {
+      for (const jr of site.agentJourneys) expect(jr.illustrative, jr.id).toBe(true)
+    })
+
     it('has exactly one compact stop, never first or last', () => {
       for (const jr of site.agentJourneys) {
         const idx = jr.stops.map((s, i) => (s.kind === 'compact' ? i : -1)).filter((i) => i >= 0)

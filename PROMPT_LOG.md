@@ -156,3 +156,4 @@ just at the end.
   product/model name; the context ring fills visually with no token counts (any number would be
   invented); under reduced motion a readable list replaces the moving window instead of a
   scaled-down path whose labels would be unreadable.
+- Reviews caught what the plan got wrong: the first build drew the 'travelled' line straight to the next stop while the agent was still leaving the last one, and the agent cut diagonally across each step instead of following it; the status chip also covered the path risers, the compact row in the phone list announced compaction before it happened, and the context ring's compacting colour was nearly invisible in the Aurum theme. Fixed with a dash-offset travelled line, a split horizontal/vertical pill transition, wider stop spacing and colour changes. Browser checklist (controller, headless Edge): all theme × width and behaviour checks passed before and after the fix wave.

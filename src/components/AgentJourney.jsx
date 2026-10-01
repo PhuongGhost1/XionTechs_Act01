@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { Bot, FileText, RefreshCw, Sparkles } from 'lucide-react'
-import { CHIP, JOURNEY_VIEW, PILL, TAG_H, cameraX, layoutJourney, pathUpTo } from '../workflow/journey'
+import { CHIP, JOURNEY_VIEW, PILL, TAG_H, cameraX, layoutJourney, totalLength, travelledLength } from '../workflow/journey'
 
 const MOVE = 'transform 700ms ease'
 const kindIcon = { resource: FileText, skill: Sparkles }
@@ -18,7 +18,7 @@ function Ring({ fill, compacting }) {
           strokeWidth="3"
           strokeLinecap="round"
           transform="rotate(-90)"
-          className={compacting ? 'stroke-accent' : 'stroke-ink'}
+          className={compacting ? 'stroke-accent' : 'stroke-muted'}
           style={{ strokeDasharray: `${fill * c} ${c}`, transition: 'stroke-dasharray 600ms ease' }}
         />
       )}
@@ -30,6 +30,7 @@ function JourneyWindow({ journey, state }) {
   const L = useMemo(() => layoutJourney(journey), [journey])
   const p = L.points[state.stopIndex]
   const cam = cameraX(L, state.stopIndex)
+  const total = totalLength(L)
 
   return (
     <svg viewBox={`0 0 ${JOURNEY_VIEW.w} ${JOURNEY_VIEW.h}`} className="block w-full" aria-hidden="true">
@@ -38,10 +39,18 @@ function JourneyWindow({ journey, state }) {
           <circle cx="1" cy="1" r="1" className="fill-line" />
         </pattern>
       </defs>
-      <rect width={JOURNEY_VIEW.w} height={JOURNEY_VIEW.h} fill="url(#aj-dots)" />
       <g style={{ transform: `translateX(${-cam}px)`, transition: MOVE }}>
+        <rect width={L.width} height={JOURNEY_VIEW.h} fill="url(#aj-dots)" />
         <path d={L.path} fill="none" strokeWidth="2" className="stroke-muted" />
-        <path d={pathUpTo(L, state.stopIndex)} fill="none" strokeWidth="2" className="stroke-accent" />
+        <path
+          d={L.path}
+          fill="none"
+          strokeWidth="2"
+          className="stroke-accent"
+          strokeDasharray={total}
+          strokeDashoffset={total - travelledLength(L, state.stopIndex)}
+          style={{ transition: 'stroke-dashoffset 700ms ease' }}
+        />
 
         {L.tags.map((t) => {
           const stop = journey.stops[t.stopIndex]
@@ -65,7 +74,8 @@ function JourneyWindow({ journey, state }) {
           )
         })}
 
-        <g style={{ transform: `translate(${p.x}px, ${p.y}px)`, transition: MOVE }}>
+        <g style={{ transform: `translateX(${p.x}px)`, transition: MOVE }}>
+         <g style={{ transform: `translateY(${p.y}px)`, transition: 'transform 250ms ease 225ms' }}>
           <rect x={-PILL.w / 2} y={-PILL.h / 2} width={PILL.w} height={PILL.h} rx={PILL.h / 2} className="fill-ink" />
           <Bot x={-PILL.w / 2 + 12} y={-8} width="16" height="16" strokeWidth={1.75} className="text-paper" />
           <text x={-PILL.w / 2 + 34} y="5" className="fill-paper text-sm font-semibold">XionTechs agent</text>
@@ -79,6 +89,7 @@ function JourneyWindow({ journey, state }) {
               {state.status}
             </text>
           </g>
+         </g>
         </g>
       </g>
     </svg>
