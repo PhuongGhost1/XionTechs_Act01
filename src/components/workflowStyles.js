@@ -25,11 +25,13 @@ export function nodeStatus(id, run, state) {
 export function nodeClasses(node, status, selected) {
   const base = 'border bg-surface text-ink transition-colors duration-300'
   const byStatus = {
-    working: 'border-accent ring-2 ring-accent/40 motion-safe:animate-pulse',
+    working: 'border-accent',
     active: node.type === 'outcome' ? 'border-accent bg-accent text-paper' : 'border-accent',
     idle: 'border-line',
     off: 'border-dashed border-line',
   }
-  const sel = selected ? 'outline outline-2 outline-offset-2 outline-primary' : ''
+  const sel = selected ? 'ring-2 ring-primary ring-offset-2 ring-offset-surface' : ''
   return `${base} ${byStatus[status]} ${sel}`
 }
+
+export const isWorking = (status) => status === 'working'

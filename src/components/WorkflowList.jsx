@@ -1,12 +1,13 @@
 import { splitBranches } from '../workflow/run'
-import { nodeClasses, nodeStatus, typeIcon } from './workflowStyles'
+import { isWorking, nodeClasses, nodeStatus, typeIcon } from './workflowStyles'
 
 function Item({ node, run, state }) {
   const status = nodeStatus(node.id, run, state)
   const Icon = typeIcon[node.type]
   const outcomeActive = status === 'active' && node.type === 'outcome'
   return (
-    <li className={`rounded-xl p-3 ${nodeClasses(node, status, false)}`}>
+    <li className={`relative rounded-xl p-3 ${nodeClasses(node, status, false)}`}>
+      {isWorking(status) && <span aria-hidden="true" className="pointer-events-none absolute -inset-1 rounded-[inherit] ring-2 ring-accent/50 motion-safe:animate-pulse" />}
       <div className="flex items-center gap-2">
         <Icon className={`h-4 w-4 shrink-0 ${outcomeActive ? '' : 'text-accent'}`} strokeWidth={1.75} />
         <span className="text-sm font-medium">{node.title}</span>
@@ -35,8 +36,8 @@ export default function WorkflowList({ workflow, run, state, className = '' }) {
       </ol>
       {branches.length > 0 && (
         <div className="mt-3 border-l-2 border-line pl-4">
-          <p className="text-xs font-medium uppercase tracking-wide text-muted">Routes to one of:</p>
-          <div className="mt-2 grid gap-3 sm:grid-cols-2">
+          <p className="text-xs font-medium uppercase tracking-wide text-muted">AI routing — routes to one of:</p>
+          <div className="mt-2 grid gap-3 min-[480px]:grid-cols-2">
             {branches.map((b) => {
               const chosen = b.label === run.branchLabel
               return (

@@ -1,7 +1,7 @@
-import { useEffect, useRef } from 'react'
+import { useLayoutEffect, useRef } from 'react'
 import { VIEW, edgePath, nodeBox, pct } from '../workflow/layout'
 import { edgeKey } from '../workflow/run'
-import { nodeClasses, nodeStatus, typeIcon, typeTag } from './workflowStyles'
+import { isWorking, nodeClasses, nodeStatus, typeIcon, typeTag } from './workflowStyles'
 
 const PACKET_MS = 600
 
@@ -9,13 +9,15 @@ const PACKET_MS = 600
 // relative to the document timeline (and finish instantly), so begin is "indefinite" and
 // the animation is started explicitly on mount.
 function Packet({ d }) {
-  const ref = useRef(null)
-  useEffect(() => {
-    ref.current?.beginElement?.()
+  const animateRef = useRef(null)
+  const circleRef = useRef(null)
+  useLayoutEffect(() => {
+    animateRef.current?.beginElement?.()
+    circleRef.current?.setAttribute('opacity', '1')
   }, [])
   return (
-    <circle r="5" className="fill-accent">
-      <animateMotion ref={ref} begin="indefinite" dur={`${PACKET_MS}ms`} fill="freeze" path={d} />
+    <circle ref={circleRef} r="5" className="fill-accent" opacity="0">
+      <animateMotion ref={animateRef} begin="indefinite" dur={`${PACKET_MS}ms`} fill="freeze" path={d} />
     </circle>
   )
 }
@@ -65,9 +67,10 @@ export default function WorkflowGraph({ workflow, run, state, selectedId, onSele
             type="button"
             onClick={() => onSelect(node.id)}
             aria-pressed={selectedId === node.id}
-            className={`absolute flex items-center gap-2 text-left ${isRouter ? 'justify-center rounded-full border-dashed px-2' : 'rounded-xl px-3'} ${nodeClasses(node, status, selectedId === node.id)}`}
+            className={`absolute flex items-center gap-2 text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent ${isRouter ? 'justify-center rounded-full border-dashed px-2' : 'rounded-xl px-3'} ${nodeClasses(node, status, selectedId === node.id)}`}
             style={{ left: pct(box.x, VIEW.w), top: pct(box.y, VIEW.h), width: pct(box.w, VIEW.w), height: pct(box.h, VIEW.h) }}
           >
+            {isWorking(status) && <span aria-hidden="true" className="pointer-events-none absolute -inset-1 rounded-[inherit] ring-2 ring-accent/50 motion-safe:animate-pulse" />}
             {typeTag[node.type] && (
               <span className="absolute -top-2.5 left-3 rounded-full bg-primarySoft px-2 text-[10px] font-medium uppercase tracking-wide text-primary">
                 {typeTag[node.type]}
