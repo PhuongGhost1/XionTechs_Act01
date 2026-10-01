@@ -111,6 +111,15 @@ body {
   animation: monitor-in 400ms ease both;
 }
 
+/* Drill-only workflow steps fade in when a drill reveals them */
+@keyframes wf-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.wf-fade-in {
+  animation: wf-fade-in 400ms ease both;
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
@@ -124,5 +133,6 @@ body {
   }
   .roadmap-stage { transition: none; }
   .monitor-row { animation: none; }
+  .wf-fade-in { animation: none; }
 }
 

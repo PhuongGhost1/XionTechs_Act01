@@ -1,6 +1,6 @@
 // Shared node styling for WorkflowGraph and WorkflowList. Off-path nodes dim their chrome
 // (dashed border) only — text always keeps full contrast.
-import { Bot, CheckCircle2, GitBranch, UserCheck, Zap } from 'lucide-react'
+import { AlertTriangle, Bot, CheckCircle2, GitBranch, RotateCw, UserCheck, Zap } from 'lucide-react'
 
 export const typeIcon = {
   trigger: Zap,
@@ -37,3 +37,10 @@ export function nodeClasses(node, status, selected) {
 }
 
 export const isWorking = (status) => status === 'working'
+
+// Problem / retry tag for a node in the current run, or null. Icon + word, never colour alone.
+export function runTag(nodeId, run, state) {
+  if (state.retrying.has(nodeId)) return { Icon: RotateCw, word: 'Retrying' }
+  if (run.problemNodeId === nodeId && state.problemSeen) return { Icon: AlertTriangle, word: 'Problem' }
+  return null
+}
