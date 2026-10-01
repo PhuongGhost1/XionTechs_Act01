@@ -35,6 +35,13 @@ to the deployed URL without one of these being resolved.
 - [ ] **Roadmap (Explore → Pilot → Production → Scale)** — framing in `roadmap` is
       PLACEHOLDER; confirm it matches how the team actually engages.
 - [ ] **CTA band copy** — `ctaBand` is PLACEHOLDER.
+- [ ] **Workflow capability labels** — agent nodes show generic labels ("AI model",
+      "Integration", "IoT gateway", "Data store"). Replace each with the actual Azure
+      service the team uses for that step (`capabilityLabels` / `workflows` in site.js).
+- [ ] **Azure strip wording** — `stack.line` (Azure-first framing) is PLACEHOLDER pending
+      team sign-off.
+- [ ] **Monitoring strip copy** — `sections.monitor` and `runLog` are illustrative /
+      placeholder.
 
 Once resolved, edit the corresponding value in `src/content/site.js` and remove the
 `PLACEHOLDER` marker/comment.

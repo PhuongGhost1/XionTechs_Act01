@@ -193,6 +193,117 @@ export const agentScenarios = [
   },
 ]
 
+// PLACEHOLDER: generic capability labels until the team confirms which Azure services each
+// step runs on (see content/TODO.md). Rendered with "draft" styling.
+export const capabilityLabels = ['AI model', 'Integration', 'IoT gateway', 'Data store']
+
+// ILLUSTRATIVE: invented demo workflows, not client claims. Rendered with a visible
+// "Illustrative scenario — not a client case study" badge. No digits anywhere (npm test).
+// x/y are node centres in a 760 × 520 canvas (see src/workflow/layout.js).
+export const workflows = [
+  {
+    id: 'support',
+    label: 'Customer Support',
+    icon: 'MessageCircle',
+    illustrative: true,
+    nodes: [
+      { id: 'email', type: 'trigger', title: 'New support email', x: 380, y: 40, desc: 'A customer emails asking where their order is, or asking for a refund.' },
+      { id: 'triage', type: 'agent', title: 'Triage agent', capability: 'AI model', x: 380, y: 120, desc: 'Reads the email, works out what the customer wants and pulls out the order details.' },
+      { id: 'route', type: 'router', title: 'AI routing', x: 380, y: 195, desc: 'Sends the request down the right path based on what the customer asked for.' },
+      { id: 'lookup', type: 'agent', title: 'Order lookup agent', capability: 'Integration', x: 200, y: 270, desc: 'Checks the order system and the shipping tracker for the latest status.' },
+      { id: 'reply', type: 'agent', title: 'Reply writer', capability: 'AI model', x: 200, y: 345, desc: 'Writes a clear reply with the tracking link and flags a late delivery.' },
+      { id: 'refund', type: 'agent', title: 'Refund agent', capability: 'Integration', x: 560, y: 270, desc: 'Checks the order against the refund policy and prepares the refund.' },
+      { id: 'approve', type: 'human', title: 'Human approves', x: 560, y: 345, desc: 'A team member approves the refund before any money moves.' },
+      { id: 'done', type: 'outcome', title: 'Customer answered', x: 380, y: 440, desc: 'The customer gets an answer quickly; your team only sees the exceptions.' },
+    ],
+    edges: [
+      ['email', 'triage'], ['triage', 'route'],
+      ['route', 'lookup'], ['lookup', 'reply'], ['reply', 'done'],
+      ['route', 'refund'], ['refund', 'approve'], ['approve', 'done'],
+    ],
+    branches: [
+      { label: 'Order status', path: ['email', 'triage', 'route', 'lookup', 'reply', 'done'] },
+      { label: 'Refund request', path: ['email', 'triage', 'route', 'refund', 'approve', 'done'] },
+    ],
+  },
+  {
+    id: 'inventory',
+    label: 'Inventory & Orders',
+    icon: 'TrendingUp',
+    illustrative: true,
+    nodes: [
+      { id: 'check', type: 'trigger', title: 'Daily stock check', x: 380, y: 40, desc: 'Every morning the stock levels are reviewed automatically.' },
+      { id: 'monitor', type: 'agent', title: 'Stock monitor agent', capability: 'Data store', x: 380, y: 120, desc: 'Compares current stock with safety levels and recent sales.' },
+      { id: 'route', type: 'router', title: 'AI routing', x: 380, y: 195, desc: 'Decides whether anything needs reordering today.' },
+      { id: 'skip', type: 'outcome', title: 'Logged, no action', x: 170, y: 270, desc: 'Stock is healthy, so the check is logged and nobody is interrupted.' },
+      { id: 'forecast', type: 'agent', title: 'Demand forecaster', capability: 'AI model', x: 560, y: 270, desc: 'Estimates upcoming demand from sales history and open orders.' },
+      { id: 'draft', type: 'agent', title: 'Reorder drafter', capability: 'Integration', x: 560, y: 345, desc: 'Drafts a reorder with quantity and supplier, using supplier lead times.' },
+      { id: 'buyer', type: 'human', title: 'Buyer approves', x: 560, y: 420, desc: 'A buyer reviews the draft and approves it with one click.' },
+      { id: 'sent', type: 'outcome', title: 'Reorder sent', x: 560, y: 490, desc: 'Stock-outs are caught before they happen; a human approves instead of chasing.' },
+    ],
+    edges: [
+      ['check', 'monitor'], ['monitor', 'route'],
+      ['route', 'skip'],
+      ['route', 'forecast'], ['forecast', 'draft'], ['draft', 'buyer'], ['buyer', 'sent'],
+    ],
+    branches: [
+      { label: 'Low stock', path: ['check', 'monitor', 'route', 'forecast', 'draft', 'buyer', 'sent'] },
+      { label: 'Stock healthy', path: ['check', 'monitor', 'route', 'skip'] },
+    ],
+  },
+  {
+    id: 'factory',
+    label: 'Smart Factory (IoT)',
+    icon: 'Factory',
+    illustrative: true,
+    nodes: [
+      { id: 'sensor', type: 'trigger', title: 'Vibration sensor spike', x: 380, y: 40, desc: 'A vibration sensor on a packaging line reports an unusual spike.' },
+      { id: 'anomaly', type: 'agent', title: 'Anomaly agent', capability: 'IoT gateway', x: 380, y: 120, desc: 'Recognises the pattern as an early sign of bearing wear.' },
+      { id: 'history', type: 'agent', title: 'Maintenance history agent', capability: 'Data store', x: 200, y: 210, desc: 'Looks up when this machine was last serviced and what was replaced.' },
+      { id: 'roster', type: 'agent', title: 'Shift roster agent', capability: 'Integration', x: 560, y: 210, desc: 'Finds the next break and which technician is on shift.' },
+      { id: 'schedule', type: 'agent', title: 'Scheduler agent', capability: 'AI model', x: 380, y: 300, desc: 'Books the technician into the next break and alerts the shift lead.' },
+      { id: 'booked', type: 'outcome', title: 'Technician booked', x: 380, y: 390, desc: 'Downtime is prevented instead of repaired; the shift lead is kept in the loop.' },
+    ],
+    edges: [
+      ['sensor', 'anomaly'],
+      ['anomaly', 'history'], ['anomaly', 'roster'],
+      ['history', 'schedule'], ['roster', 'schedule'],
+      ['schedule', 'booked'],
+    ],
+    branches: [
+      { label: 'Sensor alert', path: ['sensor', 'anomaly', ['history', 'roster'], 'schedule', 'booked'] },
+    ],
+  },
+]
+
+// ILLUSTRATIVE: invented run log for the monitoring strip. Words only — no numbers,
+// percentages or timings (npm test).
+export const runLog = [
+  { status: 'passed', workflow: 'support', text: 'Order-status reply · grounded in order data' },
+  { status: 'flagged', workflow: 'support', text: 'Refund over limit · sent to approver' },
+  { status: 'retried', workflow: 'inventory', text: 'Supplier system timeout · retried, then succeeded' },
+  { status: 'passed', workflow: 'inventory', text: 'Reorder draft · matches recent demand' },
+  { status: 'flagged', workflow: 'factory', text: 'Unusual sensor pattern · shift lead asked to confirm' },
+  { status: 'passed', workflow: 'factory', text: 'Technician booking · matched to the shift roster' },
+]
+
+// PLACEHOLDER: Azure-first framing pending team sign-off (stated by a team member on
+// 2026-10-01). The cloud and platform names are real live-site service copy.
+export const stack = {
+  draft: true,
+  line: 'Built on Microsoft Azure — with AWS and GCP when your stack needs it.',
+  chips: [
+    { label: 'Azure', primary: true },
+    { label: 'AWS' },
+    { label: 'GCP' },
+    { label: 'Power Platform' },
+    { label: 'Make' },
+    { label: 'n8n' },
+    { label: 'Retool' },
+    { label: 'Bubble' },
+  ],
+}
+
 export const whoWeAre = {
   eyebrow: 'Who We Are',
   title: 'We Deliver Consumer-Centric Tech Solutions.',
@@ -354,6 +465,10 @@ export const sections = {
     eyebrow: 'Agent demo',
     title: 'See what an AI agent does for your business',
     intro: 'Pick a situation. Watch how an agent takes it from request to result while your team only handles the exceptions.',
+  },
+  monitor: {
+    title: 'Agents are watched, not left alone.',
+    intro: 'Every run is checked. Anything unusual goes to a person.',
   },
   roadmap: {
     eyebrow: 'How we work',
