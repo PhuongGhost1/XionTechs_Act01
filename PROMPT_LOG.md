@@ -157,3 +157,16 @@ just at the end.
   invented); under reduced motion a readable list replaces the moving window instead of a
   scaled-down path whose labels would be unreadable.
 - Reviews caught what the plan got wrong: the first build drew the 'travelled' line straight to the next stop while the agent was still leaving the last one, and the agent cut diagonally across each step instead of following it; the status chip also covered the path risers, the compact row in the phone list announced compaction before it happened, and the context ring's compacting colour was nearly invisible in the Aurum theme. Fixed with a dash-offset travelled line, a split horizontal/vertical pill transition, wider stop spacing and colour changes. Browser checklist (controller, headless Edge): all theme × width and behaviour checks passed before and after the fix wave.
+
+## 2026-10-01 — approver moment + failure drills (Phuong Hoang + Claude)
+- Asked for ideas that go beyond what other agent sites already show. Chose "You're the
+  approver" (the run stops and waits for the visitor's Approve/Reject — no timer, so the agent
+  never decides for them) and "Throw a problem at it" (two predefined drills per scenario:
+  retry, ask-first detour, cross-check, or escalation to the human step).
+- Built as data-driven paths on the existing pure run logic rather than an event engine, so
+  demos are predictable in front of clients.
+- Planning corrections: the unclear-request drill skips the router (no room for an upward
+  detour), escalation edges got a side-channel `via` so they don't run through the skipped
+  card, and decision buttons got explicit, tested coordinates so they never cover a card.
+- Bundle ruling: the main chunk reached the 71 kB gzip budget, so the demo section is now
+  lazy-loaded in `App.jsx` (with a Suspense fallback that keeps the `#demo` anchor).

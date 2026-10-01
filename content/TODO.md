@@ -42,6 +42,8 @@ to the deployed URL without one of these being resolved.
       team sign-off.
 - [ ] **Monitoring strip copy** — `sections.monitor` and `runLog` are illustrative /
       placeholder.
+- [ ] **Decision and drill copy** — approval steps, "sent back" outcomes and drill wording in
+      `workflows` are illustrative; confirm they match how the team would really run these.
 
 Once resolved, edit the corresponding value in `src/content/site.js` and remove the
 `PLACEHOLDER` marker/comment.

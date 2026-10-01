@@ -72,3 +72,8 @@ If you add a new section, follow the same pattern.
   pill always reads "XionTechs agent" — never another vendor's product or model name — and no
   token counts or other numbers are shown.
 - Run `npm test` alongside `npm run lint` and `npm run build` before committing.
+- Each workflow has one `decision` (the step that waits for the visitor's Approve/Reject) and
+  two `drills` (predefined problems). Paths through the decision node end at it; outcomes come
+  from `decision.approve` / `decision.reject`. A repeated step in a path is a retry. Edges may
+  carry `{ via: x }` to route around a skipped card. All of it is illustrative and tested in
+  `src/content/site.test.js`.

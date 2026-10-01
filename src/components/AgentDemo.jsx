@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
-import { Pause, Play, RotateCcw } from 'lucide-react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { Pause, Play, RotateCcw, X } from 'lucide-react'
 import { agentJourneys, sections, workflows } from '../content/site'
 import { buildRun, nextBranchIndex, stateAt, totalTicks } from '../workflow/run'
 import { journeyStateAt, journeyTicks } from '../workflow/journey'
@@ -9,6 +9,7 @@ import WorkflowGraph from './WorkflowGraph'
 import WorkflowList from './WorkflowList'
 import { typeIcon } from './workflowStyles'
 import RunMonitor from './RunMonitor'
+import DrillMenu from './DrillMenu'
 
 const TICK_MS = 700
 
@@ -36,12 +37,16 @@ export default function AgentDemo() {
   const [selectedId, setSelectedId] = useState(null)
   const [view, setView] = useState('workflow')
   const [runId, setRunId] = useState(0)
+  const [drillId, setDrillId] = useState(null)
+  const [decision, setDecision] = useState(null)
+  const [actions, setActions] = useState([])
+  const loggedRunRef = useRef(-1)
   const viewRefs = useRef([])
   const sectionRef = useRef(null)
   const tabRefs = useRef([])
 
   const workflow = workflows[active]
-  const run = useMemo(() => buildRun(workflow, branch), [workflow, branch])
+  const run = useMemo(() => buildRun(workflow, branch, { drillId, decision }), [workflow, branch, drillId, decision])
   const journey = agentJourneys.find((j) => j.id === workflow.id)
   const total = view === 'workflow' ? totalTicks(run) : journeyTicks(journey)
   // Derived every render, so turning reduced motion on mid-run jumps to the finished state.
@@ -49,6 +54,21 @@ export default function AgentDemo() {
   const state = useMemo(() => stateAt(run, shownTick), [run, shownTick])
   const jState = useMemo(() => journeyStateAt(journey, shownTick), [journey, shownTick])
   const done = view === 'workflow' ? state.done : jState.done
+  const drill = drillId ? workflow.drills.find((d) => d.id === drillId) : null
+  const waiting = view === 'workflow' && state.waiting
+
+  const pushAction = useCallback((status, text) => {
+    setActions((list) => [{ key: `${Date.now()}-${list.length}`, status, text }, ...list].slice(0, 6))
+  }, [])
+
+  // Log a drill once per run, when the agent has handled the problem (run done or waiting).
+  useEffect(() => {
+    if (!drill || view !== 'workflow' || loggedRunRef.current === runId) return
+    if (state.done || state.waiting) {
+      loggedRunRef.current = runId
+      pushAction(drill.log.status, drill.log.text)
+    }
+  }, [drill, view, runId, state.done, state.waiting, pushAction])
 
   useEffect(() => {
     const el = sectionRef.current
@@ -71,6 +91,7 @@ export default function AgentDemo() {
   function restart() {
     setTick(0)
     setPlaying(true)
+    setDecision(null)
     setRunId((r) => r + 1)
   }
 
@@ -78,17 +99,38 @@ export default function AgentDemo() {
     setActive(i)
     setBranch(0)
     setSelectedId(null)
+    setDrillId(null)
     restart()
   }
 
   function replay() {
-    if (view === 'workflow') setBranch((b) => nextBranchIndex(workflow, b))
+    if (view === 'workflow' && !drillId) setBranch((b) => nextBranchIndex(workflow, b))
     restart()
   }
 
   function selectView(v) {
+    if (v === view) return
     setView(v)
     restart()
+  }
+
+  function selectDrill(id) {
+    setDrillId(id)
+    restart()
+  }
+
+  function clearDrill() {
+    setDrillId(null)
+    setBranch(0)
+    restart()
+  }
+
+  // Continue from the current tick — never restart — so the run picks up at the decision step.
+  function decide(choice) {
+    setDecision(choice)
+    setTick((t) => Math.min(t, totalTicks(run)))
+    setPlaying(true)
+    pushAction(choice === 'approve' ? 'approved' : 'rejected', workflow.decision.log[choice])
   }
 
   function onViewKey(e) {
@@ -190,7 +232,8 @@ export default function AgentDemo() {
                 type="button"
                 onClick={() => (done ? replay() : setPlaying((p) => !p))}
                 aria-label={done ? 'Replay animation' : playing && !done ? 'Pause animation' : 'Play animation'}
-                className={btn}
+                disabled={waiting}
+                className={`${btn} disabled:opacity-40`}
               >
                 {playing && !done ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
               </button>
@@ -200,6 +243,7 @@ export default function AgentDemo() {
                 <RotateCcw className="h-4 w-4" />
               </button>
             )}
+            {view === 'workflow' && <DrillMenu key={workflow.id} drills={workflow.drills} onSelect={selectDrill} />}
             {view === 'agent' && !reduced && (
               <button type="button" onClick={replay} aria-label="Replay the task" className={btn}>
                 <RotateCcw className="h-4 w-4" />
@@ -207,6 +251,15 @@ export default function AgentDemo() {
             )}
           </div>
         </div>
+
+        {view === 'workflow' && drill && (
+          <div className="mt-3 inline-flex items-center gap-2 rounded-full border border-accent px-3 py-1 text-xs font-medium text-ink">
+            Drill: {drill.label}
+            <button type="button" onClick={clearDrill} aria-label="Stop drill" className="rounded-full p-0.5 text-ink/70 hover:text-primary">
+              <X className="h-3.5 w-3.5" />
+            </button>
+          </div>
+        )}
 
         <div className="mt-6">
           {view === 'workflow' ? (
@@ -219,11 +272,26 @@ export default function AgentDemo() {
                   selectedId={selectedId}
                   onSelect={setSelectedId}
                   reduced={reduced}
+                  onDecide={decide}
                 />
               </div>
-              <WorkflowList workflow={workflow} run={run} state={state} className="lg:sr-only" />
+              <WorkflowList workflow={workflow} run={run} state={state} className="lg:sr-only" onDecide={decide} />
               <p className="mt-4 text-sm text-muted" aria-live="polite">
-                {state.done ? `Run complete · took the “${run.branchLabel}” path` : `Running · ${run.branchLabel} path`}
+                {state.waiting
+                  ? 'Waiting for your decision'
+                  : state.retrying.size > 0
+                    ? 'Retrying…'
+                    : drill && state.problemSeen && !state.done
+                      ? `Problem: ${drill.label}`
+                      : state.done
+                        ? drill
+                          ? `Drill complete · ${drill.label}`
+                          : run.decision
+                            ? `Run complete · ${run.decision === 'approve' ? 'approved' : 'rejected'} by you`
+                            : `Run complete · took the “${run.branchLabel}” path`
+                        : drill
+                          ? `Running · ${drill.label}`
+                          : `Running · ${run.branchLabel} path`}
               </p>
               <aside className="mt-4 hidden rounded-xl border border-line bg-paper p-4 lg:block" aria-live="polite">
                 <p className="text-xs font-medium uppercase tracking-wide text-muted">Step details</p>
@@ -250,7 +318,7 @@ export default function AgentDemo() {
             </>
           )}
         </div>
-        <RunMonitor reduced={reduced} inView={inView} playing={playing} />
+        <RunMonitor reduced={reduced} inView={inView} playing={playing} actions={actions} />
       </div>
     </section>
   )
