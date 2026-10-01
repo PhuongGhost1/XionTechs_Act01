@@ -145,3 +145,14 @@ just at the end.
   65.60 kB gzip (budget 71 kB). Browser checklist: run by the controller
   after this commit.
 - Browser checklist (controller, headless Edge via Playwright against `vite preview`) caught two bugs the per-task and whole-branch reviews missed: the completed outcome node rendered white-on-white (conflicting Tailwind colour classes on one element — the colour maths said it passed, the real browser showed it didn't), and the demo paused while on screen because the in-view threshold was a ratio of a section taller than the viewport. The final review also caught truncated node titles, connectors below 3:1, no Replay under reduced motion, and a run log with no pause. All fixed in the final fix wave; a unit test now guards against conflicting colour classes on workflow nodes.
+
+## 2026-10-01 — "Agent at work" view (Phuong Hoang + Claude)
+- User shared Relevance AI's "Cowork & Codex" animation (one agent travelling a stepped path,
+  picking up files/skills, context ring compacting) and asked to build the same. Built as a
+  second view behind a "Workflow | Agent at work" toggle, one journey per scenario tab, using
+  the same tick timer as the graph (continuous animation rejected to avoid a second timing
+  system).
+- Deliberate differences from the reference: the pill says "XionTechs agent", not a competitor's
+  product/model name; the context ring fills visually with no token counts (any number would be
+  invented); under reduced motion a readable list replaces the moving window instead of a
+  scaled-down path whose labels would be unreadable.

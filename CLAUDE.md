@@ -67,4 +67,8 @@ If you add a new section, follow the same pattern.
   760 × 520 canvas without overlapping (`npm test` enforces all of this).
 - Workflow run logic lives in `src/workflow/run.js` (pure, tested); components only
   render its output.
+- The agent demo has two views: the workflow graph and "Agent at work" (`agentJourneys` in
+  `site.js`, pure logic in `src/workflow/journey.js`). Journeys are illustrative; the agent
+  pill always reads "XionTechs agent" — never another vendor's product or model name — and no
+  token counts or other numbers are shown.
 - Run `npm test` alongside `npm run lint` and `npm run build` before committing.

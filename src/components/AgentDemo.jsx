@@ -1,8 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Pause, Play, RotateCcw } from 'lucide-react'
-import { sections, workflows } from '../content/site'
+import { agentJourneys, sections, workflows } from '../content/site'
 import { buildRun, nextBranchIndex, stateAt, totalTicks } from '../workflow/run'
+import { journeyStateAt, journeyTicks } from '../workflow/journey'
 import { iconMap } from './icons'
+import AgentJourney from './AgentJourney'
 import WorkflowGraph from './WorkflowGraph'
 import WorkflowList from './WorkflowList'
 import { typeIcon } from './workflowStyles'
@@ -32,15 +34,21 @@ export default function AgentDemo() {
   const [playing, setPlaying] = useState(true)
   const [inView, setInView] = useState(false)
   const [selectedId, setSelectedId] = useState(null)
+  const [view, setView] = useState('workflow')
+  const [runId, setRunId] = useState(0)
+  const viewRefs = useRef([])
   const sectionRef = useRef(null)
   const tabRefs = useRef([])
 
   const workflow = workflows[active]
   const run = useMemo(() => buildRun(workflow, branch), [workflow, branch])
-  const total = totalTicks(run)
-  // Derived every render, so turning reduced motion on mid-run jumps to the finished path.
+  const journey = agentJourneys.find((j) => j.id === workflow.id)
+  const total = view === 'workflow' ? totalTicks(run) : journeyTicks(journey)
+  // Derived every render, so turning reduced motion on mid-run jumps to the finished state.
   const shownTick = reduced ? total : tick
   const state = useMemo(() => stateAt(run, shownTick), [run, shownTick])
+  const jState = useMemo(() => journeyStateAt(journey, shownTick), [journey, shownTick])
+  const done = view === 'workflow' ? state.done : jState.done
 
   useEffect(() => {
     const el = sectionRef.current
@@ -60,18 +68,35 @@ export default function AgentDemo() {
     return () => clearTimeout(id)
   }, [reduced, playing, inView, tick, total])
 
+  function restart() {
+    setTick(0)
+    setPlaying(true)
+    setRunId((r) => r + 1)
+  }
+
   function selectTab(i) {
     setActive(i)
     setBranch(0)
-    setTick(0)
-    setPlaying(true)
     setSelectedId(null)
+    restart()
   }
 
   function replay() {
-    setBranch((b) => nextBranchIndex(workflow, b))
-    setTick(0)
-    setPlaying(true)
+    if (view === 'workflow') setBranch((b) => nextBranchIndex(workflow, b))
+    restart()
+  }
+
+  function selectView(v) {
+    setView(v)
+    restart()
+  }
+
+  function onViewKey(e) {
+    if (!['ArrowRight', 'ArrowLeft', 'ArrowUp', 'ArrowDown'].includes(e.key)) return
+    e.preventDefault()
+    const next = view === 'workflow' ? 'agent' : 'workflow'
+    selectView(next)
+    viewRefs.current[next === 'workflow' ? 0 : 1]?.focus()
   }
 
   function onTabKey(e) {
@@ -135,59 +160,95 @@ export default function AgentDemo() {
           <span className="rounded-full border border-dashed border-accent px-3 py-1 text-xs font-medium text-accent">
             Illustrative scenario — not a client case study
           </span>
-          {(!reduced || workflow.branches.length > 1) && (
-            <div className="flex gap-2">
-              {!reduced && (
-                <button
-                  type="button"
-                  onClick={() => (state.done ? replay() : setPlaying((p) => !p))}
-                  aria-label={playing && !state.done ? 'Pause animation' : 'Play animation'}
-                  className={btn}
-                >
-                  {playing && !state.done ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
-                </button>
-              )}
-              {workflow.branches.length > 1 && (
-                <button type="button" onClick={replay} aria-label="Replay with the next path" className={btn}>
-                  <RotateCcw className="h-4 w-4" />
-                </button>
-              )}
+          <div className="flex flex-wrap items-center gap-3">
+            <div role="radiogroup" aria-label="Demo view" className="flex rounded-full border border-line p-1" onKeyDown={onViewKey}>
+              {[
+                ['workflow', 'Workflow'],
+                ['agent', 'Agent at work'],
+              ].map(([id, label], i) => {
+                const on = view === id
+                return (
+                  <button
+                    key={id}
+                    ref={(el) => {
+                      viewRefs.current[i] = el
+                    }}
+                    type="button"
+                    role="radio"
+                    aria-checked={on}
+                    tabIndex={on ? 0 : -1}
+                    onClick={() => selectView(id)}
+                    className={`rounded-full px-3 py-1 text-xs font-medium transition ${on ? 'bg-primary text-primaryInk' : 'text-ink/70 hover:text-primary'}`}
+                  >
+                    {label}
+                  </button>
+                )
+              })}
             </div>
-          )}
+            {!reduced && (
+              <button
+                type="button"
+                onClick={() => (done ? replay() : setPlaying((p) => !p))}
+                aria-label={playing && !done ? 'Pause animation' : 'Play animation'}
+                className={btn}
+              >
+                {playing && !done ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+              </button>
+            )}
+            {view === 'workflow' && workflow.branches.length > 1 && (
+              <button type="button" onClick={replay} aria-label="Replay with the next path" className={btn}>
+                <RotateCcw className="h-4 w-4" />
+              </button>
+            )}
+            {view === 'agent' && !reduced && (
+              <button type="button" onClick={replay} aria-label="Replay the task" className={btn}>
+                <RotateCcw className="h-4 w-4" />
+              </button>
+            )}
+          </div>
         </div>
 
         <div className="mt-6">
-          <div>
-            <div className="hidden lg:block">
-              <WorkflowGraph
-                workflow={workflow}
-                run={run}
-                state={state}
-                selectedId={selectedId}
-                onSelect={setSelectedId}
-                reduced={reduced}
-              />
-            </div>
-            <WorkflowList workflow={workflow} run={run} state={state} className="lg:sr-only" />
-            <p className="mt-4 text-sm text-muted" aria-live="polite">
-              {state.done ? `Run complete · took the “${run.branchLabel}” path` : `Running · ${run.branchLabel} path`}
-            </p>
-          </div>
-
-          <aside className="mt-4 hidden rounded-xl border border-line bg-paper p-4 lg:block" aria-live="polite">
-            <p className="text-xs font-medium uppercase tracking-wide text-muted">Step details</p>
-            <div className="mt-3 flex items-center gap-2">
-              <SelectedIcon className="h-4 w-4 text-accent" strokeWidth={1.75} />
-              <p className="font-medium">{selected.title}</p>
-            </div>
-            {selected.capability && (
-              <p className="mt-2 inline-block rounded border border-dashed border-line px-1.5 text-[11px] text-muted">
-                {selected.capability} · draft label
+          {view === 'workflow' ? (
+            <>
+              <div key={runId} className="hidden lg:block">
+                <WorkflowGraph
+                  workflow={workflow}
+                  run={run}
+                  state={state}
+                  selectedId={selectedId}
+                  onSelect={setSelectedId}
+                  reduced={reduced}
+                />
+              </div>
+              <WorkflowList workflow={workflow} run={run} state={state} className="lg:sr-only" />
+              <p className="mt-4 text-sm text-muted" aria-live="polite">
+                {state.done ? `Run complete · took the “${run.branchLabel}” path` : `Running · ${run.branchLabel} path`}
               </p>
-            )}
-            <p className="mt-3 text-sm text-muted">{selected.desc}</p>
-            <p className="mt-4 text-xs text-muted">Click any step in the workflow to see what it does.</p>
-          </aside>
+              <aside className="mt-4 hidden rounded-xl border border-line bg-paper p-4 lg:block" aria-live="polite">
+                <p className="text-xs font-medium uppercase tracking-wide text-muted">Step details</p>
+                <div className="mt-3 flex items-center gap-2">
+                  <SelectedIcon className="h-4 w-4 text-accent" strokeWidth={1.75} />
+                  <p className="font-medium">{selected.title}</p>
+                </div>
+                {selected.capability && (
+                  <p className="mt-2 inline-block rounded border border-dashed border-line px-1.5 text-[11px] text-muted">
+                    {selected.capability} · draft label
+                  </p>
+                )}
+                <p className="mt-3 text-sm text-muted">{selected.desc}</p>
+                <p className="mt-4 text-xs text-muted">Click any step in the workflow to see what it does.</p>
+              </aside>
+            </>
+          ) : (
+            <>
+              <p className="mb-3 text-sm font-medium text-ink">Agent at work · {journey.task}</p>
+              <AgentJourney key={`${journey.id}-${runId}`} journey={journey} state={jState} reduced={reduced} />
+              <p className="mt-4 text-sm text-muted" aria-live="polite">
+                {jState.done ? `Task complete · ${journey.task}` : `Running · ${journey.task}`}
+              </p>
+            </>
+          )}
         </div>
         <RunMonitor reduced={reduced} inView={inView} playing={playing} />
       </div>
