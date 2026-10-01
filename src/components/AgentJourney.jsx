@@ -11,15 +11,17 @@ function Ring({ fill, compacting }) {
   return (
     <g>
       <circle r={r} fill="none" strokeWidth="3" className="stroke-line" />
-      <circle
-        r={r}
-        fill="none"
-        strokeWidth="3"
-        strokeLinecap="round"
-        transform="rotate(-90)"
-        className={compacting ? 'stroke-accent' : 'stroke-ink'}
-        style={{ strokeDasharray: `${fill * c} ${c}`, transition: 'stroke-dasharray 600ms ease' }}
-      />
+      {fill > 0 && (
+        <circle
+          r={r}
+          fill="none"
+          strokeWidth="3"
+          strokeLinecap="round"
+          transform="rotate(-90)"
+          className={compacting ? 'stroke-accent' : 'stroke-ink'}
+          style={{ strokeDasharray: `${fill * c} ${c}`, transition: 'stroke-dasharray 600ms ease' }}
+        />
+      )}
     </g>
   )
 }
@@ -89,10 +91,15 @@ function JourneyList({ journey, state, className }) {
       {journey.stops.map((s, i) => {
         if (s.kind === 'compact') {
           const reached = state.done || i < state.stopIndex
+          const current = i === state.stopIndex && !state.done
           return (
-            <li key={`compact-${i}`} className="flex items-center gap-2 py-1 text-xs font-medium uppercase tracking-wide text-muted">
+            <li
+              key={`compact-${i}`}
+              aria-current={current ? 'step' : undefined}
+              className={`flex items-center gap-2 py-1 text-xs font-medium uppercase tracking-wide ${current ? 'rounded-lg border border-accent bg-paper px-3 text-muted' : 'text-muted'}`}
+            >
               <RefreshCw className="h-3.5 w-3.5 text-accent" strokeWidth={1.75} />
-              {reached || i === state.stopIndex ? 'Context compacted — continuing' : 'Context check'}
+              {reached ? 'Context compacted — continuing' : current && state.compacting ? 'Compacting context…' : 'Context check'}
             </li>
           )
         }
