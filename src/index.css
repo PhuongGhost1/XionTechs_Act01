@@ -102,6 +102,15 @@ body {
   box-shadow: 0 10px 30px -12px rgb(var(--primary) / 0.35);
 }
 
+/* Monitoring strip: each newly mounted row slides in */
+@keyframes monitor-in {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: none; }
+}
+.monitor-row {
+  animation: monitor-in 400ms ease both;
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
@@ -114,5 +123,6 @@ body {
     animation: none;
   }
   .roadmap-stage { transition: none; }
+  .monitor-row { animation: none; }
 }
 

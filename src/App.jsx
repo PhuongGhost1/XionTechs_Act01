@@ -1,6 +1,7 @@
 import Nav from './components/Nav'
 import Hero from './components/Hero'
 import Pillars from './components/Pillars'
+import AzureStrip from './components/AzureStrip'
 import AgentDemo from './components/AgentDemo'
 import WhyUs from './components/WhyUs'
 import Roadmap from './components/Roadmap'
@@ -18,6 +19,7 @@ export default function App() {
       <main>
         <Hero />
         <Pillars />
+        <AzureStrip />
         <AgentDemo />
         <WhyUs />
         <Roadmap />

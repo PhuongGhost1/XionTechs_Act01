@@ -6,6 +6,7 @@ import { iconMap } from './icons'
 import WorkflowGraph from './WorkflowGraph'
 import WorkflowList from './WorkflowList'
 import { typeIcon } from './workflowStyles'
+import RunMonitor from './RunMonitor'
 
 const TICK_MS = 700
 
@@ -184,7 +185,7 @@ export default function AgentDemo() {
             <p className="mt-4 text-xs text-muted">Click any step in the workflow to see what it does.</p>
           </aside>
         </div>
-        {/* RunMonitor is added here in Task 5 */}
+        <RunMonitor reduced={reduced} inView={inView} />
       </div>
     </section>
   )
