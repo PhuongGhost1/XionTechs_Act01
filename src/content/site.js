@@ -242,6 +242,53 @@ export const runLog = [
   { status: 'passed', workflow: 'factory', text: 'Technician booking · matched to the shift roster' },
 ]
 
+// ILLUSTRATIVE: invented single-agent journeys for the "Agent at work" view, one per workflow
+// tab. Not client claims. No digits anywhere (npm test).
+export const agentJourneys = [
+  {
+    id: 'support',
+    task: 'Working through the morning support queue',
+    stops: [
+      { kind: 'resource', label: 'support/inbox', status: 'Reading new tickets' },
+      { kind: 'skill', label: 'skills/triage', status: 'Using skill: triage' },
+      { kind: 'resource', label: 'orders/system', status: 'Looking up order status' },
+      { kind: 'resource', label: 'shipping/tracker', status: 'Checking deliveries' },
+      { kind: 'compact', status: 'Compacting context…' },
+      { kind: 'resource', label: 'policy/refunds', status: 'Checking the refund policy' },
+      { kind: 'skill', label: 'skills/reply-writing', status: 'Using skill: reply writing' },
+      { kind: 'resource', label: 'escalations/queue', status: 'Handing exceptions to the team' },
+    ],
+  },
+  {
+    id: 'inventory',
+    task: 'Running the daily stock review',
+    stops: [
+      { kind: 'resource', label: 'stock/levels', status: 'Reading stock levels' },
+      { kind: 'resource', label: 'sales/history', status: 'Reviewing recent sales' },
+      { kind: 'skill', label: 'skills/forecasting', status: 'Using skill: forecasting' },
+      { kind: 'resource', label: 'suppliers/lead-times', status: 'Checking supplier lead times' },
+      { kind: 'compact', status: 'Compacting context…' },
+      { kind: 'resource', label: 'orders/open', status: 'Checking open orders' },
+      { kind: 'skill', label: 'skills/reorder-drafting', status: 'Using skill: reorder drafting' },
+      { kind: 'resource', label: 'approvals/buyer', status: 'Sending drafts for approval' },
+    ],
+  },
+  {
+    id: 'factory',
+    task: 'Handling a machine health alert',
+    stops: [
+      { kind: 'resource', label: 'sensors/vibration-feed', status: 'Reading the sensor feed' },
+      { kind: 'skill', label: 'skills/anomaly-detection', status: 'Using skill: anomaly detection' },
+      { kind: 'resource', label: 'machines/maintenance-log', status: 'Reading the maintenance log' },
+      { kind: 'compact', status: 'Compacting context…' },
+      { kind: 'resource', label: 'shifts/roster', status: 'Checking the shift roster' },
+      { kind: 'skill', label: 'skills/scheduling', status: 'Using skill: scheduling' },
+      { kind: 'resource', label: 'technicians/calendar', status: 'Booking a technician' },
+      { kind: 'resource', label: 'alerts/shift-lead', status: 'Alerting the shift lead' },
+    ],
+  },
+]
+
 // PLACEHOLDER: Azure-first framing pending team sign-off (stated by a team member on
 // 2026-10-01). The cloud and platform names are real live-site service copy.
 export const stack = {

@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest'
 import * as site from './site'
 import { buildRun } from '../workflow/run'
 import { VIEW, nodeBox } from '../workflow/layout'
+import { layoutJourney, TAG_H, CHIP } from '../workflow/journey'
 
 // Collect every string value in the exported content, however deeply nested.
 function collectStrings(value, out = []) {
@@ -112,6 +113,62 @@ describe('site content rules', () => {
         expect(r.text).not.toMatch(/\d/)
       }
       expect(new Set(site.runLog.map((r) => r.text)).size).toBe(6)
+    })
+  })
+
+  describe('agent journeys', () => {
+    it('has exactly one journey per workflow, in the same order', () => {
+      expect(site.agentJourneys.map((x) => x.id)).toEqual(site.workflows.map((w) => w.id))
+    })
+
+    it('has exactly one compact stop, never first or last', () => {
+      for (const jr of site.agentJourneys) {
+        const idx = jr.stops.map((s, i) => (s.kind === 'compact' ? i : -1)).filter((i) => i >= 0)
+        expect(idx.length, jr.id).toBe(1)
+        expect(idx[0] > 0 && idx[0] < jr.stops.length - 1, jr.id).toBe(true)
+      }
+    })
+
+    it('uses known kinds, unique short labels and short statuses', () => {
+      for (const jr of site.agentJourneys) {
+        const labels = jr.stops.filter((s) => s.kind !== 'compact').map((s) => s.label)
+        expect(new Set(labels).size).toBe(labels.length)
+        for (const s of jr.stops) {
+          expect(['resource', 'skill', 'compact']).toContain(s.kind)
+          if (s.kind !== 'compact') expect(s.label.length, s.label).toBeLessThanOrEqual(26)
+          expect(s.status.length, s.status).toBeLessThanOrEqual(32)
+        }
+      }
+    })
+
+    it('contains no digits', () => {
+      for (const jr of site.agentJourneys) {
+        const texts = [jr.task, ...jr.stops.flatMap((s) => [s.label ?? '', s.status])]
+        for (const t of texts) expect(t, `${jr.id}: ${t}`).not.toMatch(/\d/)
+      }
+    })
+
+    it('lays tags out inside the canvas without collisions', () => {
+      for (const jr of site.agentJourneys) {
+        const L = layoutJourney(jr)
+        const boxes = L.tags.map((t) => ({ ...t, x0: t.x - t.w / 2, x1: t.x + t.w / 2, y0: t.y - TAG_H / 2, y1: t.y + TAG_H / 2 }))
+        for (const b of boxes) {
+          expect(b.y0 >= 0 && b.y1 <= L.height && b.x0 >= 0 && b.x1 <= L.width, `${jr.id} tag ${b.stopIndex} inside`).toBe(true)
+          // clear of its own stop's status chip band
+          const p = L.points[b.stopIndex]
+          const chipTop = p.y + CHIP.dy
+          const chipBottom = chipTop + CHIP.h
+          expect(b.y1 <= chipTop || b.y0 >= chipBottom, `${jr.id} tag ${b.stopIndex} vs chip`).toBe(true)
+        }
+        for (let a = 0; a < boxes.length; a++) {
+          for (let c = a + 1; c < boxes.length; c++) {
+            const A = boxes[a]
+            const C = boxes[c]
+            const overlap = A.x0 < C.x1 && C.x0 < A.x1 && A.y0 < C.y1 && C.y0 < A.y1
+            expect(overlap, `${jr.id}: tags ${A.stopIndex}/${C.stopIndex}`).toBe(false)
+          }
+        }
+      }
     })
   })
 
