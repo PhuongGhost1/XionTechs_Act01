@@ -155,6 +155,10 @@ export const capabilityLabels = ['AI model', 'Integration', 'IoT gateway', 'Data
 // ILLUSTRATIVE: invented demo workflows, not client claims. Rendered with a visible
 // "Illustrative scenario — not a client case study" badge. No digits anywhere (npm test).
 // x/y are node centres in a 760 × 520 canvas (see src/workflow/layout.js).
+// `decision` is the step that waits for the visitor (Approve / Reject buttons at `buttons`);
+// `drills` are two predefined problems (retry, detour or escalation) a visitor can trigger;
+// `drillOnly` nodes are drawn only while a drill passes through them; an edge's optional third
+// element `{ via }` routes it down a vertical side channel at that x so it skips a card.
 export const workflows = [
   {
     id: 'support',
@@ -168,17 +172,32 @@ export const workflows = [
       { id: 'lookup', type: 'agent', title: 'Order lookup agent', capability: 'Integration', x: 200, y: 270, desc: 'Checks the order system and the shipping tracker for the latest status.' },
       { id: 'reply', type: 'agent', title: 'Reply writer', capability: 'AI model', x: 200, y: 345, desc: 'Writes a clear reply with the tracking link and flags a late delivery.' },
       { id: 'refund', type: 'agent', title: 'Refund agent', capability: 'Integration', x: 560, y: 270, desc: 'Checks the order against the refund policy and prepares the refund.' },
-      { id: 'approve', type: 'human', title: 'Human approves', x: 560, y: 345, desc: 'A team member approves the refund before any money moves.' },
+      { id: 'approve', type: 'human', title: 'Human approves', x: 560, y: 345, waitsForDecision: true, desc: 'A team member approves the refund before any money moves.' },
       { id: 'done', type: 'outcome', title: 'Customer answered', x: 380, y: 440, desc: 'The customer gets an answer quickly; your team only sees the exceptions.' },
+      { id: 'clarify', type: 'agent', title: 'Clarifying question', capability: 'AI model', x: 170, y: 195, drillOnly: true, desc: 'Asks the customer one short question before going any further.' },
+      { id: 'sentBack', type: 'outcome', title: 'Sent back with a note', x: 640, y: 440, desc: 'The refund is not made; the customer gets a note and a person follows up.' },
     ],
     edges: [
       ['email', 'triage'], ['triage', 'route'],
       ['route', 'lookup'], ['lookup', 'reply'], ['reply', 'done'],
-      ['route', 'refund'], ['refund', 'approve'], ['approve', 'done'],
+      ['route', 'refund'], ['refund', 'approve'], ['approve', 'done'], ['approve', 'sentBack'],
+      ['triage', 'clarify'], ['clarify', 'lookup'],
     ],
     branches: [
+      { label: 'Refund request', path: ['email', 'triage', 'route', 'refund', 'approve'] },
       { label: 'Order status', path: ['email', 'triage', 'route', 'lookup', 'reply', 'done'] },
-      { label: 'Refund request', path: ['email', 'triage', 'route', 'refund', 'approve', 'done'] },
+    ],
+    decision: {
+      nodeId: 'approve',
+      verb: 'refund',
+      approve: ['done'],
+      reject: ['sentBack'],
+      log: { approve: 'refund sent to the customer', reject: 'refund held, customer sent a note' },
+      buttons: { x: 382, y: 345 },
+    },
+    drills: [
+      { id: 'timeout', label: 'Order system timeout', hint: 'Watch it retry', problemNodeId: 'lookup', path: ['email', 'triage', 'route', 'lookup', 'lookup', 'reply', 'done'], log: { status: 'retried', text: 'Order system timeout · retried, then succeeded' } },
+      { id: 'unclear', label: 'Customer request is unclear', hint: 'Watch it ask first', problemNodeId: 'triage', path: ['email', 'triage', 'clarify', 'lookup', 'reply', 'done'], log: { status: 'flagged', text: 'Unclear request · asked the customer first' } },
     ],
   },
   {
@@ -193,17 +212,31 @@ export const workflows = [
       { id: 'skip', type: 'outcome', title: 'Logged, no action', x: 170, y: 270, desc: 'Stock is healthy, so the check is logged and nobody is interrupted.' },
       { id: 'forecast', type: 'agent', title: 'Demand forecaster', capability: 'AI model', x: 560, y: 270, desc: 'Estimates upcoming demand from sales history and open orders.' },
       { id: 'draft', type: 'agent', title: 'Reorder drafter', capability: 'Integration', x: 560, y: 345, desc: 'Drafts a reorder with quantity and supplier, using supplier lead times.' },
-      { id: 'buyer', type: 'human', title: 'Buyer approves', x: 560, y: 420, desc: 'A buyer reviews the draft and approves it with one click.' },
+      { id: 'buyer', type: 'human', title: 'Buyer approves', x: 560, y: 420, waitsForDecision: true, desc: 'A buyer reviews the draft and approves it with one click.' },
       { id: 'sent', type: 'outcome', title: 'Reorder sent', x: 560, y: 490, desc: 'Stock-outs are caught before they happen; a human approves instead of chasing.' },
+      { id: 'held', type: 'outcome', title: 'Reorder held for review', x: 330, y: 490, desc: 'Nothing is ordered; the draft waits for the buyer to look again.' },
     ],
     edges: [
       ['check', 'monitor'], ['monitor', 'route'],
       ['route', 'skip'],
-      ['route', 'forecast'], ['forecast', 'draft'], ['draft', 'buyer'], ['buyer', 'sent'],
+      ['route', 'forecast'], ['forecast', 'draft'], ['draft', 'buyer'], ['buyer', 'sent'], ['buyer', 'held'],
+      ['forecast', 'buyer', { via: 700 }],
     ],
     branches: [
-      { label: 'Low stock', path: ['check', 'monitor', 'route', 'forecast', 'draft', 'buyer', 'sent'] },
+      { label: 'Low stock', path: ['check', 'monitor', 'route', 'forecast', 'draft', 'buyer'] },
       { label: 'Stock healthy', path: ['check', 'monitor', 'route', 'skip'] },
+    ],
+    decision: {
+      nodeId: 'buyer',
+      verb: 'reorder',
+      approve: ['sent'],
+      reject: ['held'],
+      log: { approve: 'reorder sent to the supplier', reject: 'reorder held for review' },
+      buttons: { x: 370, y: 420 },
+    },
+    drills: [
+      { id: 'offline', label: 'Supplier system offline', hint: 'Watch it retry', problemNodeId: 'draft', path: ['check', 'monitor', 'route', 'forecast', 'draft', 'draft', 'buyer'], log: { status: 'retried', text: 'Supplier system offline · retried, then drafted' } },
+      { id: 'spike', label: 'Sales spike looks wrong', hint: 'Watch it escalate', problemNodeId: 'forecast', path: ['check', 'monitor', 'route', 'forecast', 'buyer'], log: { status: 'flagged', text: 'Unusual sales spike · escalated to the buyer' } },
     ],
   },
   {
@@ -213,20 +246,37 @@ export const workflows = [
     illustrative: true,
     nodes: [
       { id: 'sensor', type: 'trigger', title: 'Vibration sensor spike', x: 380, y: 40, desc: 'A vibration sensor on a packaging line reports an unusual spike.' },
-      { id: 'anomaly', type: 'agent', title: 'Anomaly agent', capability: 'IoT gateway', x: 380, y: 120, desc: 'Recognises the pattern as an early sign of bearing wear.' },
-      { id: 'history', type: 'agent', title: 'Maintenance history agent', capability: 'Data store', x: 200, y: 210, desc: 'Looks up when this machine was last serviced and what was replaced.' },
-      { id: 'roster', type: 'agent', title: 'Shift roster agent', capability: 'Integration', x: 560, y: 210, desc: 'Finds the next break and which technician is on shift.' },
-      { id: 'schedule', type: 'agent', title: 'Scheduler agent', capability: 'AI model', x: 380, y: 300, desc: 'Books the technician into the next break and alerts the shift lead.' },
-      { id: 'booked', type: 'outcome', title: 'Technician booked', x: 380, y: 390, desc: 'Downtime is prevented instead of repaired; the shift lead is kept in the loop.' },
+      { id: 'anomaly', type: 'agent', title: 'Anomaly agent', capability: 'IoT gateway', x: 380, y: 115, desc: 'Recognises the pattern as an early sign of bearing wear.' },
+      { id: 'crosscheck', type: 'agent', title: 'Second sensor check', capability: 'IoT gateway', x: 380, y: 185, drillOnly: true, desc: 'Reads a second sensor on the same line before trusting the first one.' },
+      { id: 'history', type: 'agent', title: 'Maintenance history agent', capability: 'Data store', x: 200, y: 255, desc: 'Looks up when this machine was last serviced and what was replaced.' },
+      { id: 'roster', type: 'agent', title: 'Shift roster agent', capability: 'Integration', x: 560, y: 255, desc: 'Finds the next break and which technician is on shift.' },
+      { id: 'schedule', type: 'agent', title: 'Scheduler agent', capability: 'AI model', x: 380, y: 330, desc: 'Proposes a technician slot in the next break.' },
+      { id: 'confirm', type: 'human', title: 'Shift lead confirms', x: 380, y: 405, waitsForDecision: true, desc: 'The shift lead confirms the plan before anyone is booked.' },
+      { id: 'booked', type: 'outcome', title: 'Technician booked', x: 380, y: 480, desc: 'Downtime is prevented instead of repaired; the shift lead is kept in the loop.' },
+      { id: 'standby', type: 'outcome', title: 'Kept under watch', x: 620, y: 480, desc: 'No one is booked yet; the machine stays under closer watch.' },
     ],
     edges: [
       ['sensor', 'anomaly'],
       ['anomaly', 'history'], ['anomaly', 'roster'],
       ['history', 'schedule'], ['roster', 'schedule'],
-      ['schedule', 'booked'],
+      ['schedule', 'confirm'], ['confirm', 'booked'], ['confirm', 'standby'],
+      ['anomaly', 'crosscheck'], ['crosscheck', 'history'], ['crosscheck', 'roster'],
+      ['history', 'confirm', { via: 200 }], ['roster', 'confirm', { via: 560 }],
     ],
     branches: [
-      { label: 'Sensor alert', path: ['sensor', 'anomaly', ['history', 'roster'], 'schedule', 'booked'] },
+      { label: 'Sensor alert', path: ['sensor', 'anomaly', ['history', 'roster'], 'schedule', 'confirm'] },
+    ],
+    decision: {
+      nodeId: 'confirm',
+      verb: 'technician booking',
+      approve: ['booked'],
+      reject: ['standby'],
+      log: { approve: 'technician booked for the next break', reject: 'machine kept under watch' },
+      buttons: { x: 590, y: 405 },
+    },
+    drills: [
+      { id: 'faulty', label: 'Sensor reading looks faulty', hint: 'Watch it double-check', problemNodeId: 'anomaly', path: ['sensor', 'anomaly', 'crosscheck', ['history', 'roster'], 'schedule', 'confirm'], log: { status: 'flagged', text: 'Faulty-looking reading · second sensor checked' } },
+      { id: 'notech', label: 'No technician on shift', hint: 'Watch it escalate', problemNodeId: 'roster', path: ['sensor', 'anomaly', ['history', 'roster'], 'confirm'], log: { status: 'flagged', text: 'No technician on shift · escalated to the shift lead' } },
     ],
   },
 ]

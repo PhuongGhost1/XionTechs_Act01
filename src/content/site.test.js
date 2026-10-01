@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import * as site from './site'
 import { buildRun } from '../workflow/run'
-import { VIEW, nodeBox } from '../workflow/layout'
+import { VIEW, nodeBox, decisionBox } from '../workflow/layout'
 import { layoutJourney, TAG_H, CHIP } from '../workflow/journey'
 
 // Collect every string value in the exported content, however deeply nested.
@@ -54,7 +54,7 @@ describe('site content rules', () => {
       }
     })
 
-    it('starts every branch at the single trigger and ends at an outcome', () => {
+    it('starts every branch at the single trigger and ends at an outcome or the decision node', () => {
       for (const wf of site.workflows) {
         const nodes = byId(wf)
         const triggers = wf.nodes.filter((n) => n.type === 'trigger')
@@ -62,7 +62,8 @@ describe('site content rules', () => {
         for (const b of wf.branches) {
           const ids = flat(b.path)
           expect(ids[0]).toBe(triggers[0].id)
-          expect(nodes[ids[ids.length - 1]].type).toBe('outcome')
+          const end = ids[ids.length - 1]
+          expect(nodes[end].type === 'outcome' || end === wf.decision.nodeId, `${wf.id}: ${b.label}`).toBe(true)
         }
       }
     })
@@ -98,6 +99,67 @@ describe('site content rules', () => {
     it('contains no digits in any workflow text', () => {
       for (const wf of site.workflows) {
         const texts = [wf.label, ...wf.branches.map((b) => b.label), ...wf.nodes.flatMap((n) => [n.title, n.desc, n.capability ?? ''])]
+        for (const t of texts) expect(t, `${wf.id}: ${t}`).not.toMatch(/\d/)
+      }
+    })
+
+    it('has exactly one approval step that waits for a decision, reached by branch zero', () => {
+      for (const wf of site.workflows) {
+        const nodes = byId(wf)
+        const waits = wf.nodes.filter((n) => n.waitsForDecision)
+        expect(waits.map((n) => n.id), wf.id).toEqual([wf.decision.nodeId])
+        expect(waits[0].type).toBe('human')
+        expect(flat(wf.branches[0].path).at(-1)).toBe(wf.decision.nodeId)
+        for (const choice of ['approve', 'reject']) {
+          const cont = wf.decision[choice]
+          expect(nodes[cont.at(-1)].type, `${wf.id} ${choice}`).toBe('outcome')
+          const run = buildRun(wf, 0, { decision: choice })
+          const edgeSet = new Set(wf.edges.map(([a, b]) => `${a}>${b}`))
+          for (const e of run.edges) expect(edgeSet.has(`${e.from}>${e.to}`), `${wf.id} ${choice} ${e.from}>${e.to}`).toBe(true)
+        }
+        expect(wf.decision.verb.length).toBeGreaterThan(0)
+      }
+    })
+
+    it('has exactly two drills that follow edges and name a problem step on their path', () => {
+      for (const wf of site.workflows) {
+        const nodes = byId(wf)
+        expect(wf.drills.length, wf.id).toBe(2)
+        const edgeSet = new Set(wf.edges.map(([a, b]) => `${a}>${b}`))
+        for (const d of wf.drills) {
+          const ids = flat(d.path)
+          expect(ids).toContain(d.problemNodeId)
+          const run = buildRun(wf, 0, { drillId: d.id })
+          for (const e of run.edges) expect(edgeSet.has(`${e.from}>${e.to}`), `${wf.id}/${d.id} ${e.from}>${e.to}`).toBe(true)
+          const end = ids.at(-1)
+          expect(nodes[end].type === 'outcome' || end === wf.decision.nodeId, `${wf.id}/${d.id} end`).toBe(true)
+          expect(['passed', 'flagged', 'retried']).toContain(d.log.status)
+        }
+      }
+    })
+
+    it('keeps drill-only steps off every normal branch', () => {
+      for (const wf of site.workflows) {
+        const drillOnly = wf.nodes.filter((n) => n.drillOnly).map((n) => n.id)
+        for (const b of wf.branches) for (const id of flat(b.path)) expect(drillOnly, `${wf.id}: ${id}`).not.toContain(id)
+      }
+    })
+
+    it('places the decision buttons inside the canvas without covering a card', () => {
+      for (const wf of site.workflows) {
+        const d = decisionBox(wf.decision)
+        expect(d.x >= 0 && d.y >= 0 && d.x + d.w <= VIEW.w && d.y + d.h <= VIEW.h, wf.id).toBe(true)
+        for (const n of wf.nodes) {
+          const b = nodeBox(n)
+          const overlap = d.x < b.x + b.w && b.x < d.x + d.w && d.y < b.y + b.h && b.y < d.y + d.h
+          expect(overlap, `${wf.id}: buttons over ${n.id}`).toBe(false)
+        }
+      }
+    })
+
+    it('contains no digits in decision and drill text', () => {
+      for (const wf of site.workflows) {
+        const texts = [wf.decision.verb, wf.decision.log.approve, wf.decision.log.reject, ...wf.drills.flatMap((d) => [d.label, d.hint, d.log.text])]
         for (const t of texts) expect(t, `${wf.id}: ${t}`).not.toMatch(/\d/)
       }
     })

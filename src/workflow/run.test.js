@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { buildRun, nextBranchIndex, totalTicks, stateAt, edgeKey, splitBranches, visibleRows } from './run'
+import { buildRun, nextBranchIndex, totalTicks, stateAt, edgeKey, splitBranches, visibleRows, visibleNodeIds } from './run'
 
 const linear = {
   branches: [{ label: 'Only', path: ['a', 'b', 'c'] }],
@@ -105,5 +105,76 @@ describe('visibleRows', () => {
     expect(visibleRows(log, 0, 4)).toEqual(['r0', 'r5', 'r4', 'r3'])
     expect(visibleRows(log, 2, 4)).toEqual(['r2', 'r1', 'r0', 'r5'])
     expect(visibleRows(log, 8, 2)).toEqual(['r2', 'r1'])
+  })
+})
+
+const decided = {
+  nodes: [
+    { id: 't', type: 'trigger' }, { id: 'a', type: 'agent' }, { id: 'h', type: 'human', waitsForDecision: true },
+    { id: 'ok', type: 'outcome' }, { id: 'no', type: 'outcome' }, { id: 'x', type: 'agent', drillOnly: true },
+  ],
+  branches: [{ label: 'Main', path: ['t', 'a', 'h'] }],
+  decision: { nodeId: 'h', approve: ['ok'], reject: ['no'] },
+  drills: [
+    { id: 'retry', label: 'Retry drill', problemNodeId: 'a', path: ['t', 'a', 'a', 'h'] },
+    { id: 'detour', label: 'Detour drill', problemNodeId: 'a', path: ['t', 'a', 'x', 'h'] },
+  ],
+}
+
+describe('decisions', () => {
+  it('stops at the decision node until a decision is given', () => {
+    const run = buildRun(decided, 0)
+    expect(run.waitStep).toBe(2)
+    expect(totalTicks(run)).toBe(4)
+    const s = stateAt(run, 4)
+    expect(s.waiting).toBe(true)
+    expect([...s.working]).toEqual(['h'])
+    expect(s.done).toBe(false)
+    expect(stateAt(run, 9).waiting).toBe(true) // clamps, never runs past the decision
+    expect([...stateAt(run, 9).working]).toEqual(['h'])
+  })
+
+  it('continues from the same tick after approve or reject', () => {
+    const ok = buildRun(decided, 0, { decision: 'approve' })
+    expect(ok.waitStep).toBe(null)
+    expect(ok.steps.flat()).toEqual(['t', 'a', 'h', 'ok'])
+    expect([...stateAt(ok, 5).travelling]).toEqual(['h>ok'])
+    expect(stateAt(ok, totalTicks(ok)).done).toBe(true)
+    const no = buildRun(decided, 0, { decision: 'reject' })
+    expect(no.steps.flat()).toEqual(['t', 'a', 'h', 'no'])
+    expect(no.decision).toBe('reject')
+  })
+})
+
+describe('drills', () => {
+  it('uses the drill path, label and problem node', () => {
+    const run = buildRun(decided, 0, { drillId: 'detour' })
+    expect(run.drillId).toBe('detour')
+    expect(run.branchLabel).toBe('Detour drill')
+    expect(run.problemNodeId).toBe('a')
+    expect(run.steps.flat()).toEqual(['t', 'a', 'x', 'h'])
+  })
+
+  it('treats a repeated step as a retry with no edge into it', () => {
+    const run = buildRun(decided, 0, { drillId: 'retry' })
+    expect([...run.retries]).toEqual([2])
+    expect(run.edges.map(edgeKey)).toEqual(['t>a', 'a>h'])
+    expect(run.edges[1].step).toBe(3)
+    expect([...stateAt(run, 4).retrying]).toEqual(['a'])
+    expect([...stateAt(run, 4).working]).toEqual(['a'])
+    expect(stateAt(run, 3).retrying.size).toBe(0)
+  })
+
+  it('reports when the problem step has been reached', () => {
+    const run = buildRun(decided, 0, { drillId: 'detour' })
+    expect(stateAt(run, 1).problemSeen).toBe(false)
+    expect(stateAt(run, 2).problemSeen).toBe(true)
+    expect(stateAt(buildRun(decided, 0), 6).problemSeen).toBe(false)
+  })
+
+  it('hides drill-only nodes unless the run passes through them', () => {
+    expect(visibleNodeIds(decided, buildRun(decided, 0)).has('x')).toBe(false)
+    expect(visibleNodeIds(decided, buildRun(decided, 0, { drillId: 'detour' })).has('x')).toBe(true)
+    expect(visibleNodeIds(decided, buildRun(decided, 0)).has('ok')).toBe(true)
   })
 })

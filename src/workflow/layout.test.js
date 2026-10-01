@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { VIEW, NODE_SIZE, nodeBox, edgePath, pct } from './layout'
+import { VIEW, NODE_SIZE, nodeBox, edgePath, pct, DECISION_SIZE, decisionBox } from './layout'
 
 describe('layout', () => {
   it('defines a size for every node type', () => {
@@ -19,5 +19,16 @@ describe('layout', () => {
 
   it('formats percentages of the view', () => {
     expect(pct(380, 760)).toBe('50%')
+  })
+
+  it('routes an edge down a side channel when given a via x', () => {
+    const from = { type: 'agent', x: 560, y: 270 } // bottom 297
+    const to = { type: 'human', x: 560, y: 420 } // top 393
+    expect(edgePath(from, to, 700)).toBe('M 560 297 V 309 H 700 V 381 H 560 V 393')
+  })
+
+  it('sizes the decision button box around its centre', () => {
+    expect(DECISION_SIZE).toEqual([160, 30])
+    expect(decisionBox({ buttons: { x: 380, y: 345 } })).toEqual({ x: 300, y: 330, w: 160, h: 30 })
   })
 })
