@@ -60,6 +60,11 @@ If you add a new section, follow the same pattern.
   on git history showing all three teammates actually working.
 - Log meaningful prompts/decisions (including AI mistakes and corrections) in
   `PROMPT_LOG.md` as you go, not retroactively at the end.
-- Agent-demo scenarios in `site.js` are invented and must stay flagged
-  `illustrative: true` with no digits in the outcome line (`npm test` enforces this).
+- Agent-demo workflows (`workflows` in `site.js`) and the monitoring `runLog` are
+  invented and must stay flagged illustrative. Agent capability labels are
+  placeholders until the team confirms the real Azure services. No digits in
+  workflow or run-log text; node titles ≤ 26 characters; nodes must fit the
+  760 × 520 canvas without overlapping (`npm test` enforces all of this).
+- Workflow run logic lives in `src/workflow/run.js` (pure, tested); components only
+  render its output.
 - Run `npm test` alongside `npm run lint` and `npm run build` before committing.

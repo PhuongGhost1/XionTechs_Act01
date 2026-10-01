@@ -139,3 +139,8 @@ just at the end.
   "IoT gateway", "Data store") until the team confirms the actual Azure services.
 - Relevance AI shows pass-rate percentages per node; we deliberately show run
   statuses in words only, because any number on our page would be invented.
+- Built the workflow graph as hand-drawn SVG + positioned buttons from data in
+  `site.js`, with pure run logic in `src/workflow/run.js` (no new dependencies;
+  React Flow was rejected because it would exceed the bundle budget). Final bundle:
+  65.60 kB gzip (budget 71 kB). Browser checklist: run by the controller
+  after this commit.
