@@ -23,14 +23,16 @@ export function nodeStatus(id, run, state) {
 }
 
 export function nodeClasses(node, status, selected) {
-  const base = 'border bg-surface text-ink transition-colors duration-300'
+  // Exactly one background, one text colour and one border colour per status — conflicting
+  // Tailwind colour classes on one element are resolved by stylesheet order, not class order.
+  const base = 'border transition-colors duration-300'
   const byStatus = {
-    working: 'border-accent',
-    active: node.type === 'outcome' ? 'border-accent bg-accent text-paper' : 'border-accent',
-    idle: 'border-line',
-    off: 'border-dashed border-line',
+    working: 'bg-paper text-ink border-accent',
+    active: node.type === 'outcome' ? 'bg-accent text-paper border-accent' : 'bg-paper text-ink border-accent',
+    idle: 'bg-paper text-ink border-muted',
+    off: 'bg-paper text-ink border-dashed border-muted',
   }
-  const sel = selected ? 'ring-2 ring-primary ring-offset-2 ring-offset-surface' : ''
+  const sel = selected ? 'ring-2 ring-ink ring-offset-2 ring-offset-surface' : ''
   return `${base} ${byStatus[status]} ${sel}`
 }
 

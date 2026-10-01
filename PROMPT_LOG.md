@@ -144,3 +144,4 @@ just at the end.
   React Flow was rejected because it would exceed the bundle budget). Final bundle:
   65.60 kB gzip (budget 71 kB). Browser checklist: run by the controller
   after this commit.
+- Browser checklist (controller, headless Edge via Playwright against `vite preview`) caught two bugs the per-task and whole-branch reviews missed: the completed outcome node rendered white-on-white (conflicting Tailwind colour classes on one element — the colour maths said it passed, the real browser showed it didn't), and the demo paused while on screen because the in-view threshold was a ratio of a section taller than the viewport. The final review also caught truncated node titles, connectors below 3:1, no Replay under reduced motion, and a run log with no pause. All fixed in the final fix wave; a unit test now guards against conflicting colour classes on workflow nodes.

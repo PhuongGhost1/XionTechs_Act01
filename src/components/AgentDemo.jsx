@@ -48,7 +48,7 @@ export default function AgentDemo() {
       setInView(true)
       return
     }
-    const io = new IntersectionObserver(([entry]) => setInView(entry.isIntersecting), { threshold: 0.3 })
+    const io = new IntersectionObserver(([entry]) => setInView(entry.isIntersecting), { threshold: 0, rootMargin: '-25% 0px -25% 0px' })
     io.observe(el)
     return () => io.disconnect()
   }, [])
@@ -135,31 +135,35 @@ export default function AgentDemo() {
           <span className="rounded-full border border-dashed border-accent px-3 py-1 text-xs font-medium text-accent">
             Illustrative scenario — not a client case study
           </span>
-          {!reduced && (
+          {(!reduced || workflow.branches.length > 1) && (
             <div className="flex gap-2">
-              <button
-                type="button"
-                onClick={() => (state.done ? replay() : setPlaying((p) => !p))}
-                aria-label={playing && !state.done ? 'Pause' : 'Play'}
-                className={btn}
-              >
-                {playing && !state.done ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
-              </button>
-              <button type="button" onClick={replay} aria-label="Replay with the next path" className={btn}>
-                <RotateCcw className="h-4 w-4" />
-              </button>
+              {!reduced && (
+                <button
+                  type="button"
+                  onClick={() => (state.done ? replay() : setPlaying((p) => !p))}
+                  aria-label={playing && !state.done ? 'Pause animation' : 'Play animation'}
+                  className={btn}
+                >
+                  {playing && !state.done ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+                </button>
+              )}
+              {workflow.branches.length > 1 && (
+                <button type="button" onClick={replay} aria-label="Replay with the next path" className={btn}>
+                  <RotateCcw className="h-4 w-4" />
+                </button>
+              )}
             </div>
           )}
         </div>
 
-        <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_16rem]">
+        <div className="mt-6">
           <div>
             <div className="hidden lg:block">
               <WorkflowGraph
                 workflow={workflow}
                 run={run}
                 state={state}
-                selectedId={selected.id}
+                selectedId={selectedId}
                 onSelect={setSelectedId}
                 reduced={reduced}
               />
@@ -170,7 +174,7 @@ export default function AgentDemo() {
             </p>
           </div>
 
-          <aside className="hidden rounded-xl border border-line bg-paper p-4 lg:block" aria-live="polite">
+          <aside className="mt-4 hidden rounded-xl border border-line bg-paper p-4 lg:block" aria-live="polite">
             <p className="text-xs font-medium uppercase tracking-wide text-muted">Step details</p>
             <div className="mt-3 flex items-center gap-2">
               <SelectedIcon className="h-4 w-4 text-accent" strokeWidth={1.75} />
@@ -185,7 +189,7 @@ export default function AgentDemo() {
             <p className="mt-4 text-xs text-muted">Click any step in the workflow to see what it does.</p>
           </aside>
         </div>
-        <RunMonitor reduced={reduced} inView={inView} />
+        <RunMonitor reduced={reduced} inView={inView} playing={playing} />
       </div>
     </section>
   )

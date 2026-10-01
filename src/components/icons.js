@@ -20,8 +20,6 @@ import {
   Factory,
   Compass,
   FlaskConical,
-  Zap,
-  CheckCircle2,
 } from 'lucide-react'
 
 export const iconMap = {
@@ -44,6 +42,4 @@ export const iconMap = {
   Factory,
   Compass,
   FlaskConical,
-  Zap,
-  CheckCircle2,
 }

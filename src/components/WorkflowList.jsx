@@ -21,7 +21,7 @@ function Item({ node, run, state }) {
 }
 
 function Steps({ steps, nodes, run, state }) {
-  return steps.flatMap((step) => step.map((id) => <Item key={id} node={nodes[id]} run={run} state={state} />))
+  return steps.flatMap((step) => step.filter((id) => nodes[id].type !== 'router').map((id) => <Item key={id} node={nodes[id]} run={run} state={state} />))
 }
 
 // Phone layout and, on desktop, the screen-reader text alternative of the graph.

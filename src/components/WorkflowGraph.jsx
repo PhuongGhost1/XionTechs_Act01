@@ -46,7 +46,7 @@ export default function WorkflowGraph({ workflow, run, state, selectedId, onSele
               fill="none"
               strokeWidth="2"
               strokeDasharray={onPath ? undefined : '4 4'}
-              className={`transition-colors duration-300 ${lit ? 'stroke-accent' : 'stroke-line'}`}
+              className={`transition-colors duration-300 ${lit ? 'stroke-accent' : 'stroke-muted'}`}
             />
           )
         })}
@@ -78,7 +78,7 @@ export default function WorkflowGraph({ workflow, run, state, selectedId, onSele
             )}
             <Icon className={`h-4 w-4 shrink-0 ${status === 'active' && node.type === 'outcome' ? '' : 'text-accent'}`} strokeWidth={1.75} />
             <span className="min-w-0">
-              <span className={`block truncate font-medium ${isRouter ? 'text-xs' : 'text-sm'}`}>{node.title}</span>
+              <span className={`block line-clamp-2 font-medium leading-tight ${isRouter ? 'text-xs' : 'text-sm'}`}>{node.title}</span>
               {node.capability && (
                 <span className="mt-0.5 inline-block rounded border border-dashed border-line px-1.5 text-[11px] text-muted" title="Draft label — final Azure service to be confirmed">
                   {node.capability}

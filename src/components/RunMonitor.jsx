@@ -13,14 +13,14 @@ const STATUS = {
   retried: { Icon: RotateCw, word: 'Retried' },
 }
 
-export default function RunMonitor({ reduced, inView }) {
+export default function RunMonitor({ reduced, inView, playing }) {
   const [offset, setOffset] = useState(0)
 
   useEffect(() => {
-    if (reduced || !inView) return
+    if (reduced || !inView || !playing) return
     const id = setInterval(() => setOffset((o) => o + 1), ROW_MS)
     return () => clearInterval(id)
-  }, [reduced, inView])
+  }, [reduced, inView, playing])
 
   const rows = reduced ? runLog : visibleRows(runLog, offset, VISIBLE)
 
