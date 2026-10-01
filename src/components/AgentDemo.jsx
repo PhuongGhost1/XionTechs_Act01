@@ -1,10 +1,13 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Pause, Play, RotateCcw } from 'lucide-react'
-import { agentScenarios, sections } from '../content/site'
-import { iconMap, stepIcons } from './icons'
+import { sections, workflows } from '../content/site'
+import { buildRun, nextBranchIndex, stateAt, totalTicks } from '../workflow/run'
+import { iconMap } from './icons'
+import WorkflowGraph from './WorkflowGraph'
+import WorkflowList from './WorkflowList'
+import { typeIcon } from './workflowStyles'
 
-const STEP_MS = 1200
-const TOTAL = 5
+const TICK_MS = 700
 
 function usePrefersReducedMotion() {
   const [reduced, setReduced] = useState(
@@ -23,13 +26,21 @@ function usePrefersReducedMotion() {
 export default function AgentDemo() {
   const reduced = usePrefersReducedMotion()
   const [active, setActive] = useState(0)
-  const [shown, setShown] = useState(reduced ? TOTAL : 0)
+  const [branch, setBranch] = useState(0)
+  const [tick, setTick] = useState(0)
   const [playing, setPlaying] = useState(true)
   const [inView, setInView] = useState(false)
+  const [selectedId, setSelectedId] = useState(null)
   const sectionRef = useRef(null)
   const tabRefs = useRef([])
 
-  // Play only while on screen.
+  const workflow = workflows[active]
+  const run = useMemo(() => buildRun(workflow, branch), [workflow, branch])
+  const total = totalTicks(run)
+  // Derived every render, so turning reduced motion on mid-run jumps to the finished path.
+  const shownTick = reduced ? total : tick
+  const state = useMemo(() => stateAt(run, shownTick), [run, shownTick])
+
   useEffect(() => {
     const el = sectionRef.current
     if (!el || !('IntersectionObserver' in window)) {
@@ -41,25 +52,29 @@ export default function AgentDemo() {
     return () => io.disconnect()
   }, [])
 
-  // Advance one step per tick. Cleanup clears the timer so switching tabs never interleaves.
+  // One timeout per tick; cleanup clears it whenever the workflow, branch or tick changes.
   useEffect(() => {
-    if (reduced) {
-      setShown(TOTAL)
-      return
-    }
-    if (!playing || !inView || shown >= TOTAL) return
-    const id = setInterval(() => setShown((n) => Math.min(n + 1, TOTAL)), STEP_MS)
-    return () => clearInterval(id)
-  }, [playing, inView, shown, reduced, active])
+    if (reduced || !playing || !inView || tick >= total) return
+    const id = setTimeout(() => setTick((t) => t + 1), TICK_MS)
+    return () => clearTimeout(id)
+  }, [reduced, playing, inView, tick, total])
 
   function selectTab(i) {
     setActive(i)
-    setShown(reduced ? TOTAL : 0)
+    setBranch(0)
+    setTick(0)
+    setPlaying(true)
+    setSelectedId(null)
+  }
+
+  function replay() {
+    setBranch((b) => nextBranchIndex(workflow, b))
+    setTick(0)
     setPlaying(true)
   }
 
   function onTabKey(e) {
-    const n = agentScenarios.length
+    const n = workflows.length
     let next = null
     if (e.key === 'ArrowRight') next = (active + 1) % n
     if (e.key === 'ArrowLeft') next = (active - 1 + n) % n
@@ -71,8 +86,10 @@ export default function AgentDemo() {
     tabRefs.current[next]?.focus()
   }
 
-  const scenario = agentScenarios[active]
-  const done = shown >= TOTAL
+  const selected = workflow.nodes.find((n) => n.id === selectedId) ?? workflow.nodes[0]
+  const SelectedIcon = typeIcon[selected.type]
+  const btn =
+    'flex h-9 w-9 items-center justify-center rounded-full border border-line text-ink/70 transition hover:border-primary hover:text-primary'
 
   return (
     <section id="demo" ref={sectionRef} className="mx-auto max-w-6xl px-6 py-20">
@@ -80,28 +97,28 @@ export default function AgentDemo() {
       <h2 className="mt-3 text-3xl md:text-4xl">{sections.demo.title}</h2>
       <p className="mt-3 max-w-xl text-muted">{sections.demo.intro}</p>
 
-      <div role="tablist" aria-label="Agent scenarios" className="mt-10 flex flex-wrap gap-2" onKeyDown={onTabKey}>
-        {agentScenarios.map((s, i) => {
-          const Icon = iconMap[s.icon]
-          const selected = i === active
+      <div role="tablist" aria-label="Agent workflows" className="mt-10 flex flex-wrap gap-2" onKeyDown={onTabKey}>
+        {workflows.map((w, i) => {
+          const Icon = iconMap[w.icon]
+          const isSel = i === active
           return (
             <button
-              key={s.id}
-              ref={(el) => (tabRefs.current[i] = el)}
+              key={w.id}
+              ref={(el) => {
+                tabRefs.current[i] = el
+              }}
               role="tab"
-              id={`demo-tab-${s.id}`}
-              aria-selected={selected}
-              aria-controls={`demo-panel-${s.id}`}
-              tabIndex={selected ? 0 : -1}
+              id={`demo-tab-${w.id}`}
+              aria-selected={isSel}
+              aria-controls="demo-panel"
+              tabIndex={isSel ? 0 : -1}
               onClick={() => selectTab(i)}
               className={`inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition ${
-                selected
-                  ? 'border-primary bg-primary text-primaryInk'
-                  : 'border-line text-ink/70 hover:border-primary hover:text-primary'
+                isSel ? 'border-primary bg-primary text-primaryInk' : 'border-line text-ink/70 hover:border-primary hover:text-primary'
               }`}
             >
               <Icon className="h-4 w-4" strokeWidth={1.75} />
-              {s.label}
+              {w.label}
             </button>
           )
         })}
@@ -109,8 +126,8 @@ export default function AgentDemo() {
 
       <div
         role="tabpanel"
-        id={`demo-panel-${scenario.id}`}
-        aria-labelledby={`demo-tab-${scenario.id}`}
+        id="demo-panel"
+        aria-labelledby={`demo-tab-${workflow.id}`}
         className="theme-fade mt-6 rounded-2xl border border-line bg-surface p-6 md:p-8"
       >
         <div className="flex flex-wrap items-center justify-between gap-3">
@@ -121,64 +138,53 @@ export default function AgentDemo() {
             <div className="flex gap-2">
               <button
                 type="button"
-                onClick={() => (done ? selectTab(active) : setPlaying((p) => !p))}
-                aria-label={playing ? 'Pause' : 'Play'}
-                className="flex h-9 w-9 items-center justify-center rounded-full border border-line text-ink/70 transition hover:border-primary hover:text-primary"
+                onClick={() => (state.done ? replay() : setPlaying((p) => !p))}
+                aria-label={playing && !state.done ? 'Pause' : 'Play'}
+                className={btn}
               >
-                {playing && !done ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+                {playing && !state.done ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
               </button>
-              <button
-                type="button"
-                onClick={() => selectTab(active)}
-                aria-label="Replay"
-                className="flex h-9 w-9 items-center justify-center rounded-full border border-line text-ink/70 transition hover:border-primary hover:text-primary"
-              >
+              <button type="button" onClick={replay} aria-label="Replay with the next path" className={btn}>
                 <RotateCcw className="h-4 w-4" />
               </button>
             </div>
           )}
         </div>
 
-        <ol className="mt-8 grid grid-cols-1 gap-6 md:grid-cols-5 md:gap-4">
-          {scenario.steps.map((step, i) => {
-            const Icon = stepIcons[i]
-            const visible = i < shown
-            const isLast = i === TOTAL - 1
-            return (
-              <li
-                key={step.role}
-                className={`demo-step relative ${visible ? 'demo-step-visible' : ''}`}
-                aria-hidden={!visible}
-              >
-                {i < TOTAL - 1 && (
-                  <span
-                    className="demo-connector absolute left-5 top-10 h-[calc(100%-1rem)] w-px bg-line md:left-10 md:top-5 md:h-px md:w-[calc(100%-2.5rem)]"
-                    aria-hidden="true"
-                  >
-                    <span
-                      className={`block h-full w-full origin-top bg-accent transition-transform duration-700 md:origin-left ${
-                        i < shown - 1 ? 'scale-y-100 md:scale-x-100' : 'scale-y-0 md:scale-x-0'
-                      }`}
-                    />
-                  </span>
-                )}
-                <div className="flex gap-4 md:block">
-                  <span
-                    className={`relative z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border ${
-                      isLast && visible ? 'border-accent bg-accent text-paper' : 'border-line bg-surface text-accent'
-                    }`}
-                  >
-                    <Icon className="h-5 w-5" strokeWidth={1.75} />
-                  </span>
-                  <div className="md:mt-4">
-                    <p className="text-xs font-medium uppercase tracking-wide text-muted">{step.role}</p>
-                    <p className="mt-1 text-sm text-ink/90">{step.text}</p>
-                  </div>
-                </div>
-              </li>
-            )
-          })}
-        </ol>
+        <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_16rem]">
+          <div>
+            <div className="hidden lg:block">
+              <WorkflowGraph
+                workflow={workflow}
+                run={run}
+                state={state}
+                selectedId={selected.id}
+                onSelect={setSelectedId}
+                reduced={reduced}
+              />
+            </div>
+            <WorkflowList workflow={workflow} run={run} state={state} className="lg:sr-only" />
+            <p className="mt-4 text-sm text-muted" aria-live="polite">
+              {state.done ? `Run complete · took the “${run.branchLabel}” path` : `Running · ${run.branchLabel} path`}
+            </p>
+          </div>
+
+          <aside className="hidden rounded-xl border border-line bg-paper p-4 lg:block" aria-live="polite">
+            <p className="text-xs font-medium uppercase tracking-wide text-muted">Step details</p>
+            <div className="mt-3 flex items-center gap-2">
+              <SelectedIcon className="h-4 w-4 text-accent" strokeWidth={1.75} />
+              <p className="font-medium">{selected.title}</p>
+            </div>
+            {selected.capability && (
+              <p className="mt-2 inline-block rounded border border-dashed border-line px-1.5 text-[11px] text-muted">
+                {selected.capability} · draft label
+              </p>
+            )}
+            <p className="mt-3 text-sm text-muted">{selected.desc}</p>
+            <p className="mt-4 text-xs text-muted">Click any step in the workflow to see what it does.</p>
+          </aside>
+        </div>
+        {/* RunMonitor is added here in Task 5 */}
       </div>
     </section>
   )

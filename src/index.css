@@ -94,17 +94,6 @@ body {
   animation: hero-pulse 2.4s ease-in-out infinite;
 }
 
-/* Agent demo step reveal */
-.demo-step {
-  opacity: 0;
-  transform: translateY(8px);
-  transition: opacity 400ms ease, transform 400ms ease;
-}
-.demo-step-visible {
-  opacity: 1;
-  transform: none;
-}
-
 /* Roadmap stages light up on scroll. Only chrome changes — text keeps full contrast. */
 .roadmap-stage {
   transition: border-color 500ms ease, background-color 500ms ease, box-shadow 500ms ease;
@@ -124,8 +113,6 @@ body {
   .hero-node {
     animation: none;
   }
-  .demo-step { opacity: 1; transform: none; transition: none; }
-  .demo-connector > span { transition: none; }
   .roadmap-stage { transition: none; }
 }
 

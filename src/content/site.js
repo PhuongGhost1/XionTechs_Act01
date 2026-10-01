@@ -148,51 +148,6 @@ export const pillars = [
   },
 ]
 
-// ILLUSTRATIVE: invented demo scenarios, not client claims. Rendered with a visible
-// "Illustrative scenario — not a client case study" badge. Outcomes are words only —
-// no numbers, so nothing reads as a measured result.
-export const agentScenarios = [
-  {
-    id: 'support',
-    label: 'Customer Support',
-    icon: 'MessageCircle',
-    illustrative: true,
-    steps: [
-      { role: 'Request', text: 'A customer asks: "Where is my order #1042?"' },
-      { role: 'Understand', text: 'The agent recognises an order-status question and pulls the order number.' },
-      { role: 'Check systems', text: 'It queries the order system and the shipping tracker.' },
-      { role: 'Act', text: 'It replies with the tracking link and flags that delivery is running late.' },
-      { role: 'Outcome', text: 'Customer answered instantly; your team only sees the exceptions.' },
-    ],
-  },
-  {
-    id: 'inventory',
-    label: 'Inventory & Orders',
-    icon: 'TrendingUp',
-    illustrative: true,
-    steps: [
-      { role: 'Request', text: 'Stock for a fast-moving part drops below its safety level.' },
-      { role: 'Understand', text: 'The agent recognises a reorder situation, not a one-off dip.' },
-      { role: 'Check systems', text: 'It checks recent sales, open orders and supplier lead times.' },
-      { role: 'Act', text: 'It drafts a reorder with quantity and supplier, and sends it for approval.' },
-      { role: 'Outcome', text: 'Stock-outs caught before they happen; a human approves instead of chasing.' },
-    ],
-  },
-  {
-    id: 'factory',
-    label: 'Smart Factory (IoT)',
-    icon: 'Factory',
-    illustrative: true,
-    steps: [
-      { role: 'Request', text: 'A vibration sensor on a packaging line reports an unusual spike.' },
-      { role: 'Understand', text: 'The agent identifies the pattern as an early bearing-wear signal.' },
-      { role: 'Check systems', text: 'It checks the maintenance history and the shift roster.' },
-      { role: 'Act', text: 'It schedules a technician for the next break and alerts the shift lead.' },
-      { role: 'Outcome', text: 'Downtime prevented instead of repaired.' },
-    ],
-  },
-]
-
 // PLACEHOLDER: generic capability labels until the team confirms which Azure services each
 // step runs on (see content/TODO.md). Rendered with "draft" styling.
 export const capabilityLabels = ['AI model', 'Integration', 'IoT gateway', 'Data store']

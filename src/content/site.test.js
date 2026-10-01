@@ -17,21 +17,6 @@ describe('site content rules', () => {
     expect(offenders).toEqual([])
   })
 
-  it('flags every agent scenario as illustrative with exactly five steps', () => {
-    expect(site.agentScenarios.length).toBe(3)
-    for (const s of site.agentScenarios) {
-      expect(s.illustrative).toBe(true)
-      expect(s.steps.map((st) => st.role)).toEqual(['Request', 'Understand', 'Check systems', 'Act', 'Outcome'])
-    }
-  })
-
-  it('keeps agent outcomes free of invented numbers', () => {
-    for (const s of site.agentScenarios) {
-      const outcome = s.steps[4].text
-      expect(outcome).not.toMatch(/\d/)
-    }
-  })
-
   it('has three pillars and four roadmap stages', () => {
     expect(site.pillars.map((p) => p.id)).toEqual(['agentic', 'platform', 'engineering'])
     expect(site.roadmap.map((r) => r.stage)).toEqual(['Explore', 'Pilot', 'Production', 'Scale'])
