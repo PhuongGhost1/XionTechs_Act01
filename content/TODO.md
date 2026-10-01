@@ -35,8 +35,6 @@ to the deployed URL without one of these being resolved.
 - [ ] **Roadmap (Explore → Pilot → Production → Scale)** — framing in `roadmap` is
       PLACEHOLDER; confirm it matches how the team actually engages.
 - [ ] **CTA band copy** — `ctaBand` is PLACEHOLDER.
-- [ ] **Chat guide answers** — review `src/chat/intents.js` wording once the pillar
-      copy is real.
 
 Once resolved, edit the corresponding value in `src/content/site.js` and remove the
 `PLACEHOLDER` marker/comment.

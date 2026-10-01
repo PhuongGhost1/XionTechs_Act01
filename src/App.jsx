@@ -8,7 +8,6 @@ import CaseStudies from './components/CaseStudies'
 import FAQ from './components/FAQ'
 import Contact from './components/Contact'
 import Footer from './components/Footer'
-import ChatGuide from './components/ChatGuide'
 
 // Testimonials.jsx is intentionally not rendered: the `testimonials` array is empty until
 // the team supplies real client quotes (see content/TODO.md).
@@ -27,7 +26,6 @@ export default function App() {
         <Contact />
       </main>
       <Footer />
-      <ChatGuide />
     </div>
   )
 }

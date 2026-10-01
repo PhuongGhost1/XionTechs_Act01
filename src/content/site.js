@@ -277,14 +277,6 @@ export const ctaBand = {
 export const caseStudiesNote =
   'Client case studies are being prepared — ask us for references on a call.'
 
-// Chat guide copy. The assistant is scripted; it never claims to be a live AI.
-export const chat = {
-  assistantLabel: "Guided assistant · answers from this site",
-  greeting: "Hi — I can point you to the right part of this page or to the team. What would you like to know?",
-  fallback: "I'm a guided assistant and don't have an answer for that yet — here's how to reach the team.",
-  nudge: "Hi 👋 Need a quick answer?",
-}
-
 // PLACEHOLDER: the live site's "project" cards link to wordpress.themeholy.com/webteck —
 // the WordPress theme vendor's own demo site, not a real client project. Confirms these are
 // unedited theme-demo content. Replace with real case study details (client, scope, stack,

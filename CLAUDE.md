@@ -60,10 +60,6 @@ If you add a new section, follow the same pattern.
   on git history showing all three teammates actually working.
 - Log meaningful prompts/decisions (including AI mistakes and corrections) in
   `PROMPT_LOG.md` as you go, not retroactively at the end.
-- The chat guide is scripted. Answers come from `src/chat/intents.js`, built from
-  `site.js` exports. If a real AI backend is ever added, change only
-  `src/chat/answerEngine.js`; `ChatGuide.jsx` must not know where answers come from.
 - Agent-demo scenarios in `site.js` are invented and must stay flagged
   `illustrative: true` with no digits in the outcome line (`npm test` enforces this).
 - Run `npm test` alongside `npm run lint` and `npm run build` before committing.
-- Chat keyword matching is word-bounded at both ends (see `src/chat/answerEngine.js`).

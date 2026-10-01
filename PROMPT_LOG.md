@@ -127,3 +127,15 @@ just at the end.
   was empty, and the nudge timer could still fire after the panel had been opened — both
   fixed in `ChatGuide.jsx` (Task 11).
 - Final bundle: **64.38 kB gzip** (baseline 56.02 kB + 8.36 kB for redesign). Browser checklist (controller, headless Edge via Playwright against `vite preview`): 74/74 automated checks passed — 3 themes at 1280/390 px, contrast samples, no theme flash, dark-preference default, picker persistence, demo play/switch/keyboard, reduced motion, chat chips/fallback/focus trap/Esc/scroll actions, anchors, one-time nudge. The final whole-branch review then caught cross-component issues the checklist missed (nav covering the mobile chat panel, navyInk/50 below AA in two themes, contact button 1.48:1 in the default theme, unlabeled draft copy in a chat answer) — fixed in the final fix wave. Remaining placeholders listed in `content/TODO.md`.
+
+## 2026-10-01 — workflow graph round (Phuong Hoang + Claude)
+- User reviewed sierra.ai and relevanceai.com/agents and observed the leading agent
+  sites show agents as live workflow graphs rather than a chatbot. Decision: remove
+  the "Ask XionTechs" chat guide entirely (recoverable from git history) and replace
+  the linear agent-demo timeline with a branching workflow graph.
+- Azure-first focus stated by team member Phuong Hoang on 2026-10-01. The captured
+  live-site copy names "Azure, AWS, and GCP", so the Azure-first strip ships as
+  PLACEHOLDER and node capability labels stay generic ("AI model", "Integration",
+  "IoT gateway", "Data store") until the team confirms the actual Azure services.
+- Relevance AI shows pass-rate percentages per node; we deliberately show run
+  statuses in words only, because any number on our page would be invented.
