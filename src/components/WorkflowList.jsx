@@ -2,12 +2,12 @@ import { splitBranches } from '../workflow/run'
 import DecisionButtons from './DecisionButtons'
 import { isWorking, nodeClasses, nodeStatus, runTag, typeIcon } from './workflowStyles'
 
-function Item({ node, run, state, workflow, onDecide }) {
-  const status = nodeStatus(node.id, run, state)
+function Item({ node, run, state, workflow, onDecide, reduced, forceOff }) {
+  const status = forceOff ? 'off' : nodeStatus(node.id, run, state)
   const Icon = typeIcon[node.type]
   const outcomeActive = status === 'active' && node.type === 'outcome'
-  const tag = runTag(node.id, run, state)
-  const waitingHere = state.waiting && workflow.decision?.nodeId === node.id
+  const tag = forceOff ? null : runTag(node.id, run, state, reduced)
+  const waitingHere = !forceOff && state.waiting && workflow.decision?.nodeId === node.id
   return (
     <li className={`relative rounded-xl p-3 ${nodeClasses(node, status, false)}`}>
       {isWorking(status) && <span aria-hidden="true" className="pointer-events-none absolute -inset-1 rounded-[inherit] ring-2 ring-accent/50 motion-safe:animate-pulse" />}
@@ -28,7 +28,9 @@ function Item({ node, run, state, workflow, onDecide }) {
       {waitingHere && (
         <div className="mt-3">
           <p className="mb-2 text-sm font-medium text-ink">Waiting for your decision</p>
-          <DecisionButtons verb={workflow.decision.verb} onDecide={onDecide} />
+          <div className="lg:hidden">
+            <DecisionButtons verb={workflow.decision.verb} onDecide={onDecide} />
+          </div>
         </div>
       )}
     </li>
@@ -45,9 +47,9 @@ function Steps({ steps, startIndex = 0, nodes, ...rest }) {
 }
 
 // Phone layout and, on desktop, the screen-reader text alternative of the graph.
-export default function WorkflowList({ workflow, run, state, className = '', onDecide }) {
+export default function WorkflowList({ workflow, run, state, className = '', onDecide, reduced = false }) {
   const nodes = Object.fromEntries(workflow.nodes.map((n) => [n.id, n]))
-  const shared = { nodes, run, state, workflow, onDecide }
+  const shared = { nodes, run, state, workflow, onDecide, reduced }
 
   // Drills and single-branch workflows read top to bottom as the run's own steps.
   if (run.drillId || workflow.branches.length === 1) {
@@ -80,7 +82,7 @@ export default function WorkflowList({ workflow, run, state, className = '', onD
                   {chosen && <span className="ml-2 text-muted">(this run)</span>}
                 </p>
                 <ol className="space-y-2">
-                  <Steps steps={steps} startIndex={chosen ? prefix.length : 0} {...shared} />
+                  <Steps steps={steps} startIndex={chosen ? prefix.length : 0} forceOff={!chosen} {...shared} />
                 </ol>
               </div>
             )

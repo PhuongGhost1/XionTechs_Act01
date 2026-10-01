@@ -80,7 +80,7 @@ export default function WorkflowGraph({ workflow, run, state, selectedId, onSele
               </span>
             )}
             {(() => {
-              const tag = runTag(node.id, run, state)
+              const tag = runTag(node.id, run, state, reduced)
               if (!tag) return null
               const TagIcon = tag.Icon
               return (

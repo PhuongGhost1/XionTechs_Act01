@@ -44,6 +44,7 @@ export default function AgentDemo() {
   const viewRefs = useRef([])
   const sectionRef = useRef(null)
   const tabRefs = useRef([])
+  const statusRef = useRef(null)
 
   const workflow = workflows[active]
   const run = useMemo(() => buildRun(workflow, branch, { drillId, decision }), [workflow, branch, drillId, decision])
@@ -56,6 +57,9 @@ export default function AgentDemo() {
   const done = view === 'workflow' ? state.done : jState.done
   const drill = drillId ? workflow.drills.find((d) => d.id === drillId) : null
   const waiting = view === 'workflow' && state.waiting
+  const retriedAlready = [...run.retries].some((i) => shownTick > 2 * i)
+  const lastNode = workflow.nodes.find((n) => n.id === run.steps.at(-1)[0])
+  const outcomeTitle = lastNode ? ` · ${lastNode.title}` : ''
 
   const pushAction = useCallback((status, text) => {
     setActions((list) => [{ key: `${Date.now()}-${list.length}`, status, text }, ...list].slice(0, 6))
@@ -131,6 +135,7 @@ export default function AgentDemo() {
     setTick((t) => Math.min(t, totalTicks(run)))
     setPlaying(true)
     pushAction(choice === 'approve' ? 'approved' : 'rejected', workflow.decision.log[choice])
+    requestAnimationFrame(() => statusRef.current?.focus())
   }
 
   function onViewKey(e) {
@@ -230,16 +235,28 @@ export default function AgentDemo() {
             {!reduced && (
               <button
                 type="button"
-                onClick={() => (done ? replay() : setPlaying((p) => !p))}
-                aria-label={done ? 'Replay animation' : playing && !done ? 'Pause animation' : 'Play animation'}
-                disabled={waiting}
-                className={`${btn} disabled:opacity-40`}
+                onClick={() => {
+                  if (waiting) return
+                  if (done) replay()
+                  else setPlaying((p) => !p)
+                }}
+                aria-label={
+                  waiting
+                    ? 'Waiting for your decision'
+                    : done
+                      ? 'Replay animation'
+                      : playing
+                        ? 'Pause animation'
+                        : 'Play animation'
+                }
+                aria-disabled={waiting}
+                className={`${btn} ${waiting ? 'opacity-40' : ''}`}
               >
                 {playing && !done ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
               </button>
             )}
             {view === 'workflow' && workflow.branches.length > 1 && (
-              <button type="button" onClick={replay} aria-label="Replay with the next path" className={btn}>
+              <button type="button" onClick={replay} aria-label={drillId ? 'Replay the drill' : 'Replay with the next path'} className={btn}>
                 <RotateCcw className="h-4 w-4" />
               </button>
             )}
@@ -275,19 +292,19 @@ export default function AgentDemo() {
                   onDecide={decide}
                 />
               </div>
-              <WorkflowList workflow={workflow} run={run} state={state} className="lg:sr-only" onDecide={decide} />
-              <p className="mt-4 text-sm text-muted" aria-live="polite">
+              <WorkflowList workflow={workflow} run={run} state={state} className="lg:sr-only" onDecide={decide} reduced={reduced} />
+              <p ref={statusRef} tabIndex={-1} className="mt-4 text-sm text-muted focus:outline-none" aria-live="polite">
                 {state.waiting
                   ? 'Waiting for your decision'
                   : state.retrying.size > 0
                     ? 'Retrying…'
-                    : drill && state.problemSeen && !state.done
+                    : drill && state.problemSeen && !state.done && !retriedAlready
                       ? `Problem: ${drill.label}`
                       : state.done
                         ? drill
-                          ? `Drill complete · ${drill.label}`
+                          ? `Drill complete · ${drill.label}${outcomeTitle}`
                           : run.decision
-                            ? `Run complete · ${run.decision === 'approve' ? 'approved' : 'rejected'} by you`
+                            ? `Run complete · ${run.decision === 'approve' ? 'approved' : 'rejected'} by you${outcomeTitle}`
                             : `Run complete · took the “${run.branchLabel}” path`
                         : drill
                           ? `Running · ${drill.label}`

@@ -9,6 +9,7 @@ import CaseStudies from './components/CaseStudies'
 import FAQ from './components/FAQ'
 import Contact from './components/Contact'
 import Footer from './components/Footer'
+import SectionErrorBoundary from './components/SectionErrorBoundary'
 
 const AgentDemo = lazy(() => import('./components/AgentDemo'))
 
@@ -22,9 +23,11 @@ export default function App() {
         <Hero />
         <Pillars />
         <AzureStrip />
-        <Suspense fallback={<section id="demo" aria-busy="true" className="mx-auto min-h-[60vh] max-w-6xl px-6 py-20" />}>
-          <AgentDemo />
-        </Suspense>
+        <SectionErrorBoundary>
+          <Suspense fallback={<section id="demo" aria-busy="true" className="mx-auto min-h-[60vh] max-w-6xl px-6 py-20" />}>
+            <AgentDemo />
+          </Suspense>
+        </SectionErrorBoundary>
         <WhyUs />
         <Roadmap />
         <CaseStudies />

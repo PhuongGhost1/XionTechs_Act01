@@ -4,11 +4,21 @@ import { AlertTriangle, ChevronDown } from 'lucide-react'
 // "Throw a problem at it" menu: lists the current workflow's drills.
 export default function DrillMenu({ drills, onSelect }) {
   const [open, setOpen] = useState(false)
+  const wrapRef = useRef(null)
   const buttonRef = useRef(null)
   const itemRefs = useRef([])
 
   useEffect(() => {
     if (open) itemRefs.current[0]?.focus()
+  }, [open])
+
+  useEffect(() => {
+    if (!open) return
+    const onDown = (e) => {
+      if (wrapRef.current && !wrapRef.current.contains(e.target)) setOpen(false)
+    }
+    document.addEventListener('pointerdown', onDown)
+    return () => document.removeEventListener('pointerdown', onDown)
   }, [open])
 
   function close() {
@@ -32,7 +42,7 @@ export default function DrillMenu({ drills, onSelect }) {
   }
 
   return (
-    <div className="relative">
+    <div ref={wrapRef} className="relative">
       <button
         ref={buttonRef}
         type="button"
@@ -46,7 +56,7 @@ export default function DrillMenu({ drills, onSelect }) {
         <ChevronDown className={`h-3.5 w-3.5 transition-transform ${open ? 'rotate-180' : ''}`} />
       </button>
       {open && (
-        <div role="menu" aria-label="Problems to throw at the agent" onKeyDown={onMenuKey} className="absolute right-0 z-20 mt-2 w-64 rounded-xl border border-line bg-surface p-1 shadow-lg">
+        <div role="menu" aria-label="Problems to throw at the agent" onKeyDown={onMenuKey} className="absolute left-0 sm:left-auto sm:right-0 z-20 mt-2 w-64 max-w-[calc(100vw-3rem)] rounded-xl border border-line bg-surface p-1 shadow-lg">
           {drills.map((d, i) => (
             <button
               key={d.id}
@@ -56,7 +66,7 @@ export default function DrillMenu({ drills, onSelect }) {
               type="button"
               role="menuitem"
               onClick={() => {
-                setOpen(false)
+                close()
                 onSelect(d.id)
               }}
               className="block w-full rounded-lg px-3 py-2 text-left hover:bg-primarySoft focus-visible:bg-primarySoft focus-visible:outline-none"

@@ -170,3 +170,4 @@ just at the end.
   card, and decision buttons got explicit, tested coordinates so they never cover a card.
 - Bundle ruling: the main chunk reached the 71 kB gzip budget, so the demo section is now
   lazy-loaded in `App.jsx` (with a Suspense fallback that keeps the `#demo` anchor).
+- Final review caught what the browser checklist (99/99 passing) missed: hidden-but-focusable duplicate Approve/Reject buttons in the desktop screen-reader list, no error boundary around the newly lazy-loaded demo (a failed chunk would blank the page), a drill menu that could run off a phone screen, and the Retry tag missing under reduced motion. All fixed in the final fix wave.

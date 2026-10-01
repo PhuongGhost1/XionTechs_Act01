@@ -39,8 +39,11 @@ export function nodeClasses(node, status, selected) {
 export const isWorking = (status) => status === 'working'
 
 // Problem / retry tag for a node in the current run, or null. Icon + word, never colour alone.
-export function runTag(nodeId, run, state) {
+export function runTag(nodeId, run, state, reduced = false) {
   if (state.retrying.has(nodeId)) return { Icon: RotateCw, word: 'Retrying' }
+  if ((reduced || state.done || state.waiting) && [...run.retries].some((i) => run.steps[i].includes(nodeId))) {
+    return { Icon: RotateCw, word: 'Retried' }
+  }
   if (run.problemNodeId === nodeId && state.problemSeen) return { Icon: AlertTriangle, word: 'Problem' }
   return null
 }
