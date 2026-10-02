@@ -1,13 +1,14 @@
-// Approve / Reject pair shown while a run waits for the visitor's decision.
-export default function DecisionButtons({ verb, onDecide, size = 'md' }) {
+// Approve / Reject pair shown while a run waits for the visitor's decision. `emphasis` draws a
+// ring around the pair that pulses three times (motion-safe) and then stays (MOTION §12).
+export default function DecisionButtons({ verb, onDecide, size = 'md', emphasis = false }) {
   const pad = size === 'sm' ? 'px-2 py-1 text-xs' : 'px-3 py-1.5 text-sm'
   return (
-    <div className="flex gap-2">
+    <div className={`flex gap-2 rounded-full ${emphasis ? 'wf-call' : ''}`}>
       <button
         type="button"
         onClick={() => onDecide('approve')}
         aria-label={`Approve the ${verb}`}
-        className={`flex-1 rounded-full bg-primary font-medium text-primaryInk transition hover:bg-primaryHover ${pad}`}
+        className={`flex-1 rounded-full bg-primary font-medium text-primaryInk transition-colors duration-micro hover:bg-primaryHover ${pad}`}
       >
         Approve
       </button>
@@ -15,7 +16,7 @@ export default function DecisionButtons({ verb, onDecide, size = 'md' }) {
         type="button"
         onClick={() => onDecide('reject')}
         aria-label={`Reject the ${verb}`}
-        className={`flex-1 rounded-full border border-line bg-paper font-medium text-ink transition hover:border-primary ${pad}`}
+        className={`flex-1 rounded-full border border-line bg-paper font-medium text-ink transition-colors duration-micro hover:border-primary ${pad}`}
       >
         Reject
       </button>
