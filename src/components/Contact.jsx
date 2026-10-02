@@ -2,10 +2,12 @@ import { useState } from 'react'
 import { Copy, Mail, MapPin, Phone } from 'lucide-react'
 import { contact, finalCta } from '../content/site'
 import { loadAgentDemo } from './agentDemoLoader'
+import FinalCompletion from './FinalCompletion'
 import SocialIcon from './SocialIcon'
 import { Eyebrow, PrimaryLink, SecondaryLink } from './ui'
 
-// Plan v3 §15: the closing call to action, with every way to reach the team beside it.
+// Plan v3 §15: the closing call to action, with every way to reach the team beside it, and the
+// closing "Get IT Done" completion (MOTION §21) as the last thing on the page.
 export default function Contact() {
   const [copied, setCopied] = useState(false)
 
@@ -101,6 +103,11 @@ export default function Contact() {
             </dd>
           </div>
         </dl>
+
+        {/* MOTION §21: the page's visual conclusion, played once as the visitor reaches it. */}
+        <div className="mt-20 border-t border-line pt-16 md:pt-20">
+          <FinalCompletion />
+        </div>
       </div>
     </section>
   )

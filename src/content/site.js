@@ -327,6 +327,8 @@ export const finalCta = {
   secondary: { label: 'See an Agent Work', href: '#ai-agents' },
   // MOTION §21: the closing completion sequence, then the slogan with "Done" settling in gold.
   completion: ['Request', 'Build', 'Automate', 'Done'],
+  // DRAFT: accessible name for the completion steps, pending sign-off.
+  completionLabel: 'From request to done',
   slogan: ['Get', 'IT', 'Done'],
 }
 
