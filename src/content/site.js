@@ -5,7 +5,7 @@
 export const company = {
   name: 'XionTechs',
   legalName: 'XionTech Joint Stock Company',
-  logo: '/XionTechs-Logo_s.png',
+  logo: { src: '/XionTechs-Logo_s.png', width: 250, height: 46 },
   tagline: 'Get IT Done',
   // PLACEHOLDER: new positioning copy written for the redesign, pending team sign-off.
   // The old live-site headline was "Perfect IT Solutions For Your Business".
@@ -18,14 +18,17 @@ export const company = {
   offices: ['Dallas', 'Ho Chi Minh City', 'Da Nang'],
 }
 
+// Source: redesign plan v3 §2. Anchor navigation; the demo is a capability, not a product page.
 export const nav = [
   { label: 'Solutions', href: '#solutions' },
-  { label: 'Agent Demo', href: '#demo' },
+  { label: 'AI Agents', href: '#ai-agents' },
+  { label: 'Selected Work', href: '#work' },
+  { label: 'How We Work', href: '#how-we-work' },
   { label: 'Why Us', href: '#why-us' },
-  { label: 'How We Work', href: '#roadmap' },
-  { label: 'FAQ', href: '#faqs' },
-  { label: 'Contact', href: '#contact' },
+  { label: 'FAQ', href: '#faq' },
 ]
+
+export const navCta = { label: 'Talk to Us', href: '#contact' }
 
 export const stats = [
   {

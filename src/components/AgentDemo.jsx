@@ -201,7 +201,7 @@ export default function AgentDemo() {
         role="tabpanel"
         id="demo-panel"
         aria-labelledby={`demo-tab-${workflow.id}`}
-        className="theme-fade mt-6 rounded-2xl border border-line bg-surface p-6 md:p-8"
+        className="mt-6 rounded-2xl border border-line bg-surface p-6 md:p-8"
       >
         <div className="flex flex-wrap items-center justify-between gap-3">
           <span className="rounded-full border border-dashed border-accent px-3 py-1 text-xs font-medium text-accent">

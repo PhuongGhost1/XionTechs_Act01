@@ -6,7 +6,8 @@ export default {
   theme: {
     extend: {
       colors: {
-        // All values resolve to CSS variables defined per data-theme in src/index.css.
+        // All values resolve to CSS variables in src/index.css. A `data-tone="dark"` ancestor
+        // swaps them for the dark palette, so the same class names work in both tones.
         paper: token('bg'),
         surface: token('surface'),
         ink: token('ink'),
@@ -17,9 +18,6 @@ export default {
         primarySoft: token('primary-soft'),
         primaryInk: token('primary-ink'),
         accent: token('accent'),
-        navy: token('navy'),
-        navyInk: token('navy-ink'),
-        navyAccent: token('navy-accent'),
       },
       // text-primary uses the foreground-safe variant so gold never becomes low-contrast text.
       textColor: { primary: token('primary-fg') },

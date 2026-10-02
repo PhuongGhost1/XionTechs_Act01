@@ -29,7 +29,7 @@ export default function Roadmap() {
   }, [])
 
   return (
-    <section id="roadmap" className="theme-fade border-t border-line bg-surface/60">
+    <section id="roadmap" className="border-t border-line bg-surface/60">
       <div className="mx-auto max-w-6xl px-6 py-20">
         <p className="text-xs font-medium uppercase tracking-wide text-accent">{sections.roadmap.eyebrow}</p>
         <h2 className="mt-3 text-3xl md:text-4xl">{sections.roadmap.title}</h2>

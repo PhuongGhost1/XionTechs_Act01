@@ -2,7 +2,7 @@ import { stack } from '../content/site'
 
 export default function AzureStrip() {
   return (
-    <section id="stack" className="theme-fade border-y border-line bg-surface/60">
+    <section id="stack" className="border-y border-line bg-surface/60">
       <div className="mx-auto flex max-w-6xl flex-col gap-4 px-6 py-8 md:flex-row md:items-center md:justify-between">
         <div className="flex flex-wrap items-center gap-3 md:max-w-md">
           <p className="text-sm font-medium text-ink">{stack.line}</p>

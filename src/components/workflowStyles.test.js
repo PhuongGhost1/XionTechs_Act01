@@ -3,7 +3,7 @@ import { nodeClasses, runTag, typeIcon } from './workflowStyles'
 import { workflows } from '../content/site'
 import { buildRun, stateAt, totalTicks } from '../workflow/run'
 
-const COLOURS = 'paper|surface|ink|muted|line|primary|primaryHover|primarySoft|primaryInk|accent|navy|navyInk|navyAccent'
+const COLOURS = 'paper|surface|ink|muted|line|primary|primaryHover|primarySoft|primaryInk|accent'
 const count = (classes, prefix) =>
   classes.split(/\s+/).filter((c) => new RegExp(`^${prefix}-(${COLOURS})(/[0-9]+)?$`).test(c)).length
 

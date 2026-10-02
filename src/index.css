@@ -2,104 +2,64 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Colour tokens as space-separated RGB so Tailwind opacity modifiers (text-ink/60) work.
-   Navy #183860 is sampled from the logo wordmark. The gold is an estimate of the logo's
-   "X" gradient. --accent on navy is a darkened amber (#925e0c, 5.2:1 on paper) so gold
-   passes contrast as text on light backgrounds. --primary-fg is the foreground-safe
-   primary (text-primary uses it); --navy-accent is the gold for text/icons on navy. */
-:root,
-:root[data-theme='navy'] {
-  --bg: 248 249 251;
+/* Brand tokens, sampled from the logo: navy #183860 (wordmark) and gold #e5a52a (the "X").
+   Values are space-separated RGB so Tailwind opacity modifiers (text-ink/60) work.
+   The page is light by default. `data-tone="dark"` re-scopes the same tokens for a dark
+   section, so every component inside it turns dark without its own colour classes.
+   --accent on light is a darkened gold (#925e0c, 5.2:1 on --bg) so it passes as text;
+   --primary-fg is the foreground-safe primary (text-primary uses it). */
+:root {
+  --bg: 250 248 244;
   --surface: 255 255 255;
   --ink: 16 24 38;
-  --muted: 91 100 116;
-  --line: 226 229 235;
+  --muted: 88 95 110;
+  --line: 228 223 213;
   --primary: 24 56 96;
   --primary-hover: 18 44 76;
-  --primary-soft: 229 235 243;
+  --primary-soft: 232 237 244;
   --primary-ink: 255 255 255;
   --primary-fg: 24 56 96;
   --accent: 146 94 12;
-  --navy-accent: 229 165 42;
-  --navy: 10 26 46;
-  --navy-ink: 248 249 251;
   color-scheme: light;
 }
 
-:root[data-theme='midnight'] {
+[data-tone='dark'] {
   --bg: 10 26 46;
   --surface: 17 37 63;
   --ink: 232 237 245;
   --muted: 163 177 198;
-  --line: 30 51 80;
+  --line: 34 56 87;
   --primary: 229 165 42;
   --primary-hover: 240 184 74;
   --primary-soft: 46 44 34;
   --primary-ink: 10 26 46;
   --primary-fg: 229 165 42;
-  --accent: 104 152 218;
-  --navy-accent: 229 165 42;
-  --navy: 17 37 63;
-  --navy-ink: 232 237 245;
+  --accent: 229 165 42;
   color-scheme: dark;
-}
-
-:root[data-theme='aurum'] {
-  --bg: 251 247 239;
-  --surface: 255 255 255;
-  --ink: 26 26 26;
-  --muted: 95 90 79;
-  --line: 233 226 211;
-  --primary: 229 165 42;
-  --primary-hover: 208 146 28;
-  --primary-soft: 250 236 208;
-  --primary-ink: 26 26 26;
-  --primary-fg: 146 94 12;
-  --accent: 24 56 96;
-  --navy-accent: 229 165 42;
-  --navy: 24 56 96;
-  --navy-ink: 251 247 239;
-  color-scheme: light;
 }
 
 html {
   scroll-behavior: smooth;
+  /* Keeps anchor targets clear of the sticky header. */
+  scroll-padding-top: 5.5rem;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
 }
 
 body {
   @apply bg-paper text-ink font-sans antialiased;
 }
 
-h1, h2, h3 {
+/* Serif is for strategic headlines only; card and UI headings stay sans. */
+h1,
+h2 {
   @apply font-display;
+  text-wrap: balance;
 }
 
-/* Theme switch fade. Applied to the elements whose colours come from tokens. */
-.theme-fade,
-body {
-  transition: background-color 200ms ease, color 200ms ease, border-color 200ms ease;
-}
-
-/* The logo PNG is navy on transparent; invert it on the dark theme. */
-:root[data-theme='midnight'] .logo-img {
+/* The logo PNG is navy on transparent; show it white inside dark sections. */
+[data-tone='dark'] .logo-img {
   filter: brightness(0) invert(1);
-}
-
-/* Hero node pulse */
-@keyframes hero-pulse {
-  0%, 100% { opacity: 0.55; }
-  50% { opacity: 1; }
-}
-.hero-node {
-  animation: hero-pulse 2.4s ease-in-out infinite;
-}
-
-/* Roadmap stages light up on scroll. Only chrome changes — text keeps full contrast. */
-.roadmap-stage {
-  transition: border-color 500ms ease, background-color 500ms ease, box-shadow 500ms ease;
-}
-.roadmap-stage-on {
-  box-shadow: 0 10px 30px -12px rgb(var(--primary) / 0.35);
 }
 
 /* Monitoring strip: each newly mounted row slides in */
@@ -124,15 +84,13 @@ body {
   html {
     scroll-behavior: auto;
   }
-  .theme-fade,
-  body {
-    transition: none;
-  }
-  .hero-node {
-    animation: none;
-  }
-  .roadmap-stage { transition: none; }
   .monitor-row { animation: none; }
   .wf-fade-in { animation: none; }
 }
 
+@layer base {
+  :focus-visible {
+    outline: 2px solid rgb(var(--primary-fg));
+    outline-offset: 3px;
+  }
+}

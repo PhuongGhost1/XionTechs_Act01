@@ -8,7 +8,7 @@ export default function Pillars() {
   const [openId, setOpenId] = useState(null)
 
   return (
-    <section id="solutions" className="theme-fade border-t border-line bg-surface/60">
+    <section id="solutions" className="border-t border-line bg-surface/60">
       <div className="mx-auto max-w-6xl px-6 py-20">
         <p className="text-xs font-medium uppercase tracking-wide text-accent">{sections.solutions.eyebrow}</p>
         <h2 className="mt-3 text-3xl md:text-4xl">{sections.solutions.title}</h2>
@@ -21,7 +21,7 @@ export default function Pillars() {
             return (
               <article
                 key={p.id}
-                className="group theme-fade flex flex-col rounded-2xl border border-line bg-surface p-6 transition hover:border-primary/40"
+                className="group flex flex-col rounded-2xl border border-line bg-surface p-6 transition hover:border-primary/40"
               >
                 <div className="flex items-start justify-between">
                   <IconBadge icon={Icon} />

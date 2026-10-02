@@ -17,15 +17,15 @@ export default function Contact() {
   }
 
   return (
-    <section id="contact" className="theme-fade border-t border-line bg-navy text-navyInk">
+    <section id="contact" data-tone="dark" className="border-t border-line bg-paper text-ink">
       <div className="mx-auto grid max-w-6xl grid-cols-1 gap-12 px-6 py-20 lg:grid-cols-2">
         <div>
-          <p className="text-xs font-medium uppercase tracking-wide text-navyInk/60">Work with us</p>
+          <p className="text-xs font-medium uppercase tracking-wide text-ink/60">Work with us</p>
           <h2 className="mt-3 text-3xl md:text-4xl">{ctaBand.title}</h2>
-          <p className="mt-4 max-w-md text-navyInk/60">{ctaBand.body}</p>
+          <p className="mt-4 max-w-md text-ink/60">{ctaBand.body}</p>
           <a
             href={`mailto:${contact.email}`}
-            className="mt-8 inline-flex rounded-full bg-navyAccent px-6 py-3 text-sm font-medium text-navy transition hover:bg-navyAccent/90"
+            className="mt-8 inline-flex rounded-full bg-primary px-6 py-3 text-sm font-medium text-primaryInk transition hover:bg-primaryHover"
           >
             Book a call
           </a>
@@ -33,7 +33,7 @@ export default function Contact() {
 
         <dl className="grid grid-cols-1 gap-8 sm:grid-cols-2">
           <div>
-            <dt className="flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-navyInk/60">
+            <dt className="flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-ink/60">
               <Mail className="h-4 w-4" /> Email
             </dt>
             <dd className="mt-3 flex items-center gap-2 text-sm">
@@ -42,30 +42,30 @@ export default function Contact() {
                 type="button"
                 onClick={copyEmail}
                 aria-label="Copy email address"
-                className="rounded-full border border-navyInk/20 p-1.5 text-navyInk/70 transition hover:border-navyAccent hover:text-navyAccent"
+                className="rounded-full border border-ink/20 p-1.5 text-ink/70 transition hover:border-accent hover:text-accent"
               >
                 <Copy className="h-3.5 w-3.5" />
               </button>
-              {copied && <span className="text-xs text-navyAccent">Copied</span>}
+              {copied && <span className="text-xs text-accent">Copied</span>}
             </dd>
           </div>
           <div>
-            <dt className="flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-navyInk/60">
+            <dt className="flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-ink/60">
               <Phone className="h-4 w-4" /> Phone
             </dt>
             <dd className="mt-3 space-y-1 text-sm">
               {contact.phones.map((p) => (
-                <a key={p} href={`tel:${p.replace(/\s+/g, '')}`} className="block hover:text-navyAccent">
+                <a key={p} href={`tel:${p.replace(/\s+/g, '')}`} className="block hover:text-accent">
                   {p}
                 </a>
               ))}
             </dd>
           </div>
           <div className="sm:col-span-2">
-            <dt className="flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-navyInk/60">
+            <dt className="flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-ink/60">
               <MapPin className="h-4 w-4" /> Offices
             </dt>
-            <dd className="mt-3 space-y-2 text-sm text-navyInk/70">
+            <dd className="mt-3 space-y-2 text-sm text-ink/70">
               {contact.addresses.map((a) => (
                 <p key={a}>{a}</p>
               ))}
@@ -79,7 +79,7 @@ export default function Contact() {
                 target="_blank"
                 rel="noreferrer"
                 aria-label={s.label}
-                className="flex h-9 w-9 items-center justify-center rounded-full border border-navyInk/20 text-navyInk/70 transition hover:border-primary hover:bg-primary hover:text-primaryInk"
+                className="flex h-9 w-9 items-center justify-center rounded-full border border-ink/20 text-ink/70 transition hover:border-primary hover:bg-primary hover:text-primaryInk"
               >
                 <SocialIcon name={s.icon} />
               </a>
