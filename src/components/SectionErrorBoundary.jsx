@@ -11,9 +11,9 @@ export default class SectionErrorBoundary extends Component {
   render() {
     if (this.state.failed) {
       return (
-        <section id="demo" className="mx-auto max-w-6xl px-6 py-20">
-          <p className="text-sm text-muted">The interactive demo couldn't load. Please reload the page.</p>
-        </section>
+        <div role="status" className="rounded-2xl border border-line bg-surface p-8 text-sm text-muted">
+          The interactive demo couldn&rsquo;t load. Reload the page to try again.
+        </div>
       )
     }
     return this.props.children

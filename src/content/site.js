@@ -67,6 +67,27 @@ export const solutions = {
   ],
 }
 
+// PLAN §5. Heading adapted: the plan's "a real business workflow" became "a business workflow",
+// because the scenarios below are illustrative, not client implementations.
+export const aiAgents = {
+  eyebrow: 'AI agents',
+  title: 'See an AI agent work through a business workflow.',
+  intro:
+    'From incoming requests to decisions, system actions and human approval: see how an agent moves work forward while your team handles the exceptions.',
+  // DRAFT: callout descriptions written for the redesign, pending team sign-off.
+  callouts: [
+    { title: 'Understand', icon: 'ScanSearch', draft: true, desc: 'Reads the request and works out what is being asked, and by whom.' },
+    { title: 'Decide', icon: 'GitBranch', draft: true, desc: 'Routes the work to the right step, and stops for a person when a decision needs one.' },
+    { title: 'Act', icon: 'Zap', draft: true, desc: 'Uses your systems to finish the task, and records what it did.' },
+  ],
+  advanced: {
+    more: 'Explore Further',
+    less: 'Back to the Basic Run',
+    moreHint: 'Try other scenarios, throw a problem at the agent, or watch one agent work a long task.',
+    lessHint: 'Scenarios, drills, the Agent at work view and the run log are open.',
+  },
+}
+
 export const stats = [
   {
     value: '25+',
@@ -565,11 +586,6 @@ export const testimonials = []
 
 // PLACEHOLDER: redesign section copy, pending team sign-off.
 export const sections = {
-  demo: {
-    eyebrow: 'Agent demo',
-    title: 'See what an AI agent does for your business',
-    intro: 'Pick a situation. Watch how an agent takes it from request to result while your team only handles the exceptions.',
-  },
   projects: {
     eyebrow: 'Selected work',
     title: 'Software we have engineered',

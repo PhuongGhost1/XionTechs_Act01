@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Pause, Play, RotateCcw, X } from 'lucide-react'
-import { agentJourneys, sections, workflows } from '../content/site'
+import { ChevronDown, Pause, Play, RotateCcw, X } from 'lucide-react'
+import { agentJourneys, aiAgents, workflows } from '../content/site'
+import { useReducedMotion } from '../hooks/useReducedMotion'
 import { buildRun, nextBranchIndex, stateAt, totalTicks } from '../workflow/run'
 import { journeyStateAt, journeyTicks } from '../workflow/journey'
 import { iconMap } from './icons'
@@ -13,22 +14,12 @@ import DrillMenu from './DrillMenu'
 
 const TICK_MS = 700
 
-function usePrefersReducedMotion() {
-  const [reduced, setReduced] = useState(
-    () => typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches,
-  )
-  useEffect(() => {
-    const mq = window.matchMedia?.('(prefers-reduced-motion: reduce)')
-    if (!mq) return
-    const onChange = (e) => setReduced(e.matches)
-    mq.addEventListener('change', onChange)
-    return () => mq.removeEventListener('change', onChange)
-  }, [])
-  return reduced
-}
-
+// Progressive disclosure (plan v3 §5): by default one scenario, the workflow view, play/pause and
+// the approval moment. "Explore further" reveals scenarios, the Agent at work view, drills,
+// path replay and the run log.
 export default function AgentDemo() {
-  const reduced = usePrefersReducedMotion()
+  const reduced = useReducedMotion()
+  const [advanced, setAdvanced] = useState(false)
   const [active, setActive] = useState(0)
   const [branch, setBranch] = useState(0)
   const [tick, setTick] = useState(0)
@@ -108,8 +99,21 @@ export default function AgentDemo() {
   }
 
   function replay() {
-    if (view === 'workflow' && !drillId) setBranch((b) => nextBranchIndex(workflow, b))
+    if (advanced && view === 'workflow' && !drillId) setBranch((b) => nextBranchIndex(workflow, b))
     restart()
+  }
+
+  // Collapsing returns to the default story: first scenario, workflow view, approval path.
+  function toggleAdvanced() {
+    if (advanced) {
+      setActive(0)
+      setBranch(0)
+      setView('workflow')
+      setDrillId(null)
+      setSelectedId(null)
+      restart()
+    }
+    setAdvanced((a) => !a)
   }
 
   function selectView(v) {
@@ -165,73 +169,76 @@ export default function AgentDemo() {
     'flex h-9 w-9 items-center justify-center rounded-full border border-line text-ink/70 transition hover:border-primary hover:text-primary'
 
   return (
-    <section id="demo" ref={sectionRef} className="mx-auto max-w-6xl px-6 py-20">
-      <p className="text-xs font-medium uppercase tracking-wide text-accent">{sections.demo.eyebrow}</p>
-      <h2 className="mt-3 text-3xl md:text-4xl">{sections.demo.title}</h2>
-      <p className="mt-3 max-w-xl text-muted">{sections.demo.intro}</p>
-
-      <div role="tablist" aria-label="Agent workflows" className="mt-10 flex flex-wrap gap-2" onKeyDown={onTabKey}>
-        {workflows.map((w, i) => {
-          const Icon = iconMap[w.icon]
-          const isSel = i === active
-          return (
-            <button
-              key={w.id}
-              ref={(el) => {
-                tabRefs.current[i] = el
-              }}
-              role="tab"
-              id={`demo-tab-${w.id}`}
-              aria-selected={isSel}
-              aria-controls="demo-panel"
-              tabIndex={isSel ? 0 : -1}
-              onClick={() => selectTab(i)}
-              className={`inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition ${
-                isSel ? 'border-primary bg-primary text-primaryInk' : 'border-line text-ink/70 hover:border-primary hover:text-primary'
-              }`}
-            >
-              <Icon className="h-4 w-4" strokeWidth={1.75} />
-              {w.label}
-            </button>
-          )
-        })}
-      </div>
+    <div ref={sectionRef}>
+      {advanced && (
+        <div role="tablist" aria-label="Agent workflows" className="mb-6 flex flex-wrap gap-2" onKeyDown={onTabKey}>
+          {workflows.map((w, i) => {
+            const Icon = iconMap[w.icon]
+            const isSel = i === active
+            return (
+              <button
+                key={w.id}
+                ref={(el) => {
+                  tabRefs.current[i] = el
+                }}
+                role="tab"
+                id={`demo-tab-${w.id}`}
+                aria-selected={isSel}
+                aria-controls="demo-panel"
+                tabIndex={isSel ? 0 : -1}
+                onClick={() => selectTab(i)}
+                className={`inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition ${
+                  isSel ? 'border-primary bg-primary text-primaryInk' : 'border-line text-ink/70 hover:border-primary hover:text-primary'
+                }`}
+              >
+                <Icon className="h-4 w-4" strokeWidth={1.75} />
+                {w.label}
+              </button>
+            )
+          })}
+        </div>
+      )}
 
       <div
-        role="tabpanel"
+        role={advanced ? 'tabpanel' : undefined}
         id="demo-panel"
-        aria-labelledby={`demo-tab-${workflow.id}`}
-        className="mt-6 rounded-2xl border border-line bg-surface p-6 md:p-8"
+        aria-labelledby={advanced ? `demo-tab-${workflow.id}` : undefined}
+        className="rounded-2xl border border-line bg-surface p-5 shadow-2xl shadow-black/20 md:p-8"
       >
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <span className="rounded-full border border-dashed border-accent px-3 py-1 text-xs font-medium text-accent">
-            Illustrative scenario — not a client case study
-          </span>
           <div className="flex flex-wrap items-center gap-3">
-            <div role="radiogroup" aria-label="Demo view" className="flex rounded-full border border-line p-1" onKeyDown={onViewKey}>
-              {[
-                ['workflow', 'Workflow'],
-                ['agent', 'Agent at work'],
-              ].map(([id, label], i) => {
-                const on = view === id
-                return (
-                  <button
-                    key={id}
-                    ref={(el) => {
-                      viewRefs.current[i] = el
-                    }}
-                    type="button"
-                    role="radio"
-                    aria-checked={on}
-                    tabIndex={on ? 0 : -1}
-                    onClick={() => selectView(id)}
-                    className={`rounded-full px-3 py-1 text-xs font-medium transition ${on ? 'bg-primary text-primaryInk' : 'text-ink/70 hover:text-primary'}`}
-                  >
-                    {label}
-                  </button>
-                )
-              })}
-            </div>
+            <span className="rounded-full border border-dashed border-accent px-3 py-1 text-xs font-medium text-accent">
+              Illustrative scenario — not a client case study
+            </span>
+            {!advanced && <span className="text-sm text-muted">Scenario: {workflow.label}</span>}
+          </div>
+          <div className="flex flex-wrap items-center gap-3">
+            {advanced && (
+              <div role="radiogroup" aria-label="Demo view" className="flex rounded-full border border-line p-1" onKeyDown={onViewKey}>
+                {[
+                  ['workflow', 'Workflow'],
+                  ['agent', 'Agent at work'],
+                ].map(([id, label], i) => {
+                  const on = view === id
+                  return (
+                    <button
+                      key={id}
+                      ref={(el) => {
+                        viewRefs.current[i] = el
+                      }}
+                      type="button"
+                      role="radio"
+                      aria-checked={on}
+                      tabIndex={on ? 0 : -1}
+                      onClick={() => selectView(id)}
+                      className={`rounded-full px-3 py-1 text-xs font-medium transition ${on ? 'bg-primary text-primaryInk' : 'text-ink/70 hover:text-primary'}`}
+                    >
+                      {label}
+                    </button>
+                  )
+                })}
+              </div>
+            )}
             {!reduced && (
               <button
                 type="button"
@@ -255,13 +262,13 @@ export default function AgentDemo() {
                 {playing && !done ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
               </button>
             )}
-            {view === 'workflow' && workflow.branches.length > 1 && (
+            {advanced && view === 'workflow' && workflow.branches.length > 1 && (
               <button type="button" onClick={replay} aria-label={drillId ? 'Replay the drill' : 'Replay with the next path'} className={btn}>
                 <RotateCcw className="h-4 w-4" />
               </button>
             )}
-            {view === 'workflow' && <DrillMenu key={workflow.id} drills={workflow.drills} onSelect={selectDrill} />}
-            {view === 'agent' && !reduced && (
+            {advanced && view === 'workflow' && <DrillMenu key={workflow.id} drills={workflow.drills} onSelect={selectDrill} />}
+            {advanced && view === 'agent' && !reduced && (
               <button type="button" onClick={replay} aria-label="Replay the task" className={btn}>
                 <RotateCcw className="h-4 w-4" />
               </button>
@@ -335,8 +342,21 @@ export default function AgentDemo() {
             </>
           )}
         </div>
-        <RunMonitor reduced={reduced} inView={inView} playing={playing} actions={actions} />
+        {advanced && <RunMonitor reduced={reduced} inView={inView} playing={playing} actions={actions} />}
+
+        <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-line pt-5">
+          <p className="text-sm text-muted">{advanced ? aiAgents.advanced.lessHint : aiAgents.advanced.moreHint}</p>
+          <button
+            type="button"
+            onClick={toggleAdvanced}
+            aria-expanded={advanced}
+            className="inline-flex items-center gap-1.5 rounded-full border border-line px-4 py-2 text-sm font-medium text-ink transition-colors hover:border-primary hover:text-primary"
+          >
+            {advanced ? aiAgents.advanced.less : aiAgents.advanced.more}
+            <ChevronDown aria-hidden="true" className={`h-4 w-4 transition-transform duration-200 ${advanced ? 'rotate-180' : ''}`} />
+          </button>
+        </div>
       </div>
-    </section>
+    </div>
   )
 }

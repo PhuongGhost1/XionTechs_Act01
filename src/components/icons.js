@@ -22,6 +22,9 @@ import {
   FlaskConical,
   LayoutGrid,
   Users,
+  ScanSearch,
+  GitBranch,
+  Zap,
 } from 'lucide-react'
 
 export const iconMap = {
@@ -46,4 +49,7 @@ export const iconMap = {
   FlaskConical,
   LayoutGrid,
   Users,
+  ScanSearch,
+  GitBranch,
+  Zap,
 }
