@@ -172,9 +172,66 @@ describe('drills', () => {
     expect(stateAt(buildRun(decided, 0), 6).problemSeen).toBe(false)
   })
 
+  it('carries the drill fault word, or null', () => {
+    const withFault = { ...decided, drills: decided.drills.map((d) => (d.id === 'retry' ? { ...d, fault: 'Timeout' } : d)) }
+    expect(buildRun(withFault, 0, { drillId: 'retry' }).fault).toBe('Timeout')
+    expect(buildRun(decided, 0, { drillId: 'detour' }).fault).toBe(null)
+    expect(buildRun(decided, 0).fault).toBe(null)
+  })
+
   it('hides drill-only nodes unless the run passes through them', () => {
     expect(visibleNodeIds(decided, buildRun(decided, 0)).has('x')).toBe(false)
     expect(visibleNodeIds(decided, buildRun(decided, 0, { drillId: 'detour' })).has('x')).toBe(true)
     expect(visibleNodeIds(decided, buildRun(decided, 0)).has('ok')).toBe(true)
+  })
+})
+
+describe('failure and recovery (MOTION §11)', () => {
+  // t, a, a (retry), h: the retry step is 2, so a fails at tick 3, retries at 4, recovers at 5.
+  const run = buildRun(decided, 0, { drillId: 'retry' })
+
+  it('fails the step and puts the connector into it in error on the tick before the retry', () => {
+    const s = stateAt(run, 3)
+    expect([...s.failing]).toEqual(['a'])
+    expect([...s.errorEdges]).toEqual(['t>a'])
+    expect(s.active.has('a')).toBe(false)
+    expect(s.working.size).toBe(0)
+    expect(s.travelling.size).toBe(0)
+  })
+
+  it('sends the signal along the same connector again while the step retries', () => {
+    const s = stateAt(run, 4)
+    expect([...s.retrying]).toEqual(['a'])
+    expect([...s.travelling]).toEqual(['t>a'])
+    expect(s.failing.size).toBe(0)
+    expect(s.errorEdges.size).toBe(0)
+  })
+
+  it('shows a brief recovery while the next signal leaves, then counts the step as retried', () => {
+    const s = stateAt(run, 5)
+    expect([...s.recovered]).toEqual(['a'])
+    expect([...s.travelling]).toEqual(['a>h'])
+    expect(s.retried.has('a')).toBe(true)
+    const later = stateAt(run, 6)
+    expect(later.recovered.size).toBe(0)
+    expect(later.retried.has('a')).toBe(true)
+    expect(later.waiting).toBe(true)
+  })
+
+  it('reports nothing of the kind before the failure or on a run without retries', () => {
+    const before = stateAt(run, 2)
+    expect(before.failing.size + before.recovered.size + before.retried.size + before.errorEdges.size).toBe(0)
+    for (let t = 0; t <= 6; t++) {
+      const s = stateAt(buildRun(decided, 0, { drillId: 'detour' }), t)
+      expect(s.failing.size + s.recovered.size + s.retried.size + s.errorEdges.size, `tick ${t}`).toBe(0)
+    }
+  })
+
+  it('finds the connector that first reached a step retried twice', () => {
+    const twice = { ...decided, drills: [{ id: 'twice', label: 'Twice', problemNodeId: 'a', path: ['t', 'a', 'a', 'a', 'h'] }] }
+    const r = buildRun(twice, 0, { drillId: 'twice' })
+    expect([...r.retries]).toEqual([2, 3])
+    expect([...stateAt(r, 5).errorEdges]).toEqual(['t>a'])
+    expect([...stateAt(r, 6).travelling]).toEqual(['t>a'])
   })
 })

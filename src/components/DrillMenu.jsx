@@ -51,9 +51,9 @@ export default function DrillMenu({ drills, onSelect }) {
         onClick={() => setOpen((v) => !v)}
         className="inline-flex items-center gap-1.5 rounded-full border border-line px-3 py-1.5 text-xs font-medium text-ink/80 transition hover:border-primary hover:text-primary"
       >
-        <AlertTriangle className="h-3.5 w-3.5 text-accent" strokeWidth={2} />
-        Throw a problem at it
-        <ChevronDown className={`h-3.5 w-3.5 transition-transform ${open ? 'rotate-180' : ''}`} />
+        <AlertTriangle aria-hidden="true" className="h-3.5 w-3.5 text-accent" strokeWidth={2} />
+        Throw a Problem at It
+        <ChevronDown aria-hidden="true" className={`h-3.5 w-3.5 transition-transform duration-micro ${open ? 'rotate-180' : ''}`} />
       </button>
       {open && (
         <div role="menu" aria-label="Problems to throw at the agent" onKeyDown={onMenuKey} className="absolute left-0 sm:left-auto sm:right-0 z-20 mt-2 w-64 max-w-[calc(100vw-3rem)] rounded-xl border border-line bg-surface p-1 shadow-lg">

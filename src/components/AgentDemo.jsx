@@ -1,30 +1,38 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { ChevronDown, Pause, Play, RotateCcw, X } from 'lucide-react'
 import { agentJourneys, aiAgents, workflows } from '../content/site'
+import { useInView } from '../hooks/useInView'
 import { useReducedMotion } from '../hooks/useReducedMotion'
 import { buildRun, nextBranchIndex, stateAt, totalTicks } from '../workflow/run'
 import { journeyStateAt, journeyTicks } from '../workflow/journey'
+import { executionLog, statusLine } from '../workflow/log'
+import { runPhase, tickMs } from '../workflow/phase'
 import { iconMap } from './icons'
 import AgentJourney from './AgentJourney'
+import AgentRunLog from './AgentRunLog'
+import AgentRunStatus from './AgentRunStatus'
 import WorkflowGraph from './WorkflowGraph'
 import WorkflowList from './WorkflowList'
 import { typeIcon } from './workflowStyles'
 import RunMonitor from './RunMonitor'
 import DrillMenu from './DrillMenu'
+import './AgentDemo.css'
 
-const TICK_MS = 700
+const copy = aiAgents.run
 
-// Progressive disclosure (plan v3 §5): by default one scenario, the workflow view, play/pause and
-// the approval moment. "Explore further" reveals scenarios, the Agent at work view, drills,
-// path replay and the run log.
+// Progressive disclosure (MOTION §10): by default one scenario, the workflow, play/pause, a simple
+// status, the approval moment and a small execution log. "Explore What Happens Next" appears after
+// the first meaningful action (an approve/reject, or a finished run) and stays; it reveals
+// scenarios, the Agent at work view, drills (retry and escalate), path replay and the run log.
+// The run itself is one state machine: the tick, read through src/workflow (run, phase, log).
 export default function AgentDemo() {
   const reduced = useReducedMotion()
   const [advanced, setAdvanced] = useState(false)
+  const [unlocked, setUnlocked] = useState(false)
   const [active, setActive] = useState(0)
   const [branch, setBranch] = useState(0)
   const [tick, setTick] = useState(0)
   const [playing, setPlaying] = useState(true)
-  const [inView, setInView] = useState(false)
   const [selectedId, setSelectedId] = useState(null)
   const [view, setView] = useState('workflow')
   const [runId, setRunId] = useState(0)
@@ -36,6 +44,7 @@ export default function AgentDemo() {
   const sectionRef = useRef(null)
   const tabRefs = useRef([])
   const statusRef = useRef(null)
+  const inView = useInView(sectionRef, { rootMargin: '-25% 0px -25% 0px' })
 
   const workflow = workflows[active]
   const run = useMemo(() => buildRun(workflow, branch, { drillId, decision }), [workflow, branch, drillId, decision])
@@ -45,12 +54,12 @@ export default function AgentDemo() {
   const shownTick = reduced ? total : tick
   const state = useMemo(() => stateAt(run, shownTick), [run, shownTick])
   const jState = useMemo(() => journeyStateAt(journey, shownTick), [journey, shownTick])
+  const log = useMemo(() => executionLog(workflow, run, shownTick, copy.log), [workflow, run, shownTick])
   const done = view === 'workflow' ? state.done : jState.done
   const drill = drillId ? workflow.drills.find((d) => d.id === drillId) : null
   const waiting = view === 'workflow' && state.waiting
-  const retriedAlready = [...run.retries].some((i) => shownTick > 2 * i)
-  const lastNode = workflow.nodes.find((n) => n.id === run.steps.at(-1)[0])
-  const outcomeTitle = lastNode ? ` · ${lastNode.title}` : ''
+  const phase = runPhase(workflow, state)
+  const shownPhase = !playing && !done && !waiting ? 'paused' : phase
 
   const pushAction = useCallback((status, text) => {
     setActions((list) => [{ key: `${Date.now()}-${list.length}`, status, text }, ...list].slice(0, 6))
@@ -65,23 +74,18 @@ export default function AgentDemo() {
     }
   }, [drill, view, runId, state.done, state.waiting, pushAction])
 
+  // A finished run is a meaningful first action too; once unlocked, the advanced toggle stays.
   useEffect(() => {
-    const el = sectionRef.current
-    if (!el || !('IntersectionObserver' in window)) {
-      setInView(true)
-      return
-    }
-    const io = new IntersectionObserver(([entry]) => setInView(entry.isIntersecting), { threshold: 0, rootMargin: '-25% 0px -25% 0px' })
-    io.observe(el)
-    return () => io.disconnect()
-  }, [])
+    if (done) setUnlocked(true)
+  }, [done])
 
   // One timeout per tick; cleanup clears it whenever the workflow, branch or tick changes.
+  // The failure tick is held a little longer (src/workflow/phase.js).
   useEffect(() => {
     if (reduced || !playing || !inView || tick >= total) return
-    const id = setTimeout(() => setTick((t) => t + 1), TICK_MS)
+    const id = setTimeout(() => setTick((t) => t + 1), tickMs(view === 'workflow' ? phase : null))
     return () => clearTimeout(id)
-  }, [reduced, playing, inView, tick, total])
+  }, [reduced, playing, inView, tick, total, view, phase])
 
   function restart() {
     setTick(0)
@@ -136,6 +140,7 @@ export default function AgentDemo() {
   // Continue from the current tick — never restart — so the run picks up at the decision step.
   function decide(choice) {
     setDecision(choice)
+    setUnlocked(true)
     setTick((t) => Math.min(t, totalTicks(run)))
     setPlaying(true)
     pushAction(choice === 'approve' ? 'approved' : 'rejected', workflow.decision.log[choice])
@@ -166,12 +171,12 @@ export default function AgentDemo() {
   const selected = workflow.nodes.find((n) => n.id === selectedId) ?? workflow.nodes[0]
   const SelectedIcon = typeIcon[selected.type]
   const btn =
-    'flex h-9 w-9 items-center justify-center rounded-full border border-line text-ink/70 transition hover:border-primary hover:text-primary'
+    'flex h-9 w-9 items-center justify-center rounded-full border border-line text-ink/70 transition-colors duration-micro hover:border-primary hover:text-primary'
 
   return (
     <div ref={sectionRef}>
       {advanced && (
-        <div role="tablist" aria-label="Agent workflows" className="mb-6 flex flex-wrap gap-2" onKeyDown={onTabKey}>
+        <div role="tablist" aria-label="Agent workflows" className="wf-rise mb-6 flex flex-wrap gap-2" onKeyDown={onTabKey}>
           {workflows.map((w, i) => {
             const Icon = iconMap[w.icon]
             const isSel = i === active
@@ -187,11 +192,11 @@ export default function AgentDemo() {
                 aria-controls="demo-panel"
                 tabIndex={isSel ? 0 : -1}
                 onClick={() => selectTab(i)}
-                className={`inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition ${
+                className={`inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition-colors duration-micro ${
                   isSel ? 'border-primary bg-primary text-primaryInk' : 'border-line text-ink/70 hover:border-primary hover:text-primary'
                 }`}
               >
-                <Icon className="h-4 w-4" strokeWidth={1.75} />
+                <Icon aria-hidden="true" className="h-4 w-4" strokeWidth={1.75} />
                 {w.label}
               </button>
             )
@@ -217,7 +222,7 @@ export default function AgentDemo() {
               <div role="radiogroup" aria-label="Demo view" className="flex rounded-full border border-line p-1" onKeyDown={onViewKey}>
                 {[
                   ['workflow', 'Workflow'],
-                  ['agent', 'Agent at work'],
+                  ['agent', 'Agent at Work'],
                 ].map(([id, label], i) => {
                   const on = view === id
                   return (
@@ -231,7 +236,7 @@ export default function AgentDemo() {
                       aria-checked={on}
                       tabIndex={on ? 0 : -1}
                       onClick={() => selectView(id)}
-                      className={`rounded-full px-3 py-1 text-xs font-medium transition ${on ? 'bg-primary text-primaryInk' : 'text-ink/70 hover:text-primary'}`}
+                      className={`rounded-full px-3 py-1 text-xs font-medium transition-colors duration-micro ${on ? 'bg-primary text-primaryInk' : 'text-ink/70 hover:text-primary'}`}
                     >
                       {label}
                     </button>
@@ -259,18 +264,18 @@ export default function AgentDemo() {
                 aria-disabled={waiting}
                 className={`${btn} ${waiting ? 'opacity-40' : ''}`}
               >
-                {playing && !done ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+                {playing && !done ? <Pause aria-hidden="true" className="h-4 w-4" /> : <Play aria-hidden="true" className="h-4 w-4" />}
               </button>
             )}
             {advanced && view === 'workflow' && workflow.branches.length > 1 && (
               <button type="button" onClick={replay} aria-label={drillId ? 'Replay the drill' : 'Replay with the next path'} className={btn}>
-                <RotateCcw className="h-4 w-4" />
+                <RotateCcw aria-hidden="true" className="h-4 w-4" />
               </button>
             )}
             {advanced && view === 'workflow' && <DrillMenu key={workflow.id} drills={workflow.drills} onSelect={selectDrill} />}
             {advanced && view === 'agent' && !reduced && (
               <button type="button" onClick={replay} aria-label="Replay the task" className={btn}>
-                <RotateCcw className="h-4 w-4" />
+                <RotateCcw aria-hidden="true" className="h-4 w-4" />
               </button>
             )}
           </div>
@@ -280,7 +285,7 @@ export default function AgentDemo() {
           <div className="mt-3 inline-flex items-center gap-2 rounded-full border border-accent px-3 py-1 text-xs font-medium text-ink">
             Drill: {drill.label}
             <button type="button" onClick={clearDrill} aria-label="Stop drill" className="rounded-full p-0.5 text-ink/70 hover:text-primary">
-              <X className="h-3.5 w-3.5" />
+              <X aria-hidden="true" className="h-3.5 w-3.5" />
             </button>
           </div>
         )}
@@ -288,39 +293,40 @@ export default function AgentDemo() {
         <div className="mt-6">
           {view === 'workflow' ? (
             <>
-              <div key={runId} className="hidden lg:block">
-                <WorkflowGraph
-                  workflow={workflow}
-                  run={run}
-                  state={state}
-                  selectedId={selectedId}
-                  onSelect={setSelectedId}
-                  reduced={reduced}
-                  onDecide={decide}
+              {/* On large screens the status and the log float over the canvas's top corners
+                  (kept clear of every card); on phones they sit above and below the list. */}
+              <div className="relative">
+                <AgentRunStatus
+                  statusRef={statusRef}
+                  phase={shownPhase}
+                  word={copy.phase[shownPhase]}
+                  text={statusLine(workflow, run, state, copy.status)}
+                  message={waiting ? aiAgents.humanMessage : null}
+                  className="mb-4 lg:absolute lg:right-[1.5%] lg:top-[2%] lg:z-10 lg:mb-0 lg:w-[33%]"
+                />
+                <div key={runId} className="hidden lg:block">
+                  <WorkflowGraph
+                    workflow={workflow}
+                    run={run}
+                    state={state}
+                    phase={phase}
+                    selectedId={selectedId}
+                    onSelect={setSelectedId}
+                    reduced={reduced}
+                    onDecide={decide}
+                  />
+                </div>
+                <WorkflowList workflow={workflow} run={run} state={state} phase={phase} className="lg:sr-only" onDecide={decide} />
+                <AgentRunLog
+                  title={copy.log.title}
+                  entries={log}
+                  className="mt-4 lg:absolute lg:left-[1.5%] lg:top-[2%] lg:z-10 lg:mt-0 lg:w-[33%]"
                 />
               </div>
-              <WorkflowList workflow={workflow} run={run} state={state} className="lg:sr-only" onDecide={decide} reduced={reduced} />
-              <p ref={statusRef} tabIndex={-1} className="mt-4 text-sm text-muted focus:outline-none" aria-live="polite">
-                {state.waiting
-                  ? 'Waiting for your decision'
-                  : state.retrying.size > 0
-                    ? 'Retrying…'
-                    : drill && state.problemSeen && !state.done && !retriedAlready
-                      ? `Problem: ${drill.label}`
-                      : state.done
-                        ? drill
-                          ? `Drill complete · ${drill.label}${outcomeTitle}`
-                          : run.decision
-                            ? `Run complete · ${run.decision === 'approve' ? 'approved' : 'rejected'} by you${outcomeTitle}`
-                            : `Run complete · took the “${run.branchLabel}” path`
-                        : drill
-                          ? `Running · ${drill.label}`
-                          : `Running · ${run.branchLabel} path`}
-              </p>
               <aside className="mt-4 hidden rounded-xl border border-line bg-paper p-4 lg:block" aria-live="polite">
                 <p className="text-xs font-medium uppercase tracking-wide text-muted">Step details</p>
                 <div className="mt-3 flex items-center gap-2">
-                  <SelectedIcon className="h-4 w-4 text-accent" strokeWidth={1.75} />
+                  <SelectedIcon aria-hidden="true" className="h-4 w-4 text-accent" strokeWidth={1.75} />
                   <p className="font-medium">{selected.title}</p>
                 </div>
                 {selected.capability && (
@@ -344,18 +350,20 @@ export default function AgentDemo() {
         </div>
         {advanced && <RunMonitor reduced={reduced} inView={inView} playing={playing} actions={actions} />}
 
-        <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-line pt-5">
-          <p className="text-sm text-muted">{advanced ? aiAgents.advanced.lessHint : aiAgents.advanced.moreHint}</p>
-          <button
-            type="button"
-            onClick={toggleAdvanced}
-            aria-expanded={advanced}
-            className="inline-flex items-center gap-1.5 rounded-full border border-line px-4 py-2 text-sm font-medium text-ink transition-colors hover:border-primary hover:text-primary"
-          >
-            {advanced ? aiAgents.advanced.less : aiAgents.advanced.more}
-            <ChevronDown aria-hidden="true" className={`h-4 w-4 transition-transform duration-200 ${advanced ? 'rotate-180' : ''}`} />
-          </button>
-        </div>
+        {unlocked && (
+          <div className="wf-rise mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-line pt-5">
+            <p className="text-sm text-muted">{advanced ? aiAgents.advanced.lessHint : aiAgents.advanced.moreHint}</p>
+            <button
+              type="button"
+              onClick={toggleAdvanced}
+              aria-expanded={advanced}
+              className="inline-flex items-center gap-1.5 rounded-full border border-line px-4 py-2 text-sm font-medium text-ink transition-colors duration-micro hover:border-primary hover:text-primary"
+            >
+              {advanced ? aiAgents.advanced.less : aiAgents.advanced.more}
+              <ChevronDown aria-hidden="true" className={`h-4 w-4 transition-transform duration-micro ${advanced ? 'rotate-180' : ''}`} />
+            </button>
+          </div>
+        )}
       </div>
     </div>
   )

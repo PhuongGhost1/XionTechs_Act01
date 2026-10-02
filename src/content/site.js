@@ -114,6 +114,57 @@ export const aiAgents = {
     moreHint: 'Try other scenarios, throw a problem at the agent, or watch one agent work a long task.',
     lessHint: 'Scenarios, drills, the Agent at work view and the run log are open.',
   },
+  // DRAFT: UI words for the demo's run status, node chips and execution log (MOTION §8, §11,
+  // §12, §29), pending sign-off. Words only, no digits (src/workflow/log.test.js). `{name}` is
+  // filled in by src/workflow/log.js.
+  run: {
+    phase: {
+      running: 'Running',
+      decision: 'Deciding',
+      approval: 'Your call',
+      error: 'Error',
+      retrying: 'Retrying',
+      recovered: 'Recovered',
+      completed: 'Complete',
+      paused: 'Paused',
+    },
+    status: {
+      waiting: 'Waiting for your decision',
+      error: 'Error · {problem}',
+      retrying: 'Retrying…',
+      recovered: 'Recovered · {step}',
+      problem: 'Problem: {problem}',
+      drillDone: 'Drill complete · {problem}',
+      approved: 'Run complete · approved by you',
+      rejected: 'Run complete · rejected by you',
+      pathDone: 'Run complete · took the “{path}” path',
+      running: 'Running · {what}',
+      runningPath: 'Running · {path} path',
+    },
+    chip: {
+      working: 'Working',
+      deciding: 'Deciding',
+      waiting: 'Your call',
+      retrying: 'Retrying',
+      retried: 'Retried',
+      recovered: 'Recovered',
+      problem: 'Problem',
+      done: 'Done',
+    },
+    log: {
+      title: 'Execution log',
+      received: 'Request received',
+      working: '{step} working',
+      decided: 'Decision made',
+      waiting: 'Waiting for approval',
+      approved: 'Approved by you',
+      rejected: 'Rejected by you',
+      failed: 'Step failed',
+      retrying: 'Retrying…',
+      recovered: 'Recovered',
+      completed: 'Completed',
+    },
+  },
 }
 
 // PLAN §6–9, MOTION §13–16. Two real product stories plus the Agent Demo as the third proof
@@ -345,6 +396,8 @@ export const capabilityLabels = ['AI model', 'Integration', 'IoT gateway', 'Data
 // `drills` are two predefined problems (retry, detour or escalation) a visitor can trigger;
 // `drillOnly` nodes are drawn only while a drill passes through them; an edge's optional third
 // element `{ via }` routes it down a vertical side channel at that x so it skips a card.
+// A retry drill (a repeated step) names its `fault`: the one-word error chip shown on the failing
+// step before the retry (MOTION §11).
 export const workflows = [
   {
     id: 'support',
@@ -382,7 +435,7 @@ export const workflows = [
       buttons: { x: 382, y: 345 },
     },
     drills: [
-      { id: 'timeout', label: 'Order system timeout', hint: 'Watch it retry', problemNodeId: 'lookup', path: ['email', 'triage', 'route', 'lookup', 'lookup', 'reply', 'done'], log: { status: 'retried', text: 'Order system timeout · retried, then succeeded' } },
+      { id: 'timeout', label: 'Order system timeout', hint: 'Watch it retry', fault: 'Timeout', problemNodeId: 'lookup', path: ['email', 'triage', 'route', 'lookup', 'lookup', 'reply', 'done'], log: { status: 'retried', text: 'Order system timeout · retried, then succeeded' } },
       { id: 'unclear', label: 'Customer request is unclear', hint: 'Watch it ask first', problemNodeId: 'triage', path: ['email', 'triage', 'clarify', 'lookup', 'reply', 'done'], log: { status: 'flagged', text: 'Unclear request · asked the customer first' } },
     ],
   },
@@ -421,7 +474,7 @@ export const workflows = [
       buttons: { x: 370, y: 420 },
     },
     drills: [
-      { id: 'offline', label: 'Supplier system offline', hint: 'Watch it retry', problemNodeId: 'draft', path: ['check', 'monitor', 'route', 'forecast', 'draft', 'draft', 'buyer'], log: { status: 'retried', text: 'Supplier system offline · retried, then drafted' } },
+      { id: 'offline', label: 'Supplier system offline', hint: 'Watch it retry', fault: 'Offline', problemNodeId: 'draft', path: ['check', 'monitor', 'route', 'forecast', 'draft', 'draft', 'buyer'], log: { status: 'retried', text: 'Supplier system offline · retried, then drafted' } },
       { id: 'spike', label: 'Sales spike looks wrong', hint: 'Watch it escalate', problemNodeId: 'forecast', path: ['check', 'monitor', 'route', 'forecast', 'buyer'], log: { status: 'flagged', text: 'Unusual sales spike · escalated to the buyer' } },
     ],
   },

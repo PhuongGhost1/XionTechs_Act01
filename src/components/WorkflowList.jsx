@@ -1,35 +1,42 @@
+import { UserCheck } from 'lucide-react'
+import { aiAgents } from '../content/site'
 import { splitBranches } from '../workflow/run'
 import DecisionButtons from './DecisionButtons'
-import { isWorking, nodeClasses, nodeStatus, runTag, typeIcon } from './workflowStyles'
+import { chipTone, glowTone, nodeChip, nodeClasses, nodeStatus, typeIcon } from './workflowStyles'
 
-function Item({ node, run, state, workflow, onDecide, reduced, forceOff }) {
+// Same states as the graph in a static form: border, glow, chip and text; no depth or travel.
+function Item({ node, run, state, workflow, onDecide, forceOff, dim }) {
   const status = forceOff ? 'off' : nodeStatus(node.id, run, state)
   const Icon = typeIcon[node.type]
   const outcomeActive = status === 'active' && node.type === 'outcome'
-  const tag = forceOff ? null : runTag(node.id, run, state, reduced)
-  const waitingHere = !forceOff && state.waiting && workflow.decision?.nodeId === node.id
+  const chip = forceOff ? null : nodeChip(node, run, state)
+  const waitingHere = status === 'waiting'
   return (
-    <li className={`relative rounded-xl p-3 ${nodeClasses(node, status, false)}`}>
-      {isWorking(status) && <span aria-hidden="true" className="pointer-events-none absolute -inset-1 rounded-[inherit] ring-2 ring-accent/50 motion-safe:animate-pulse" />}
+    <li className={`relative rounded-xl p-3 ${nodeClasses(node, status, false, dim && !waitingHere)}`}>
+      <span aria-hidden="true" className="wf-glow" data-glow={glowTone(status)} />
       <div className="flex flex-wrap items-center gap-2">
-        <Icon className={`h-4 w-4 shrink-0 ${outcomeActive ? '' : 'text-accent'}`} strokeWidth={1.75} />
+        <Icon aria-hidden="true" className={`h-4 w-4 shrink-0 ${outcomeActive ? '' : 'text-accent'}`} strokeWidth={1.75} />
         <span className="text-sm font-medium">{node.title}</span>
         {node.capability && (
           <span className="rounded border border-dashed border-line px-1.5 text-[11px] text-muted">{node.capability}</span>
         )}
-        {tag && (
-          <span className="inline-flex items-center gap-1 rounded-full border border-accent px-2 text-[11px] font-medium text-ink">
-            <tag.Icon className="h-3 w-3 text-accent" strokeWidth={2} />
-            {tag.word}
+        {chip && (
+          <span className={`inline-flex items-center gap-1 rounded-full border bg-paper px-2 text-[11px] font-medium text-ink ${chipTone[chip.tone].border}`}>
+            <chip.Icon aria-hidden="true" className={`h-3 w-3 ${chipTone[chip.tone].icon}`} strokeWidth={2} />
+            {chip.word}
           </span>
         )}
       </div>
       <p className={`mt-1 text-sm ${outcomeActive ? '' : 'text-muted'}`}>{node.desc}</p>
-      {waitingHere && (
+      {waitingHere && workflow.decision?.nodeId === node.id && (
         <div className="mt-3">
-          <p className="mb-2 text-sm font-medium text-ink">Waiting for your decision</p>
+          <p className="text-sm font-medium text-ink">{aiAgents.run.status.waiting}</p>
+          <p className="mb-3 mt-1 flex items-center gap-1.5 text-sm font-medium text-accent">
+            <UserCheck aria-hidden="true" className="h-4 w-4 shrink-0" strokeWidth={1.75} />
+            {aiAgents.humanMessage}
+          </p>
           <div className="lg:hidden">
-            <DecisionButtons verb={workflow.decision.verb} onDecide={onDecide} />
+            <DecisionButtons verb={workflow.decision.verb} onDecide={onDecide} emphasis />
           </div>
         </div>
       )}
@@ -47,9 +54,9 @@ function Steps({ steps, startIndex = 0, nodes, ...rest }) {
 }
 
 // Phone layout and, on desktop, the screen-reader text alternative of the graph.
-export default function WorkflowList({ workflow, run, state, className = '', onDecide, reduced = false }) {
+export default function WorkflowList({ workflow, run, state, phase, className = '', onDecide }) {
   const nodes = Object.fromEntries(workflow.nodes.map((n) => [n.id, n]))
-  const shared = { nodes, run, state, workflow, onDecide, reduced }
+  const shared = { nodes, run, state, workflow, onDecide, dim: phase === 'approval' }
 
   // Drills and single-branch workflows read top to bottom as the run's own steps.
   if (run.drillId || workflow.branches.length === 1) {

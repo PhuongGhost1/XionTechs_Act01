@@ -3,6 +3,11 @@
 // Timeline, one tick at a time: tick 0 pulses the trigger (step 0). For every later step i,
 // tick 2i-1 sends packets along the edges into it, tick 2i shows its nodes working, and the
 // nodes are active from tick 2i+1. The run is done at totalTicks(run), or waits there when it has a pending decision.
+//
+// A retry step r (the same node again, MOTION §11) uses the otherwise empty tick before it:
+// tick 2r-1 the node fails (`failing`, and the connector into it is in `errorEdges`), tick 2r
+// the signal travels that connector again while the node retries, tick 2r+1 it has `recovered`
+// (while the next signal leaves), and from then on it counts as `retried`.
 
 const asStep = (s) => (Array.isArray(s) ? s : [s])
 
@@ -43,6 +48,7 @@ export function buildRun(workflow, branchIndex, opts = {}) {
     branchLabel: source.label,
     drillId: drill?.id ?? null,
     problemNodeId: drill?.problemNodeId ?? null,
+    fault: drill?.fault ?? null,
     decision: waitStep === null && opts.decision ? opts.decision : null,
   }
 }
@@ -75,12 +81,32 @@ export function stateAt(run, rawTick) {
       if (tick > workTick) active.add(id)
     }
   })
-  // A node working again on a retry step is not also "active".
-  for (const id of working) active.delete(id)
   for (const edge of run.edges) {
     if (tick === 2 * edge.step - 1) travelling.add(edgeKey(edge))
     if (tick >= 2 * edge.step) lit.add(edgeKey(edge))
   }
+
+  const failing = new Set()
+  const recovered = new Set()
+  const retried = new Set()
+  const errorEdges = new Set()
+  for (const r of run.retries ?? []) {
+    // The connector into the failing node is the one that first reached it.
+    let entry = r - 1
+    while (entry > 0 && run.retries.has(entry)) entry--
+    const into = run.edges.filter((e) => e.step === entry).map(edgeKey)
+    const ids = run.steps[r]
+    if (tick === 2 * r - 1) {
+      ids.forEach((id) => failing.add(id))
+      into.forEach((k) => errorEdges.add(k))
+    }
+    if (tick === 2 * r) into.forEach((k) => travelling.add(k))
+    if (tick === 2 * r + 1) ids.forEach((id) => recovered.add(id))
+    if (tick > 2 * r) ids.forEach((id) => retried.add(id))
+  }
+  // A node working again on a retry step, or failing before it, is not also "active".
+  for (const id of working) active.delete(id)
+  for (const id of failing) active.delete(id)
 
   let problemSeen = false
   if (run.problemNodeId) {
@@ -89,7 +115,10 @@ export function stateAt(run, rawTick) {
   }
 
   const waiting = waitingRun && tick >= totalTicks(run)
-  return { active, working, travelling, lit, retrying, problemSeen, waiting, done: !waitingRun && tick >= totalTicks(run) }
+  return {
+    active, working, travelling, lit, retrying, failing, recovered, retried, errorEdges, problemSeen, waiting,
+    done: !waitingRun && tick >= totalTicks(run),
+  }
 }
 
 // Drill-only nodes are drawn only when the current run passes through them.
