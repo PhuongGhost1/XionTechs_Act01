@@ -137,6 +137,35 @@ export const selectedWork = {
   },
 }
 
+// PLAN §10. Technology categories, not a logo wall. `items` name tools only where the live site
+// names them (LIVE service copy); `.NET and APIs` and `React` come from the plan's example list
+// and stay draft until the team confirms it wants to market them.
+export const engineering = {
+  eyebrow: 'Engineering behind the work',
+  title: 'Built to fit your stack.',
+  categories: [
+    { label: '.NET and APIs', draft: true },
+    { label: 'React', draft: true },
+    { label: 'Cloud', items: 'Azure, AWS, GCP' },
+    { label: 'Enterprise integrations' },
+    { label: 'AI and ML' },
+    { label: 'Data' },
+    { label: 'Automation', items: 'Power Platform, Make, n8n, Retool, Bubble' },
+  ],
+}
+
+// PLAN §11. No durations, cadences or prices: none of them are confirmed.
+export const howWeWork = {
+  eyebrow: 'How we work',
+  title: 'From idea to production, one step at a time.',
+  steps: [
+    { id: 'discover', title: 'Discover', desc: 'Find the workflow or product opportunity worth solving.' },
+    { id: 'build', title: 'Build', desc: 'Turn the idea into a working pilot or product increment.' },
+    { id: 'integrate', title: 'Integrate', desc: 'Connect data, APIs, systems, users, and operational workflows.' },
+    { id: 'scale', title: 'Scale', desc: 'Add capability, automation, and engineering capacity as the business grows.' },
+  ],
+}
+
 export const stats = [
   {
     value: '25+',
@@ -352,23 +381,6 @@ export const agentJourneys = [
   },
 ]
 
-// PLACEHOLDER: Azure-first framing pending team sign-off (stated by a team member on
-// 2026-10-01). The cloud and platform names are real live-site service copy.
-export const stack = {
-  draft: true,
-  line: 'Built on Microsoft Azure — with AWS and GCP when your stack needs it.',
-  chips: [
-    { label: 'Azure', primary: true },
-    { label: 'AWS' },
-    { label: 'GCP' },
-    { label: 'Power Platform' },
-    { label: 'Make' },
-    { label: 'n8n' },
-    { label: 'Retool' },
-    { label: 'Bubble' },
-  ],
-}
-
 export const whoWeAre = {
   eyebrow: 'Who We Are',
   title: 'We Deliver Consumer-Centric Tech Solutions.',
@@ -380,44 +392,6 @@ export const whoWeAre = {
   ],
   badge: { value: '25', label: 'Years of experience in IT Development Industry' },
 }
-
-// PLACEHOLDER: engagement model framing written for the redesign, pending team sign-off.
-// Replaces the live site's Discovery/Design/Development/Deployment steps. No durations
-// or prices — those would be invented.
-export const roadmap = [
-  {
-    stage: 'Explore',
-    title: 'Find the right first use case',
-    icon: 'Compass',
-    get: 'A short workshop that maps your workflows and picks the one where an agent pays off first.',
-    involvement: 'A few hours from the people who know the process.',
-    next: 'A scoped pilot proposal.',
-  },
-  {
-    stage: 'Pilot',
-    title: 'One agent, one workflow',
-    icon: 'FlaskConical',
-    get: 'A working agent on real data, with a human approving every action.',
-    involvement: 'Weekly check-ins and feedback on what the agent gets right or wrong.',
-    next: 'A go/no-go decision backed by what you saw.',
-  },
-  {
-    stage: 'Production',
-    title: 'Integrated and monitored',
-    icon: 'Rocket',
-    get: 'The agent wired into your systems, with monitoring, fallbacks and support.',
-    involvement: 'Sign-off on integrations and access.',
-    next: 'A backlog of the next workflows to automate.',
-  },
-  {
-    stage: 'Scale',
-    title: 'More agents, connected operations',
-    icon: 'TrendingUp',
-    get: 'Additional agents, IoT and data platform work, and the engineering to keep it all running.',
-    involvement: 'A quarterly roadmap review.',
-    next: 'Ongoing partnership.',
-  },
-]
 
 export const whyChooseUs = {
   eyebrow: 'Why Choose Us',
@@ -510,11 +484,5 @@ export const sections = {
   monitor: {
     title: 'Agents are watched, not left alone.',
     intro: 'Every run is checked. Anything unusual goes to a person.',
-  },
-  roadmap: {
-    eyebrow: 'How we work',
-    title: 'From idea to agent, one step at a time',
-    intro: 'Start small and low-risk. Each stage ends with something you can see and a decision you control.',
-    draftNote: 'Draft engagement model — pending team sign-off.',
   },
 }

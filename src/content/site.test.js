@@ -34,8 +34,10 @@ describe('site content rules', () => {
     for (const h of [...hrefs, site.navCta.href]) expect(h.startsWith('#'), h).toBe(true)
   })
 
-  it('has four roadmap stages', () => {
-    expect(site.roadmap.map((r) => r.stage)).toEqual(['Explore', 'Pilot', 'Production', 'Scale'])
+  it('walks through the four plan steps without promising durations', () => {
+    expect(site.howWeWork.steps.map((s) => s.id)).toEqual(['discover', 'build', 'integrate', 'scale'])
+    const timing = /\b(hours?|days?|weeks?|weekly|months?|monthly|quarter(ly)?|years?)\b/i
+    expect(collectStrings(site.howWeWork).filter((s) => timing.test(s))).toEqual([])
   })
 
   describe('workflows', () => {
@@ -286,8 +288,10 @@ describe('site content rules', () => {
     })
   })
 
-  it('lists Azure first in the stack strip', () => {
-    expect(site.stack.chips[0]).toEqual({ label: 'Azure', primary: true })
-    expect(site.stack.chips.map((c) => c.label)).toEqual(['Azure', 'AWS', 'GCP', 'Power Platform', 'Make', 'n8n', 'Retool', 'Bubble'])
+  it('lists technology categories once each, tools only where named', () => {
+    const labels = site.engineering.categories.map((c) => c.label)
+    expect(new Set(labels).size).toBe(labels.length)
+    const cloud = site.engineering.categories.find((c) => c.label === 'Cloud')
+    expect(cloud.items).toBe('Azure, AWS, GCP')
   })
 })

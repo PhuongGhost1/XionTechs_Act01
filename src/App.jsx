@@ -1,9 +1,9 @@
 import Nav from './components/Nav'
 import Hero from './components/Hero'
 import Solutions from './components/Solutions'
-import AzureStrip from './components/AzureStrip'
+import EngineeringStrip from './components/EngineeringStrip'
 import WhyUs from './components/WhyUs'
-import Roadmap from './components/Roadmap'
+import HowWeWork from './components/HowWeWork'
 import SelectedWork from './components/SelectedWork'
 import FAQ from './components/FAQ'
 import Contact from './components/Contact'
@@ -27,8 +27,8 @@ export default function App() {
         <Solutions />
         <AiAgents />
         <SelectedWork />
-        <AzureStrip />
-        <Roadmap />
+        <EngineeringStrip />
+        <HowWeWork />
         <WhyUs />
         <FAQ />
         <Contact />
