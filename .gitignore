@@ -5,4 +5,4 @@ dist-ssr
 .env
 .DS_Store
 yarn.lock
-.vercel/
+.vercel/*
