@@ -1,14 +1,13 @@
+import { lazy, Suspense } from 'react'
 import Nav from './components/Nav'
 import Hero from './components/Hero'
 import Solutions from './components/Solutions'
 import AiAgents from './components/AiAgents'
-import SelectedWork from './components/SelectedWork'
-import EngineeringStrip from './components/EngineeringStrip'
-import HowWeWork from './components/HowWeWork'
-import WhyUs from './components/WhyUs'
-import FAQ from './components/FAQ'
-import Contact from './components/Contact'
 import Footer from './components/Footer'
+import SectionErrorBoundary from './components/SectionErrorBoundary'
+
+// Selected Work through Contact load as one chunk right after the first screen (BelowFold.jsx).
+const BelowFold = lazy(() => import('./components/BelowFold'))
 
 // Section order and light/dark rhythm follow the redesign plan v3 (§1, §17).
 export default function App() {
@@ -25,12 +24,11 @@ export default function App() {
         <Hero />
         <Solutions />
         <AiAgents />
-        <SelectedWork />
-        <EngineeringStrip />
-        <HowWeWork />
-        <WhyUs />
-        <FAQ />
-        <Contact />
+        <SectionErrorBoundary message="This part of the page couldn’t load. Reload the page to try again.">
+          <Suspense fallback={<div aria-busy="true" className="min-h-screen" />}>
+            <BelowFold />
+          </Suspense>
+        </SectionErrorBoundary>
       </main>
       <Footer />
     </div>

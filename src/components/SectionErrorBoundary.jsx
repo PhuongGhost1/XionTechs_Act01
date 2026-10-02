@@ -12,7 +12,7 @@ export default class SectionErrorBoundary extends Component {
     if (this.state.failed) {
       return (
         <div role="status" className="rounded-2xl border border-line bg-surface p-8 text-sm text-muted">
-          The interactive demo couldn&rsquo;t load. Reload the page to try again.
+          {this.props.message ?? 'The interactive demo couldn’t load. Reload the page to try again.'}
         </div>
       )
     }

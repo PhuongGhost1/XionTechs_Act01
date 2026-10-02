@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { ArrowRight, Menu, X } from 'lucide-react'
 import { company, nav, navCta } from '../content/site'
+import { SECTIONS_READY } from './sectionsReady'
 
 // Header behaviour (MOTION §4): soft at the top of the page, solid with a border and a light
 // shadow once scrolled, a little shorter while scrolling down and back to full height on the way
@@ -44,9 +45,16 @@ function useHeaderMode() {
 const HREFS = nav.map((item) => item.href)
 
 // The nav link whose section crosses a thin band a third of the way down the viewport, or null
-// (hero, contact, or a section without a nav link).
+// (hero, contact, or a section without a nav link). Sections in the lazy lower half appear later,
+// so the observer is rebuilt when they announce themselves (SECTIONS_READY).
 function useActiveSection() {
   const [active, setActive] = useState(null)
+  const [generation, setGeneration] = useState(0)
+  useEffect(() => {
+    const onReady = () => setGeneration((g) => g + 1)
+    window.addEventListener(SECTIONS_READY, onReady)
+    return () => window.removeEventListener(SECTIONS_READY, onReady)
+  }, [])
   useEffect(() => {
     if (!('IntersectionObserver' in window)) return
     const sections = HREFS.map((href) => document.getElementById(href.slice(1))).filter(Boolean)
@@ -64,7 +72,7 @@ function useActiveSection() {
     )
     sections.forEach((s) => io.observe(s))
     return () => io.disconnect()
-  }, [])
+  }, [generation])
   return active
 }
 
