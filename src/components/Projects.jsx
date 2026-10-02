@@ -2,10 +2,12 @@ import { useState } from 'react'
 import { ArrowRight, ChevronDown, ChevronRight } from 'lucide-react'
 import { projects, sections } from '../content/site'
 import MockPerformance from './MockPerformance'
+import MockCrm from './MockCrm'
 
 // One illustrative mock-up per project id, until sanitized real screenshots are supplied.
 const mocks = {
   performance: MockPerformance,
+  crm: MockCrm,
 }
 
 function MockFrame({ project }) {
@@ -112,6 +114,7 @@ export default function Projects() {
                         ))}
                       </ul>
                     </div>
+                    {p.note && <p className="font-display text-base text-ink">{p.note}</p>}
                   </div>
                 )}
               </div>

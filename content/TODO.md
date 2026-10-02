@@ -53,6 +53,9 @@ to the deployed URL without one of these being resolved.
 - [ ] **Performance platform: integration wording** - the brief mentions Dynamics 365 / OData
       and exact user roles as [VERIFY]. The page only says "Connected to existing enterprise
       systems" until the team confirms what can be named.
+- [ ] **CRM platform: real state model and domain** - the card uses the brief's generic
+      "New / In Progress / Pending / Completed" states and no industry. Replace with the real
+      product's terminology once the team approves what can be shown.
 
 Once resolved, edit the corresponding value in `src/content/site.js` and remove the
 `PLACEHOLDER` marker/comment.

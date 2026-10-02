@@ -191,4 +191,8 @@ just at the end.
   below it, since these cards are capability showcases, not signed-off client case studies.
 - Project 01 (Performance Management Platform): goal-setting mock with stage tracker, goal rows
   and approve/reject actions; expandable detail with the four review stages.
+- Project 02 (CRM & Customer Operations): customer-record mock with search, status pipeline,
+  fields and activity. The brief's AI extension (agent summarising customer context) is marked
+  conceptual there, so only its positioning line ("We build the platform - and we can add the
+  agent.") is shown; no AI feature is drawn into the CRM mock.
 

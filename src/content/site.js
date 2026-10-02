@@ -491,6 +491,42 @@ export const projects = [
       actions: ['Reject', 'Approve'],
     },
   },
+  {
+    id: 'crm',
+    draft: true,
+    eyebrow: 'Business platform',
+    title: 'CRM & Customer Operations',
+    desc: 'A centralized platform that brings customer data, workflows, and operational actions into one connected workspace.',
+    tags: ['CRM', 'Workflow', 'Integration'],
+    proofPoints: ['Customer workflows', 'Operational UI', 'System integration'],
+    detail:
+      'XionTechs engineers business platforms around the workflows teams actually use, connecting customer data, internal processes, and operational actions in a single experience.',
+    // Generic status model from the brief; replace with the real product's states once confirmed.
+    stages: ['New', 'In Progress', 'Pending', 'Completed'],
+    proves: [
+      'Business application development',
+      'Search, filtering and data-rich interfaces',
+      'Role-based operational workflows',
+      'API and system integration',
+    ],
+    // Broader positioning line from the brief; the CRM itself is not presented as an AI product.
+    note: 'We build the platform — and we can add the agent.',
+    cta: 'See how it works',
+    mock: {
+      label: 'Customer record screen',
+      search: 'Search customers and records',
+      record: 'Customer A',
+      recordMeta: 'Customer record · sample data',
+      status: 'In Progress',
+      fields: [
+        { label: 'Owner', value: 'Team member B' },
+        { label: 'Open request', value: 'Account update' },
+      ],
+      activityTitle: 'Recent activity',
+      activity: ['Follow-up call logged', 'Request moved to In Progress', 'Record details updated'],
+      actions: ['Add note', 'Update status'],
+    },
+  },
 ]
 
 export const faqs = [
