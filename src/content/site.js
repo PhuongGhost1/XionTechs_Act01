@@ -88,6 +88,55 @@ export const aiAgents = {
   },
 }
 
+// PLAN §6–9. Two real product stories from the team's screenshots, with the Agent Demo as the
+// third proof point (no invented third case study). No client names, metrics or outcomes, and
+// no digits (npm test). Each `src` stays null until a sanitized screenshot is approved for
+// publication (content/TODO.md); until then the page draws a labelled outline of the layout.
+// Expected files: /work/staffxp-dashboard.webp, /work/staffxp-sign-in.webp, /work/ess-portal.webp
+export const selectedWork = {
+  eyebrow: 'Selected work',
+  title: 'Software we’ve engineered.',
+  intro:
+    'Selected product experiences from the kinds of systems we build. Client identities and sensitive information are omitted where required.',
+  pendingNote: 'Screenshot pending privacy review. The layout is shown as an outline.',
+  proofs: [
+    { id: 'staffxp', label: 'Product engineering', name: 'StaffXP', href: '#work-staffxp' },
+    { id: 'ess', label: 'Enterprise workflow', name: 'ESS', href: '#work-ess' },
+    { id: 'agents', label: 'AI and automation', name: 'Agent demo', href: '#ai-agents', note: 'Illustrative' },
+  ],
+  agentsNote: 'The agent demo above is the third proof point: an illustrative scenario, not a client project.',
+  agentsLink: { label: 'See an Agent Work', href: '#ai-agents' },
+  staffxp: {
+    id: 'work-staffxp',
+    name: 'StaffXP',
+    eyebrow: 'Education / staff experience',
+    title: 'A connected workspace for school staff.',
+    desc: 'A connected staff workspace bringing everyday activities, notices, wellbeing, tasks, and operational information into one experience.',
+    tags: ['Staff experience', 'Business workflow', 'Role-based platform', 'Integrated operations'],
+    main: { src: null, alt: 'StaffXP staff dashboard', width: 1600, height: 1000 },
+    secondary: { src: null, alt: 'StaffXP sign-in screen', width: 1200, height: 900 },
+  },
+  ess: {
+    id: 'work-ess',
+    name: 'ESS',
+    eyebrow: 'Enterprise / ESS',
+    title: 'Self-service software around the employee.',
+    desc: 'A connected employee experience that brings everyday HR actions, workforce information, requests, and self-service workflows into one place.',
+    screen: { src: null, alt: 'ESS employee self-service portal', width: 1600, height: 1000 },
+    // Modules visible in the supplied screenshot (PLAN §8), grouped under the plan's annotations.
+    // `marker` is where the annotation sits on the screen, in % of its width and height; move the
+    // markers when the real screenshot replaces the outline.
+    areas: [
+      { id: 'profile', label: 'Employee profile', modules: ['Profile', 'Employment'], marker: { x: 25, y: 17 } },
+      { id: 'requests', label: 'Self-service requests', modules: ['Requests', 'Approval delegations'], marker: { x: 25, y: 41 } },
+      { id: 'workforce', label: 'Workforce information', modules: ['Org chart', 'Rewards & benefits', 'Payslips'], marker: { x: 51, y: 41 } },
+      { id: 'performance', label: 'Skills & performance', modules: ['Skills & performance'], marker: { x: 77, y: 41 } },
+      { id: 'time', label: 'Time and attendance', modules: ['Attendance', 'Time off'], marker: { x: 25, y: 69 } },
+      { id: 'learning', label: 'Learning', modules: ['Courses'], marker: { x: 64, y: 69 } },
+    ],
+  },
+}
+
 export const stats = [
   {
     value: '25+',
@@ -400,134 +449,6 @@ export const ctaBand = {
   body: "Tell us about one workflow that eats your team's time. We'll come back with what an agent could do about it.",
 }
 
-// Real situation: no verified case studies yet (see content/TODO.md).
-export const caseStudiesNote =
-  'Client case studies are being prepared — ask us for references on a call.'
-
-// PLACEHOLDER: the live site's "project" cards link to wordpress.themeholy.com/webteck —
-// the WordPress theme vendor's own demo site, not a real client project. Confirms these are
-// unedited theme-demo content. Replace with real case study details (client, scope, stack,
-// outcome) before demo day.
-export const caseStudies = [
-  { title: 'Cloud Security Service', tag: 'PLACEHOLDER', desc: 'Add real scope, stack, and outcome once available.' },
-  { title: 'Data Analytics System', tag: 'PLACEHOLDER', desc: 'Add real scope, stack, and outcome once available.' },
-  { title: 'IT Solution & Consultancy', tag: 'PLACEHOLDER', desc: 'Add real scope, stack, and outcome once available.' },
-]
-
-// DRAFT: project showcase copy taken from the team's briefs in docs/idea/project-*.md, pending
-// sign-off before publication. Rendered with a visible "Draft copy" tag. No client names, no
-// metrics, no digits (npm test). `mock` holds invented sample values for the illustrative UI
-// mock-up (labelled "not a product screenshot" on the page) — swap the mock for sanitized real
-// screenshots once the team supplies them (see content/TODO.md).
-export const projects = [
-  {
-    id: 'performance',
-    draft: true,
-    eyebrow: 'Enterprise platform',
-    title: 'Performance Management Platform',
-    desc: 'A connected enterprise workflow for employee goals, performance reviews, approvals, and calibration.',
-    tags: ['Enterprise', 'Workflow', 'Integration'],
-    proofPoints: ['Goal workflows', 'Manager approvals', 'Enterprise integration'],
-    detail:
-      'XionTechs designed and engineered a role-aware platform that connects multiple stages of the performance review lifecycle, from goal setting through review and calibration.',
-    stages: ['Goal Setting', 'Mid-Year Review', 'End-Year Review', 'Calibration'],
-    proves: [
-      'Complex business workflow implementation',
-      'Role-aware enterprise applications',
-      'Multi-stage approval flows',
-      'Connected to existing enterprise systems',
-    ],
-    cta: 'Explore the workflow',
-    mock: {
-      label: 'Performance management screen',
-      heading: 'Goal Setting',
-      context: 'Employee A · current review cycle',
-      view: 'Manager view',
-      currentStage: 0,
-      goals: [
-        { title: 'Improve the onboarding guide', kind: 'Development', status: 'Submitted' },
-        { title: 'Reduce rework after releases', kind: 'Business', status: 'Approved' },
-        { title: 'Mentor a new teammate', kind: 'People', status: 'Needs revision' },
-      ],
-      actions: ['Reject', 'Approve'],
-    },
-  },
-  {
-    id: 'crm',
-    draft: true,
-    eyebrow: 'Business platform',
-    title: 'CRM & Customer Operations',
-    desc: 'A centralized platform that brings customer data, workflows, and operational actions into one connected workspace.',
-    tags: ['CRM', 'Workflow', 'Integration'],
-    proofPoints: ['Customer workflows', 'Operational UI', 'System integration'],
-    detail:
-      'XionTechs engineers business platforms around the workflows teams actually use, connecting customer data, internal processes, and operational actions in a single experience.',
-    // Generic status model from the brief; replace with the real product's states once confirmed.
-    stages: ['New', 'In Progress', 'Pending', 'Completed'],
-    proves: [
-      'Business application development',
-      'Search, filtering and data-rich interfaces',
-      'Role-based operational workflows',
-      'API and system integration',
-    ],
-    // Broader positioning line from the brief; the CRM itself is not presented as an AI product.
-    note: 'We build the platform — and we can add the agent.',
-    cta: 'See how it works',
-    mock: {
-      label: 'Customer record screen',
-      search: 'Search customers and records',
-      record: 'Customer A',
-      recordMeta: 'Customer record · sample data',
-      status: 'In Progress',
-      fields: [
-        { label: 'Owner', value: 'Team member B' },
-        { label: 'Open request', value: 'Account update' },
-      ],
-      activityTitle: 'Recent activity',
-      activity: ['Follow-up call logged', 'Request moved to In Progress', 'Record details updated'],
-      actions: ['Add note', 'Update status'],
-    },
-  },
-  {
-    // AI flagship card. No real AI project screenshots or sign-off exist yet, so it is badged as
-    // an illustrative concept and points to the (also illustrative) Agent Demo.
-    id: 'agent',
-    draft: true,
-    badge: 'Illustrative concept — not a delivered client project',
-    eyebrow: 'AI engineering',
-    title: 'AI Agent Workflow Automation',
-    desc: 'AI agents that connect business requests, decisions, integrations, and human approval into one workflow.',
-    tags: ['Agent', 'Automation', 'Integration'],
-    proofPoints: ['Agent orchestration', 'Business integration', 'Human-in-the-loop'],
-    detail:
-      'XionTechs builds AI workflows that go beyond chat — connecting specialized agents, business systems, and human decisions to automate real operational work.',
-    stages: ['Business event', 'Triage agent', 'AI decision', 'Specialized agents', 'Human approval', 'Final outcome'],
-    proves: [
-      'AI agent engineering and orchestration',
-      'API and tool integration',
-      'Human-in-the-loop control for sensitive decisions',
-      'Retry, escalation and run visibility',
-    ],
-    note: 'AI is not just a chatbot. It can become part of the workflow.',
-    cta: 'Explore the workflow',
-    link: { label: 'See an agent work', href: '#demo' },
-    mock: {
-      label: 'Agent workflow view',
-      flow: {
-        trigger: 'Business event',
-        triage: 'Triage agent',
-        decision: 'AI decision',
-        agents: [
-          { title: 'Lookup agent', does: 'Integration' },
-          { title: 'Action agent', does: 'Action' },
-        ],
-        approval: 'Human approval',
-        outcome: 'Final outcome',
-      },
-    },
-  },
-]
-
 export const faqs = [
   {
     q: 'How can we help your business?',
@@ -586,12 +507,6 @@ export const testimonials = []
 
 // PLACEHOLDER: redesign section copy, pending team sign-off.
 export const sections = {
-  projects: {
-    eyebrow: 'Selected work',
-    title: 'Software we have engineered',
-    intro: 'The kinds of platforms we build, shown without client names. Screens are illustrative until approved screenshots are ready.',
-    mockNote: 'Illustrative UI with sample data — not a product screenshot',
-  },
   monitor: {
     title: 'Agents are watched, not left alone.',
     intro: 'Every run is checked. Anything unusual goes to a person.',

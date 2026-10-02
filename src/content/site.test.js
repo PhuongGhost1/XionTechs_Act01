@@ -253,32 +253,36 @@ describe('site content rules', () => {
     })
   })
 
-  describe('projects', () => {
-    it('keeps every showcase project flagged as draft, with unique ids', () => {
-      const ids = site.projects.map((p) => p.id)
-      expect(ids.length).toBeGreaterThan(0)
-      expect(new Set(ids).size).toBe(ids.length)
-      for (const p of site.projects) expect(p.draft, p.id).toBe(true)
-    })
-
-    it('badges the AI card as an illustrative concept that leads to the demo', () => {
-      const agent = site.projects.find((p) => p.id === 'agent')
-      expect(agent.badge).toMatch(/illustrative/i)
-      expect(agent.link.href).toBe('#demo')
-    })
+  describe('selected work', () => {
+    const work = site.selectedWork
+    const screens = [work.staffxp.main, work.staffxp.secondary, work.ess.screen]
 
     it('shows no numbers, so no invented metric can slip in', () => {
-      const offenders = collectStrings(site.projects).filter((s) => /\d/.test(s))
-      expect(offenders).toEqual([])
+      expect(collectStrings(work).filter((s) => /\d/.test(s))).toEqual([])
     })
 
-    it('has the copy and stages each card needs, and only in-page links', () => {
-      for (const p of site.projects) {
-        for (const key of ['eyebrow', 'title', 'desc', 'detail', 'cta']) expect(p[key], `${p.id}.${key}`).toBeTruthy()
-        expect(p.stages.length, p.id).toBeGreaterThan(1)
-        expect(p.mock.label, p.id).toBeTruthy()
-        if (p.link) expect(p.link.href.startsWith('#'), p.id).toBe(true)
+    it('gives every screen alt text and its intrinsic size', () => {
+      for (const sc of screens) {
+        expect(sc.alt).toBeTruthy()
+        expect(sc.width).toBeGreaterThan(0)
+        expect(sc.height).toBeGreaterThan(0)
+        if (sc.src) expect(sc.src.startsWith('/work/'), sc.src).toBe(true)
       }
+    })
+
+    it('annotates ESS areas with modules and on-screen markers', () => {
+      const ids = work.ess.areas.map((a) => a.id)
+      expect(new Set(ids).size).toBe(ids.length)
+      for (const a of work.ess.areas) {
+        expect(a.modules.length, a.id).toBeGreaterThan(0)
+        for (const v of [a.marker.x, a.marker.y]) expect(v >= 0 && v <= 100, a.id).toBe(true)
+      }
+    })
+
+    it('has two product stories and the demo as the third proof, marked illustrative', () => {
+      expect(work.proofs.map((p) => p.id)).toEqual(['staffxp', 'ess', 'agents'])
+      expect(work.proofs[2].note).toMatch(/illustrative/i)
+      for (const p of work.proofs) expect(p.href.startsWith('#'), p.id).toBe(true)
     })
   })
 

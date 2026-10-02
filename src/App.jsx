@@ -4,8 +4,7 @@ import Solutions from './components/Solutions'
 import AzureStrip from './components/AzureStrip'
 import WhyUs from './components/WhyUs'
 import Roadmap from './components/Roadmap'
-import Projects from './components/Projects'
-import CaseStudies from './components/CaseStudies'
+import SelectedWork from './components/SelectedWork'
 import FAQ from './components/FAQ'
 import Contact from './components/Contact'
 import Footer from './components/Footer'
@@ -26,12 +25,11 @@ export default function App() {
       <main id="main">
         <Hero />
         <Solutions />
-        <AzureStrip />
         <AiAgents />
-        <WhyUs />
+        <SelectedWork />
+        <AzureStrip />
         <Roadmap />
-        <Projects />
-        <CaseStudies />
+        <WhyUs />
         <FAQ />
         <Contact />
       </main>
