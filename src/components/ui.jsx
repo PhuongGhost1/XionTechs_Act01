@@ -38,13 +38,40 @@ export function SectionHeader({ eyebrow, title, intro, titleId, draft, className
   )
 }
 
-const pill = 'group inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-medium transition-colors'
+// Link micro-interactions (MOTION §6, §22): fast (micro) and small, on hover and keyboard focus
+// alike, never a scale. Named groups (group/link) keep a hovered parent card from triggering them.
+const pill =
+  'group/link relative inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-medium transition-[color,background-color,border-color,transform] duration-micro ease-brand'
+
+// The arrow steps right; the button lifts a pixel and gains depth (a shadow layer that fades in).
+const arrow =
+  'h-4 w-4 transition-transform duration-micro ease-brand motion-safe:group-hover/link:translate-x-1 motion-safe:group-focus-visible/link:translate-x-1'
+const depth =
+  'after:pointer-events-none after:absolute after:inset-0 after:rounded-full after:shadow-depth-2 after:opacity-0 after:transition-opacity after:duration-micro hover:after:opacity-100 focus-visible:after:opacity-100 motion-safe:hover:-translate-y-px motion-safe:focus-visible:-translate-y-px'
+
+// A gold line that draws under the label from the left.
+function GoldUnderline({ children }) {
+  return (
+    <span className="relative">
+      {children}
+      <span
+        aria-hidden="true"
+        className="absolute inset-x-0 -bottom-1 h-[1.5px] origin-left scale-x-0 rounded-full bg-accent transition-transform duration-base ease-brand group-hover/link:scale-x-100 group-focus-visible/link:scale-x-100 motion-reduce:transition-none"
+      />
+    </span>
+  )
+}
 
 export function PrimaryLink({ href, children, onPointerEnter, onFocus }) {
   return (
-    <a href={href} onPointerEnter={onPointerEnter} onFocus={onFocus} className={`${pill} bg-primary text-primaryInk hover:bg-primaryHover`}>
+    <a
+      href={href}
+      onPointerEnter={onPointerEnter}
+      onFocus={onFocus}
+      className={`${pill} ${depth} bg-primary text-primaryInk hover:bg-primaryHover`}
+    >
       {children}
-      <ArrowRight aria-hidden="true" className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5" />
+      <ArrowRight aria-hidden="true" className={arrow} />
     </a>
   )
 }
@@ -57,22 +84,22 @@ export function SecondaryLink({ href, children, onPointerEnter, onFocus }) {
       onFocus={onFocus}
       className={`${pill} border border-ink/20 text-ink hover:border-primary hover:text-primary`}
     >
-      {children}
+      <GoldUnderline>{children}</GoldUnderline>
     </a>
   )
 }
 
-// Underlined text link with an arrow, for in-section next steps.
+// Text link with an arrow, for in-section next steps: gold underline draws in, arrow steps right.
 export function TextLink({ href, children, onPointerEnter, onFocus }) {
   return (
     <a
       href={href}
       onPointerEnter={onPointerEnter}
       onFocus={onFocus}
-      className="group inline-flex items-center gap-1.5 text-sm font-medium text-primary underline-offset-4 hover:underline"
+      className="group/link inline-flex items-center gap-1.5 text-sm font-medium text-primary"
     >
-      {children}
-      <ArrowRight aria-hidden="true" className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5" />
+      <GoldUnderline>{children}</GoldUnderline>
+      <ArrowRight aria-hidden="true" className={arrow} />
     </a>
   )
 }

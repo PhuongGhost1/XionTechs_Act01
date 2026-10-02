@@ -1,0 +1,319 @@
+/* Hero connected system (MOTION §5): shallow CSS 3D, no WebGL.
+   Planes, back to front: a faint dot grid, the connector SVG, then the nodes, each floating at its
+   own depth. HeroSystem.jsx writes only three variables on .hs-stage, outside React renders:
+     --px, --py  pointer over the canvas, -1..1 (fine pointers only)
+     --flat      0..1, how far the system has settled into a straight workflow as it scrolls away
+   Everything else comes from data attributes: data-state on nodes and edges, data-near on the
+   node nearest the pointer, and on the root data-mode (3d | flat), data-motion (full | reduce)
+   and data-playing. Colours are theme tokens only; the brand gold lives in the dark palette, so
+   decorative gold layers carry data-tone="dark" to borrow it (see index.css). */
+
+.hs {
+  --k3d: 1; /* 0 in the flat fallback: no tilt, no depth */
+  --zmax: 28px; /* how far the front node floats toward the viewer */
+}
+@media (min-width: 640px) {
+  .hs {
+    --zmax: 44px;
+  }
+}
+.hs[data-mode='flat'] {
+  --k3d: 0;
+}
+.hs[data-mode='3d'] .hs-view {
+  perspective: 1200px;
+}
+
+.hs-camera,
+.hs-stage,
+.hs-wrap,
+.hs-node {
+  transform-style: preserve-3d;
+}
+
+/* Slow camera drift: under two degrees over sixteen seconds. Paused off screen or on request. */
+.hs[data-mode='3d'][data-motion='full'] .hs-camera {
+  animation: hs-drift 16s ease-in-out infinite;
+}
+@keyframes hs-drift {
+  0%,
+  100% {
+    transform: rotateX(0deg) rotateY(0deg) translate3d(0, 0, 0);
+  }
+  50% {
+    transform: rotateX(1.4deg) rotateY(-1.8deg) translate3d(0, -4px, 0);
+  }
+}
+
+/* The stage holds the resting tilt; the pointer adds a few degrees; scrolling away removes it. */
+.hs-stage {
+  --px: 0;
+  --py: 0;
+  --flat: 0;
+  --rx: calc((7deg - var(--py) * 4deg) * (1 - var(--flat)) * var(--k3d));
+  --ry: calc((-9deg + var(--px) * 6deg) * (1 - var(--flat)) * var(--k3d));
+  transform: rotateX(var(--rx)) rotateY(var(--ry));
+  transition: transform var(--dur-base) var(--ease-brand);
+}
+
+/* Back plane: a faint dot grid, furthest from the viewer. The mask only uses alpha. */
+.hs-grid {
+  position: absolute;
+  inset: -8%;
+  background-image: radial-gradient(circle, rgb(var(--muted) / 0.32) 1px, transparent 1.6px);
+  background-size: 18px 18px;
+  -webkit-mask-image: radial-gradient(closest-side, black 45%, transparent);
+  mask-image: radial-gradient(closest-side, black 45%, transparent);
+  transform: translateZ(calc(var(--zmax) * -2 * (1 - var(--flat)) * var(--k3d)));
+  transition: transform var(--dur-base) var(--ease-brand);
+}
+
+/* Connector plane ----------------------------------------------------------------------- */
+.hs-wire {
+  fill: none;
+  stroke: rgb(var(--muted) / 0.4);
+  stroke-width: 1.5;
+}
+.hs-edge.is-judgment .hs-wire {
+  stroke-dasharray: 4 6;
+}
+.hs-orbit {
+  fill: none;
+  stroke: rgb(var(--accent) / 0.2);
+  stroke-width: 1;
+}
+
+/* A lit edge draws itself from its source (pathLength is 100). Back to idle: fade, then rewind. */
+.hs-lit {
+  fill: none;
+  stroke: rgb(var(--accent));
+  stroke-width: 2.25;
+  stroke-linecap: round;
+  stroke-dasharray: 100;
+  stroke-dashoffset: 100;
+  opacity: 0;
+  transition:
+    opacity 300ms var(--ease-brand),
+    stroke-dashoffset 0s linear 300ms;
+}
+.hs-edge:not([data-state='idle']) .hs-lit {
+  stroke-dashoffset: 0;
+  opacity: 1;
+  transition:
+    stroke-dashoffset 600ms var(--ease-brand),
+    opacity 120ms linear;
+}
+/* The human judgment branch is dashed, so it fades in instead of drawing. */
+.hs-edge.is-judgment .hs-lit {
+  stroke-dasharray: 4 6;
+  stroke-dashoffset: 0;
+  stroke-width: 1.75;
+}
+.hs-edge.is-judgment:not([data-state='idle']) .hs-lit {
+  opacity: 0.85;
+  transition: opacity 600ms var(--ease-brand);
+}
+
+/* The signal: one short gold dash that travels the edge once while it runs. */
+.hs-pulse {
+  fill: none;
+  stroke: rgb(var(--accent));
+  stroke-width: 5;
+  stroke-linecap: round;
+  stroke-dasharray: 3 200;
+  stroke-dashoffset: 3;
+  opacity: 0;
+}
+.hs-edge.is-judgment .hs-pulse {
+  stroke-width: 4;
+}
+.hs-edge[data-state='run'] .hs-pulse {
+  animation: hs-signal 640ms cubic-bezier(0.45, 0, 0.2, 1) both;
+}
+@keyframes hs-signal {
+  0% {
+    stroke-dashoffset: 3;
+    opacity: 0;
+  }
+  12%,
+  85% {
+    opacity: 1;
+  }
+  100% {
+    stroke-dashoffset: -100;
+    opacity: 0;
+  }
+}
+
+/* Node plane ------------------------------------------------------------------------------ */
+
+/* Full-canvas layer per node, so % translations are canvas-relative: settles into the line. */
+.hs-wrap {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  transform: translate(calc(var(--fx) * var(--flat)), calc(var(--fy) * var(--flat)));
+}
+
+/* Each node floats at its depth, shifts with the pointer by depth, lifts when the pointer is
+   near, and counter-rotates against the stage so its label always faces the viewer. */
+.hs-node {
+  --lift: 0;
+  --act: 0;
+  position: absolute;
+  transform: translate(-50%, -50%)
+    translate3d(
+      calc(var(--px) * var(--depth) * 10px),
+      calc(var(--py) * var(--depth) * 8px - var(--lift) * 4px),
+      calc((var(--depth) * var(--zmax) + var(--lift) * 14px) * (1 - var(--flat)) * var(--k3d))
+    )
+    rotateY(calc(var(--ry) * -1)) rotateX(calc(var(--rx) * -1));
+  transition: transform var(--dur-base) var(--ease-brand);
+}
+.hs-node[data-near='true'] {
+  --lift: 1;
+}
+.hs-node[data-state='active'] {
+  --act: 1;
+}
+
+/* Activation comes slightly toward the viewer, once the signal has arrived (--arrive). */
+.hs-body {
+  position: relative;
+  transform: translateZ(calc(var(--act) * 10px * var(--k3d)));
+  transition: transform 500ms var(--ease-spring) var(--arrive, 0ms);
+}
+
+.hs-ring {
+  position: absolute;
+  inset: -6px;
+  border-radius: 9999px;
+  box-shadow:
+    0 0 0 3px rgb(var(--accent) / 0.3),
+    0 0 22px 2px rgb(var(--accent) / 0.3);
+  opacity: 0;
+  transition: opacity var(--dur-base) var(--ease-brand);
+}
+.hs-node[data-near='true'] .hs-ring {
+  opacity: 0.5;
+}
+.hs-node[data-state='active'] .hs-ring {
+  opacity: 1;
+  transition-delay: var(--arrive, 0ms);
+}
+
+.hs-depth {
+  opacity: 0;
+  transition: opacity var(--dur-base) var(--ease-brand);
+}
+.hs-node[data-near='true'] .hs-depth,
+.hs-node[data-state='active'] .hs-depth {
+  opacity: 1;
+}
+
+.hs-pill {
+  transition: border-color var(--dur-base) var(--ease-brand);
+}
+.hs-node:not([data-state='idle']) .hs-pill {
+  border-color: rgb(var(--accent) / 0.6);
+}
+.hs-node.is-judgment:not([data-state='idle']) .hs-pill {
+  border-style: dashed;
+}
+.hs-icon {
+  color: rgb(var(--muted));
+  transition: color var(--dur-base) var(--ease-brand);
+}
+.hs-node:not([data-state='idle']) .hs-icon {
+  color: rgb(var(--accent));
+}
+.hs-node[data-state='active'] :is(.hs-pill, .hs-icon) {
+  transition-delay: var(--arrive, 0ms);
+}
+
+/* DONE appears: the gold face settles over the outline. */
+.hs-done-face {
+  opacity: 0;
+  transform: scale(0.92);
+  transition:
+    opacity 300ms var(--ease-brand),
+    transform 500ms var(--ease-spring);
+}
+.hs-node:not([data-state='idle']) .hs-done-face {
+  opacity: 1;
+  transform: none;
+}
+
+/* Pointer users get the node's hint after a short hover (the same hints are in the caption and
+   in the visually hidden list). */
+.hs-tip {
+  position: absolute;
+  opacity: 0;
+  transform: translateZ(60px);
+  transition: opacity 150ms var(--ease-brand);
+}
+.hs-tip[data-side='above'] {
+  bottom: calc(100% + 10px);
+}
+.hs-tip[data-side='below'] {
+  top: calc(100% + 10px);
+}
+.hs-tip[data-align='start'] {
+  left: 0;
+}
+.hs-tip[data-align='end'] {
+  right: 0;
+}
+.hs-tip[data-align='center'] {
+  left: 50%;
+  transform: translateX(-50%) translateZ(60px);
+}
+.hs-node[data-near='true'] .hs-tip {
+  opacity: 1;
+  transition-delay: 400ms;
+}
+
+/* One-time assembly as the hero loads (MOTION §31 H). */
+.hs[data-motion='full'] .hs-body {
+  animation: hs-assemble 700ms var(--ease-brand) backwards;
+  animation-delay: calc(120ms + var(--i) * 80ms);
+}
+.hs[data-motion='full'] .hs-wires {
+  animation: hs-fade 900ms var(--ease-brand) 150ms backwards;
+}
+@keyframes hs-assemble {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 10px, -24px);
+  }
+}
+@keyframes hs-fade {
+  from {
+    opacity: 0;
+  }
+}
+
+.hs-caption {
+  animation: hs-caption 300ms var(--ease-brand) both;
+}
+@keyframes hs-caption {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+}
+
+/* Paused by the visitor or off screen: every loop holds where it is. (Matches the drift rule's
+   specificity and comes later, so its animation shorthand does not reset the play state.) */
+.hs[data-playing='false'][data-motion='full'] :is(.hs-camera, .hs-pulse) {
+  animation-play-state: paused;
+}
+
+/* Reduced motion (MOTION §25): the final state, no drift, parallax, loop or transitions. */
+.hs[data-motion='reduce'] :is(.hs-camera, .hs-pulse, .hs-body, .hs-wires, .hs-caption) {
+  animation: none;
+}
+.hs[data-motion='reduce']
+  :is(.hs-stage, .hs-grid, .hs-node, .hs-body, .hs-ring, .hs-depth, .hs-pill, .hs-icon, .hs-lit, .hs-done-face, .hs-tip) {
+  transition: none;
+}
