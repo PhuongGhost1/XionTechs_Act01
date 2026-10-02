@@ -1,26 +1,28 @@
 import { selectedWork } from '../content/site'
 import { loadAgentDemo } from './agentDemoLoader'
+import { StoryConnector } from './StoryConnector'
 import StoryEss from './StoryEss'
 import StoryStaffxp from './StoryStaffxp'
-import { SectionHeader, TextLink } from './ui'
+import { Reveal, SectionHeader, TextLink } from './ui'
 
-// Plan v3 §6–9: an editorial portfolio with two product stories, each with its own visual
-// treatment, and the Agent Demo as the third proof point.
+const proof = Object.fromEntries(selectedWork.proofs.map((p) => [p.id, p]))
+
+// Plan v3 §6–9, MOTION §13–16: two real product stories with their own visual treatments
+// (StaffXP a product visual, ESS an information map) and the Agent Demo above as the third proof.
+// Connectors run AI → StaffXP → ESS so the AI and software stories read as one system.
 export default function SelectedWork() {
   const { proofs } = selectedWork
   return (
     <section id="work" aria-labelledby="work-title" className="py-24 md:py-32">
       <div className="mx-auto max-w-6xl px-6">
-        <SectionHeader eyebrow={selectedWork.eyebrow} title={selectedWork.title} intro={selectedWork.intro} titleId="work-title" />
+        <Reveal>
+          <SectionHeader eyebrow={selectedWork.eyebrow} title={selectedWork.title} intro={selectedWork.intro} titleId="work-title" />
+        </Reveal>
 
         <ol className="mt-12 grid grid-cols-1 border-y border-line sm:grid-cols-3" aria-label="Proof points">
           {proofs.map((p, i) => (
             <li key={p.id} className="border-line py-5 sm:px-6 sm:first:pl-0 [&:not(:first-child)]:border-t sm:[&:not(:first-child)]:border-l sm:[&:not(:first-child)]:border-t-0">
-              <a
-                href={p.href}
-                onPointerEnter={p.id === 'agents' ? loadAgentDemo : undefined}
-                className="group block"
-              >
+              <a href={p.href} onPointerEnter={p.id === 'agents' ? loadAgentDemo : undefined} className="group block">
                 <span className="text-sm tabular-nums text-muted">{String(i + 1).padStart(2, '0')}</span>
                 <span className="mt-2 flex items-center gap-2 text-lg font-semibold text-ink group-hover:text-primary">
                   {p.name}
@@ -35,7 +37,9 @@ export default function SelectedWork() {
         </ol>
       </div>
 
+      <StoryConnector from={proof.agents.label} to={proof.staffxp.label} className="mt-16 md:mt-20" />
       <StoryStaffxp />
+      <StoryConnector from={proof.staffxp.label} to={proof.ess.label} className="mt-20 md:mt-28" />
       <StoryEss />
 
       <div className="mx-auto mt-24 max-w-6xl px-6">

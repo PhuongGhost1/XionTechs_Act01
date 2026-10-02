@@ -1,9 +1,10 @@
-import { Eyebrow } from './ui'
+import { Eyebrow, Reveal } from './ui'
 
 // Shared opener for a Selected Work story: number, eyebrow, serif title, description, tags.
+// Fades in once as it enters the viewport.
 export function StoryHeader({ index, story }) {
   return (
-    <div className="mx-auto grid max-w-6xl grid-cols-1 gap-6 px-6 lg:grid-cols-[1.1fr_1fr] lg:gap-16">
+    <Reveal className="mx-auto grid max-w-6xl grid-cols-1 gap-6 px-6 lg:grid-cols-[1.1fr_1fr] lg:gap-16">
       <div>
         <div className="flex items-baseline gap-4">
           <span className="font-display text-2xl tabular-nums text-muted">{String(index).padStart(2, '0')}</span>
@@ -26,6 +27,6 @@ export function StoryHeader({ index, story }) {
           </ul>
         )}
       </div>
-    </div>
+    </Reveal>
   )
 }

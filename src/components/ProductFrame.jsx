@@ -1,40 +1,61 @@
 import { selectedWork } from '../content/site'
 
-// A product screen in a browser frame. With a `src` it shows the approved screenshot; without
-// one it shows `outline` (a drawing of the layout, no invented data) and says so. `overlay` is
-// positioned over the screen area only (used for annotation markers).
-export default function ProductFrame({ screen, outline, overlay, priority = false, className = '' }) {
+// A real product screen, shown at its true aspect ratio and in its own colours (MOTION §14, §30).
+// `device` (StaffXP): a bezel with a lit top edge that shifts a few px with the pointer (reads the
+// --px variable set by the showcase), a slim browser bar and a deep shadow. `flat` (ESS): a thin
+// border only, so annotations can meet the screen's edge. `overlay` sits over the screen area only.
+// Without an approved `src` the frame shows a neutral placeholder that says the screen is pending,
+// and no overlay, so nothing is ever drawn over a screen that is not there.
+export default function ProductFrame({ screen, variant = 'device', overlay, className = '' }) {
   const pending = !screen.src
+  const device = variant === 'device'
   return (
     <figure className={className}>
-      <div className="overflow-hidden rounded-xl border border-line bg-surface shadow-2xl shadow-black/25">
-        <div aria-hidden="true" className="flex items-center gap-1.5 border-b border-line px-3.5 py-2.5">
-          <span className="h-2 w-2 rounded-full bg-line" />
-          <span className="h-2 w-2 rounded-full bg-line" />
-          <span className="h-2 w-2 rounded-full bg-line" />
-          {pending && (
-            <span className="ml-auto rounded-full border border-dashed border-muted/60 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-muted">
-              Outline
-            </span>
-          )}
-        </div>
-        <div className="relative">
-          {pending ? (
-            <div role="img" aria-label={`Layout outline of the ${screen.alt}. ${selectedWork.pendingNote}`} style={{ aspectRatio: `${screen.width} / ${screen.height}` }}>
-              {outline}
+      <div
+        className={
+          device
+            ? 'relative rounded-2xl bg-surface bg-gradient-to-b from-ink/10 to-transparent p-1.5 shadow-depth-3 shadow-black/60 ring-1 ring-ink/10'
+            : 'relative'
+        }
+      >
+        {device && (
+          <span
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-x-[14%] -top-px h-px bg-gradient-to-r from-transparent via-ink/60 to-transparent motion-safe:transition-transform motion-safe:duration-base motion-safe:ease-brand"
+            style={{ transform: 'translate3d(calc(var(--px, 0) * 28px), 0, 0)' }}
+          />
+        )}
+        <div className={`overflow-hidden ${device ? 'rounded-[0.65rem] ring-1 ring-ink/10' : 'rounded-lg shadow-depth-2 ring-1 ring-ink/15'}`}>
+          {device && (
+            <div aria-hidden="true" className="flex items-center gap-1.5 bg-paper px-3 py-2">
+              <span className="h-1.5 w-1.5 rounded-full bg-ink/25" />
+              <span className="h-1.5 w-1.5 rounded-full bg-ink/25" />
+              <span className="h-1.5 w-1.5 rounded-full bg-ink/25" />
             </div>
-          ) : (
-            <img
-              src={screen.src}
-              alt={screen.alt}
-              width={screen.width}
-              height={screen.height}
-              loading={priority ? 'eager' : 'lazy'}
-              decoding="async"
-              className="block h-auto w-full"
-            />
           )}
-          {overlay}
+          <div className="relative">
+            {pending ? (
+              <div
+                role="img"
+                aria-label={`${screen.alt} ${selectedWork.pendingNote}`}
+                className="flex items-center justify-center bg-paper p-6 text-center text-xs text-muted"
+                style={{ aspectRatio: `${screen.width} / ${screen.height}` }}
+              >
+                {selectedWork.pendingNote}
+              </div>
+            ) : (
+              <img
+                src={screen.src}
+                alt={screen.alt}
+                width={screen.width}
+                height={screen.height}
+                loading="lazy"
+                decoding="async"
+                className="block h-auto w-full"
+              />
+            )}
+            {!pending && overlay}
+          </div>
         </div>
       </div>
     </figure>
