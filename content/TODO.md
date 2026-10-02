@@ -44,6 +44,15 @@ to the deployed URL without one of these being resolved.
       placeholder.
 - [ ] **Decision and drill copy** — approval steps, "sent back" outcomes and drill wording in
       `workflows` are illustrative; confirm they match how the team would really run these.
+- [ ] **Project showcase: real screenshots** - the cards in `projects` (site.js) show coded,
+      illustrative UI mock-ups with invented sample values. Replace each with 3-5 sanitized,
+      approved product screenshots (no names, emails, client logos or HR data).
+- [ ] **Project showcase: copy sign-off** - `projects` copy comes from the briefs in
+      `docs/idea/` and is tagged "Draft copy" on the page. Confirm titles, descriptions and
+      capability statements, and that each project may be shown publicly.
+- [ ] **Performance platform: integration wording** - the brief mentions Dynamics 365 / OData
+      and exact user roles as [VERIFY]. The page only says "Connected to existing enterprise
+      systems" until the team confirms what can be named.
 
 Once resolved, edit the corresponding value in `src/content/site.js` and remove the
 `PLACEHOLDER` marker/comment.

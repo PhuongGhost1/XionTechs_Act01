@@ -77,3 +77,8 @@ If you add a new section, follow the same pattern.
   from `decision.approve` / `decision.reject`. A repeated step in a path is a retry. Edges may
   carry `{ via: x }` to route around a skipped card. All of it is illustrative and tested in
   `src/content/site.test.js`.
+- Project showcase cards (`projects` in `site.js`, rendered by `Projects.jsx`) come from the
+  briefs in `docs/idea/`. They stay `draft: true` until the team signs off, never name a client
+  or a metric, and contain no digits (`npm test`). Each card's UI is a coded mock-up
+  (`Mock*.jsx`) fed by invented sample values in `projects[].mock` and captioned "not a product
+  screenshot" - replace it with sanitized real screenshots, do not dress it up as one.

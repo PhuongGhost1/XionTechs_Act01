@@ -238,6 +238,29 @@ describe('site content rules', () => {
     })
   })
 
+  describe('projects', () => {
+    it('keeps every showcase project flagged as draft, with unique ids', () => {
+      const ids = site.projects.map((p) => p.id)
+      expect(ids.length).toBeGreaterThan(0)
+      expect(new Set(ids).size).toBe(ids.length)
+      for (const p of site.projects) expect(p.draft, p.id).toBe(true)
+    })
+
+    it('shows no numbers, so no invented metric can slip in', () => {
+      const offenders = collectStrings(site.projects).filter((s) => /\d/.test(s))
+      expect(offenders).toEqual([])
+    })
+
+    it('has the copy and stages each card needs, and only in-page links', () => {
+      for (const p of site.projects) {
+        for (const key of ['eyebrow', 'title', 'desc', 'detail', 'cta']) expect(p[key], `${p.id}.${key}`).toBeTruthy()
+        expect(p.stages.length, p.id).toBeGreaterThan(1)
+        expect(p.mock.label, p.id).toBeTruthy()
+        if (p.link) expect(p.link.href.startsWith('#'), p.id).toBe(true)
+      }
+    })
+  })
+
   it('lists Azure first in the stack strip', () => {
     expect(site.stack.chips[0]).toEqual({ label: 'Azure', primary: true })
     expect(site.stack.chips.map((c) => c.label)).toEqual(['Azure', 'AWS', 'GCP', 'Power Platform', 'Make', 'n8n', 'Retool', 'Bubble'])

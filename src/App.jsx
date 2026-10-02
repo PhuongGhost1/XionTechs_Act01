@@ -5,6 +5,7 @@ import Pillars from './components/Pillars'
 import AzureStrip from './components/AzureStrip'
 import WhyUs from './components/WhyUs'
 import Roadmap from './components/Roadmap'
+import Projects from './components/Projects'
 import CaseStudies from './components/CaseStudies'
 import FAQ from './components/FAQ'
 import Contact from './components/Contact'
@@ -30,6 +31,7 @@ export default function App() {
         </SectionErrorBoundary>
         <WhyUs />
         <Roadmap />
+        <Projects />
         <CaseStudies />
         <FAQ />
         <Contact />

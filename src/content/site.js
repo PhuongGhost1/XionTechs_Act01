@@ -453,6 +453,46 @@ export const caseStudies = [
   { title: 'IT Solution & Consultancy', tag: 'PLACEHOLDER', desc: 'Add real scope, stack, and outcome once available.' },
 ]
 
+// DRAFT: project showcase copy taken from the team's briefs in docs/idea/project-*.md, pending
+// sign-off before publication. Rendered with a visible "Draft copy" tag. No client names, no
+// metrics, no digits (npm test). `mock` holds invented sample values for the illustrative UI
+// mock-up (labelled "not a product screenshot" on the page) — swap the mock for sanitized real
+// screenshots once the team supplies them (see content/TODO.md).
+export const projects = [
+  {
+    id: 'performance',
+    draft: true,
+    eyebrow: 'Enterprise platform',
+    title: 'Performance Management Platform',
+    desc: 'A connected enterprise workflow for employee goals, performance reviews, approvals, and calibration.',
+    tags: ['Enterprise', 'Workflow', 'Integration'],
+    proofPoints: ['Goal workflows', 'Manager approvals', 'Enterprise integration'],
+    detail:
+      'XionTechs designed and engineered a role-aware platform that connects multiple stages of the performance review lifecycle, from goal setting through review and calibration.',
+    stages: ['Goal Setting', 'Mid-Year Review', 'End-Year Review', 'Calibration'],
+    proves: [
+      'Complex business workflow implementation',
+      'Role-aware enterprise applications',
+      'Multi-stage approval flows',
+      'Connected to existing enterprise systems',
+    ],
+    cta: 'Explore the workflow',
+    mock: {
+      label: 'Performance management screen',
+      heading: 'Goal Setting',
+      context: 'Employee A · current review cycle',
+      view: 'Manager view',
+      currentStage: 0,
+      goals: [
+        { title: 'Improve the onboarding guide', kind: 'Development', status: 'Submitted' },
+        { title: 'Reduce rework after releases', kind: 'Business', status: 'Approved' },
+        { title: 'Mentor a new teammate', kind: 'People', status: 'Needs revision' },
+      ],
+      actions: ['Reject', 'Approve'],
+    },
+  },
+]
+
 export const faqs = [
   {
     q: 'How can we help your business?',
@@ -520,6 +560,12 @@ export const sections = {
     eyebrow: 'Agent demo',
     title: 'See what an AI agent does for your business',
     intro: 'Pick a situation. Watch how an agent takes it from request to result while your team only handles the exceptions.',
+  },
+  projects: {
+    eyebrow: 'Selected work',
+    title: 'Software we have engineered',
+    intro: 'The kinds of platforms we build, shown without client names. Screens are illustrative until approved screenshots are ready.',
+    mockNote: 'Illustrative UI with sample data — not a product screenshot',
   },
   monitor: {
     title: 'Agents are watched, not left alone.',

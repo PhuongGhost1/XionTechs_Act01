@@ -171,3 +171,24 @@ just at the end.
 - Bundle ruling: the main chunk reached the 71 kB gzip budget, so the demo section is now
   lazy-loaded in `App.jsx` (with a Suspense fallback that keeps the `#demo` anchor).
 - Final review caught what the browser checklist (99/99 passing) missed: hidden-but-focusable duplicate Approve/Reject buttons in the desktop screen-reader list, no error boundary around the newly lazy-loaded demo (a failed chunk would blank the page), a drill menu that could run off a phone screen, and the Retry tag missing under reduced motion. All fixed in the final fix wave.
+
+## 2026-10-02 - project showcase from the idea briefs (Danh Nguyen + Claude)
+- Prompt: read the three project briefs in `docs/idea/`, review them, and if they hold up
+  implement all three, one branch per project.
+- Review outcome: the briefs describe showcase cards for the landing page, not three separate
+  apps, and they are careful about claims (no client names, no metrics, `[VERIFY]` markers). The
+  gap is that every brief is built around real product screenshots and none were supplied.
+  Decision: build each card's visual as a coded UI mock-up with invented sample values, captioned
+  "Illustrative UI with sample data - not a product screenshot", and tag the copy "Draft copy".
+  Inventing a screenshot-looking image would have broken the "real or clearly labeled" rule.
+- Decision: Dynamics 365 is named in the brief but flagged as needing confirmation, so the page
+  says "Connected to existing enterprise systems" and the D365 tag from the brief's sketch was
+  replaced by "Integration".
+- Decision: branches are stacked (`feat/project-01-performance` -> `-02-crm` -> `-03-ai-agent`)
+  rather than three siblings, because all three cards share one section component and one content
+  array; sibling branches would each re-create that and conflict on merge.
+- The new section takes over the `#work` anchor; the "case studies are being prepared" strip stays
+  below it, since these cards are capability showcases, not signed-off client case studies.
+- Project 01 (Performance Management Platform): goal-setting mock with stage tracker, goal rows
+  and approve/reject actions; expandable detail with the four review stages.
+
