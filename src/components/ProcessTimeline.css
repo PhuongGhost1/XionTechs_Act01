@@ -36,7 +36,8 @@
 }
 
 /* The run box is as long as the track, so translating it by --tl × its own size moves the dot
-   from the first node to the last with transforms only. */
+   from the first node to the last with transforms only. The translated (invisible) box reaches
+   past the track, so the section clips horizontal overflow (overflow-x-clip in HowWeWork.jsx). */
 .ptl-run {
   position: absolute;
   inset: 0;

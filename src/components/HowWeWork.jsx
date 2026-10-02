@@ -6,7 +6,7 @@ import { SectionHeader } from './ui'
 // scrolls (ProcessTimeline). Horizontal from lg, vertical below.
 export default function HowWeWork() {
   return (
-    <section id="how-we-work" aria-labelledby="how-title" className="py-24 md:py-32">
+    <section id="how-we-work" aria-labelledby="how-title" className="overflow-x-clip py-24 md:py-32">
       <div className="mx-auto max-w-6xl px-6">
         <SectionHeader eyebrow={howWeWork.eyebrow} title={howWeWork.title} titleId="how-title" />
         <div className="mt-16">
