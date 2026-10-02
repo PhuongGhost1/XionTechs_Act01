@@ -18,6 +18,23 @@ export default {
         primarySoft: token('primary-soft'),
         primaryInk: token('primary-ink'),
         accent: token('accent'),
+        danger: token('danger'),
+        success: token('success'),
+      },
+      transitionTimingFunction: {
+        brand: 'var(--ease-brand)',
+        spring: 'var(--ease-spring)',
+      },
+      transitionDuration: {
+        micro: 'var(--dur-micro)',
+        base: 'var(--dur-base)',
+        section: 'var(--dur-section)',
+      },
+      boxShadow: {
+        // Layered, restrained depth (MOTION §2): near, lifted, floating.
+        'depth-1': '0 1px 2px rgb(16 24 38 / 0.06), 0 2px 6px rgb(16 24 38 / 0.05)',
+        'depth-2': '0 2px 4px rgb(16 24 38 / 0.06), 0 10px 24px -6px rgb(16 24 38 / 0.14)',
+        'depth-3': '0 4px 8px rgb(16 24 38 / 0.08), 0 28px 56px -16px rgb(16 24 38 / 0.32)',
       },
       // text-primary uses the foreground-safe variant so gold never becomes low-contrast text.
       textColor: { primary: token('primary-fg') },

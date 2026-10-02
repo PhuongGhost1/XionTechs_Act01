@@ -13,7 +13,7 @@ export default function EngineeringStrip() {
           </h2>
         </div>
         <ul className="grid grid-cols-1 border-t border-line sm:grid-cols-2">
-          {engineering.categories.map((c) => (
+          {engineering.layers.map((c) => (
             <li key={c.label} className="flex flex-col justify-center border-b border-line py-4 sm:odd:pr-6 sm:even:border-l sm:even:pl-6">
               <span className="font-medium text-ink">
                 {c.label}

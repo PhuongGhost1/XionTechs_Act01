@@ -20,7 +20,17 @@
   --primary-ink: 255 255 255;
   --primary-fg: 24 56 96;
   --accent: 146 94 12;
+  --danger: 180 35 24;
+  --success: 6 118 71;
   color-scheme: light;
+
+  /* Motion tokens (MOTION §22): micro 150–250 ms, normal 300–500 ms, section 600–900 ms.
+     --ease-brand is a smooth ease-out; --ease-spring adds a small settle, never a bounce. */
+  --dur-micro: 200ms;
+  --dur-base: 400ms;
+  --dur-section: 750ms;
+  --ease-brand: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-spring: cubic-bezier(0.34, 1.24, 0.64, 1);
 }
 
 [data-tone='dark'] {
@@ -35,6 +45,8 @@
   --primary-ink: 10 26 46;
   --primary-fg: 229 165 42;
   --accent: 229 165 42;
+  --danger: 249 112 102;
+  --success: 71 205 137;
   color-scheme: dark;
 }
 
@@ -80,9 +92,36 @@ h2 {
   animation: wf-fade-in 400ms ease both;
 }
 
+/* One-time reveal for content entering the viewport (see Reveal in components/ui.jsx).
+   Content is only hidden once JS has marked it as not yet revealed. */
+.reveal[data-revealed='false'] {
+  opacity: 0;
+  transform: translate3d(0, var(--reveal-y, 16px), 0);
+}
+.reveal {
+  transition:
+    opacity var(--dur-section) var(--ease-brand),
+    transform var(--dur-section) var(--ease-brand);
+  transition-delay: var(--reveal-delay, 0ms);
+}
+
+@layer utilities {
+  /* Shallow 3D (MOTION §5, §9, §23): perspective on the parent, preserve-3d on the stage. */
+  .perspective-near { perspective: 900px; }
+  .perspective-far { perspective: 1600px; }
+  .preserve-3d { transform-style: preserve-3d; }
+  .backface-hidden { backface-visibility: hidden; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
+  }
+  .reveal,
+  .reveal[data-revealed='false'] {
+    opacity: 1;
+    transform: none;
+    transition: none;
   }
   .monitor-row { animation: none; }
   .wf-fade-in { animation: none; }

@@ -1,4 +1,6 @@
+import { useRef } from 'react'
 import { ArrowRight } from 'lucide-react'
+import { useInView } from '../hooks/useInView'
 
 // Draft copy is marked on the page in development and when the URL has `?review`, so the team
 // can see what still needs sign-off. Production visitors see the copy without the marker.
@@ -72,5 +74,24 @@ export function TextLink({ href, children, onPointerEnter, onFocus }) {
       {children}
       <ArrowRight aria-hidden="true" className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5" />
     </a>
+  )
+}
+
+// Fades and lifts its content in once, the first time it scrolls into view (MOTION §22: trigger
+// once per section). `delay` staggers siblings. Reduced motion shows content immediately (CSS).
+export function Reveal({ as = 'div', delay = 0, className = '', style, children, ...rest }) {
+  const Tag = as
+  const ref = useRef(null)
+  const shown = useInView(ref, { once: true, rootMargin: '0px 0px -12% 0px' })
+  return (
+    <Tag
+      ref={ref}
+      data-revealed={shown ? 'true' : 'false'}
+      className={`reveal ${className}`}
+      style={{ ...style, '--reveal-delay': `${delay}ms` }}
+      {...rest}
+    >
+      {children}
+    </Tag>
   )
 }

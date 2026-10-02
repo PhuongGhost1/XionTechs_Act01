@@ -44,7 +44,7 @@ export default function HeroSystem() {
     return () => clearTimeout(id)
   }, [finished, inView, step])
 
-  const nodes = LAYOUT.map((n, i) => ({ ...n, label: hero.system[i] }))
+  const nodes = LAYOUT.map((n, i) => ({ ...n, label: hero.system[i].label }))
   const packet = nodes[shown]
 
   return (

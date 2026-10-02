@@ -1,3 +1,4 @@
+import { existsSync } from 'node:fs'
 import { describe, it, expect } from 'vitest'
 import * as site from './site'
 import { buildRun } from '../workflow/run'
@@ -23,8 +24,10 @@ describe('site content rules', () => {
     for (const b of site.solutions.bands) expect(b.examples.length, b.id).toBeGreaterThan(0)
   })
 
-  it('draws the five-step hero system', () => {
-    expect(site.hero.system).toEqual(['Request', 'AI', 'Business logic', 'Existing systems', 'Human'])
+  it('draws the hero system from request to done, with a hint for every node', () => {
+    const ids = site.hero.system.map((n) => n.id)
+    expect(ids).toEqual(['request', 'agent', 'decision', 'system', 'human', 'done'])
+    for (const n of site.hero.system) expect(n.hint, n.id).toBeTruthy()
     expect(site.hero.headline).toContain(site.hero.headlineAccent)
   })
 
@@ -272,6 +275,16 @@ describe('site content rules', () => {
       }
     })
 
+    it('ships every referenced screenshot', () => {
+      for (const sc of screens.filter((x) => x.src)) expect(existsSync(`public${sc.src}`), sc.src).toBe(true)
+    })
+
+    it('keeps StaffXP hotspots and ESS regions inside the screenshot', () => {
+      const inside = (b) => b.x >= 0 && b.y >= 0 && b.w > 0 && b.h > 0 && b.x + b.w <= 100.5 && b.y + b.h <= 100.5
+      for (const h of work.staffxp.hotspots) expect(inside(h.box), h.id).toBe(true)
+      for (const a of work.ess.areas) for (const r of a.regions) expect(inside(r), a.id).toBe(true)
+    })
+
     it('annotates ESS areas with modules and on-screen markers', () => {
       const ids = work.ess.areas.map((a) => a.id)
       expect(new Set(ids).size).toBe(ids.length)
@@ -298,10 +311,10 @@ describe('site content rules', () => {
     expect(collectStrings(site.finalCta).filter((s) => /book/i.test(s))).toEqual([])
   })
 
-  it('lists technology categories once each, tools only where named', () => {
-    const labels = site.engineering.categories.map((c) => c.label)
-    expect(new Set(labels).size).toBe(labels.length)
-    const cloud = site.engineering.categories.find((c) => c.label === 'Cloud')
-    expect(cloud.items).toBe('Azure, AWS, GCP')
+  it('stacks engineering layers once each, naming tools only where the live site does', () => {
+    const ids = site.engineering.layers.map((l) => l.id)
+    expect(new Set(ids).size).toBe(ids.length)
+    expect(site.engineering.layers.find((l) => l.id === 'cloud').items).toBe('Azure, AWS, GCP')
+    for (const l of site.engineering.layers.filter((x) => x.id === 'frontend' || x.id === 'backend')) expect(l.draft, l.id).toBe(true)
   })
 })

@@ -1,6 +1,7 @@
 // Page copy. Every value comes from one of these sources (see CLAUDE.md, "Content rules"):
 //   LIVE         the live xiontechs.com site, captured 2026-09-22
 //   PLAN §n      the team's redesign brief, docs/idea/XionTechs_Landing_Page_Redesign_Plan_v3.md
+//   MOTION §n    the team's 3D / motion brief, docs/idea/XionTechs_Landing_Page_3D_Motion_Automation_Plan.md
 //   DRAFT        written for the redesign from LIVE / PLAN material, pending team sign-off;
 //                flagged `draft: true` and marked on the page in development and with `?review`
 //   ILLUSTRATIVE / PLACEHOLDER   not real; always labelled on the page for every visitor
@@ -26,17 +27,30 @@ export const nav = [
 
 export const navCta = { label: 'Talk to Us', href: '#contact' }
 
-// PLAN §3. `system` is the hero diagram: Request → AI → Business logic → Existing systems → Human.
+// PLAN §3 copy; MOTION §5–6 for the hero system and the slogan sequence.
+// `system` is the hero's connected system (MOTION §5): a signal travels request → agent →
+// decision, branches to a business system (and, when judgment is needed, a human), and ends at
+// done. `hint` is the delayed hover/focus tooltip; MOTION gives the agent, decision, integration
+// and human lines; the request and done lines are DRAFT. Nothing depends on hover.
 export const hero = {
   eyebrow: 'Get IT Done',
+  slogan: ['Get', 'IT', 'Done'],
   headline: 'AI agents and software engineering for the work that matters.',
   headlineAccent: 'the work that matters',
   intro:
     'XionTechs helps businesses turn ideas, workflows and operational problems into production-ready software, from AI agents to complete engineering teams.',
   primary: { label: 'See What We Build', href: '#work' },
   secondary: { label: 'Talk to Us', href: '#contact' },
-  system: ['Request', 'AI', 'Business logic', 'Existing systems', 'Human'],
-  systemLabel: 'Diagram: a request goes to AI, then business logic, then your existing systems, then a person.',
+  system: [
+    { id: 'request', label: 'Request', hint: 'A request or event comes in.' },
+    { id: 'agent', label: 'AI agent', hint: 'Understands the request.', core: true },
+    { id: 'decision', label: 'Decision', hint: 'Chooses the next step.' },
+    { id: 'system', label: 'Business system', hint: 'Works with your systems.' },
+    { id: 'human', label: 'Human', hint: 'Steps in when judgment is needed.' },
+    { id: 'done', label: 'Done', hint: 'The work gets done.' },
+  ],
+  systemLabel:
+    'Diagram: a request reaches an AI agent, which makes a decision, works with a business system, hands judgment calls to a person, and finishes the work.',
 }
 
 // PLAN §4. Three capability bands instead of three equal cards.
@@ -51,6 +65,8 @@ export const solutions = {
       desc: 'Agents that understand requests, make decisions, use tools, and hand off exceptions.',
       examples: ['Workflow automation', 'AI routing and decisions', 'Tool integration', 'Human-in-the-loop'],
       link: { label: 'See an Agent Work', href: '#ai-agents', preloadDemo: true },
+      // MOTION §7: one signal travels these steps.
+      visual: { kind: 'flow', steps: ['Request', 'Agent', 'Decision', 'Action'] },
     },
     {
       id: 'software',
@@ -59,6 +75,8 @@ export const solutions = {
       desc: 'Business applications designed around the way teams actually work.',
       examples: ['Enterprise platforms', 'CRM and operations', 'Internal tools', 'Workflow systems'],
       link: { label: 'See Selected Work', href: '#work' },
+      // MOTION §7: layered product frames slide into alignment.
+      visual: { kind: 'layers' },
     },
     {
       id: 'teams',
@@ -66,41 +84,44 @@ export const solutions = {
       icon: 'Users',
       desc: 'Product, backend, frontend, cloud, and integration engineers when you need to build.',
       examples: ['Product engineering', 'Custom application development', 'Cloud and APIs', 'Dedicated engineering capacity'],
+      // MOTION §7: architecture blocks stack in this order.
+      visual: { kind: 'stack', steps: ['Frontend', 'API', 'Cloud', 'Integration'] },
     },
   ],
 }
 
-// PLAN §5. Heading adapted: the plan's "a real business workflow" became "a business workflow",
-// because the scenarios below are illustrative, not client implementations.
+// MOTION §8 heading and supporting copy; PLAN §5 for the demo below it.
 export const aiAgents = {
   eyebrow: 'AI agents',
-  title: 'See an AI agent work through a business workflow.',
-  intro:
-    'From incoming requests to decisions, system actions and human approval: see how an agent moves work forward while your team handles the exceptions.',
+  title: 'AI agents that move work forward.',
+  intro: 'From requests to decisions, system actions, and human approval.',
+  // MOTION §12: shown while the run waits for the visitor's approval.
+  humanMessage: 'Automation with human control.',
   // DRAFT: callout descriptions written for the redesign, pending team sign-off.
   callouts: [
     { title: 'Understand', icon: 'ScanSearch', draft: true, desc: 'Reads the request and works out what is being asked, and by whom.' },
     { title: 'Decide', icon: 'GitBranch', draft: true, desc: 'Routes the work to the right step, and stops for a person when a decision needs one.' },
     { title: 'Act', icon: 'Zap', draft: true, desc: 'Uses your systems to finish the task, and records what it did.' },
   ],
+  // MOTION §10: the advanced controls appear after the first meaningful action.
   advanced: {
-    more: 'Explore Further',
+    more: 'Explore What Happens Next',
     less: 'Back to the Basic Run',
     moreHint: 'Try other scenarios, throw a problem at the agent, or watch one agent work a long task.',
     lessHint: 'Scenarios, drills, the Agent at work view and the run log are open.',
   },
 }
 
-// PLAN §6–9. Two real product stories from the team's screenshots, with the Agent Demo as the
-// third proof point (no invented third case study). No client names, metrics or outcomes, and
-// no digits (npm test). Each `src` stays null until a sanitized screenshot is approved for
-// publication (content/TODO.md); until then the page draws a labelled outline of the layout.
-// Expected files: /work/staffxp-dashboard.webp, /work/staffxp-sign-in.webp, /work/ess-portal.webp
+// PLAN §6–9, MOTION §13–16. Two real product stories plus the Agent Demo as the third proof
+// point (no invented third case study). Screenshots are the team's, sanitized before commit:
+// browser chrome cropped, and personal names, staff IDs, class codes and the client's school
+// names replaced with sample values (PROMPT_LOG, 2026-10-02). No metrics or outcomes, and no
+// digits in this copy (npm test). Region boxes are % of the screenshot: { x, y, w, h }.
 export const selectedWork = {
   eyebrow: 'Selected work',
-  title: 'Software we’ve engineered.',
+  title: 'Software we\u2019ve engineered.',
   intro:
-    'Selected product experiences from the kinds of systems we build. Client identities and sensitive information are omitted where required.',
+    'Selected product experiences from the kinds of systems we build. Names and identifying details in the screenshots are replaced with sample values.',
   pendingNote: 'Screenshot pending privacy review. The layout is shown as an outline.',
   proofs: [
     { id: 'staffxp', label: 'Product engineering', name: 'StaffXP', href: '#work-staffxp' },
@@ -114,10 +135,29 @@ export const selectedWork = {
     name: 'StaffXP',
     eyebrow: 'Education / staff experience',
     title: 'A connected workspace for school staff.',
-    desc: 'A connected staff workspace bringing everyday activities, notices, wellbeing, tasks, and operational information into one experience.',
+    desc: 'A staff experience platform bringing everyday activities, notices, wellbeing, tasks, and operational information into one workspace.',
     tags: ['Staff experience', 'Business workflow', 'Role-based platform', 'Integrated operations'],
-    main: { src: null, alt: 'StaffXP staff dashboard', width: 1600, height: 1000 },
-    secondary: { src: null, alt: 'StaffXP sign-in screen', width: 1200, height: 900 },
+    main: {
+      src: '/work/staffxp-dashboard.webp',
+      alt: 'StaffXP staff dashboard with academic calendar, to-do list, notices, quick links, assignments to mark and an AI assistant panel. Sample data.',
+      width: 1869,
+      height: 958,
+    },
+    secondary: {
+      src: '/work/staffxp-sign-in.webp',
+      alt: 'StaffXP sign-in screen with a Sign in with Microsoft button.',
+      width: 1874,
+      height: 954,
+    },
+    // MOTION §13: only UI visible in the screenshot is annotated.
+    hotspots: [
+      { id: 'calendar', label: 'Academic calendar', box: { x: 0.7, y: 34.4, w: 19.1, h: 61.1 } },
+      { id: 'tasks', label: 'To-do list, linked to Microsoft To Do', box: { x: 21.5, y: 34.4, w: 38.2, h: 32.4 } },
+      { id: 'notices', label: 'Notices', box: { x: 21.5, y: 69.4, w: 38.2, h: 30.6 } },
+      { id: 'links', label: 'Quick links, including employee self-service', box: { x: 61.4, y: 34.4, w: 19.1, h: 22.2 } },
+      { id: 'marking', label: 'Assignments to mark', box: { x: 61.4, y: 59.3, w: 19.1, h: 34.1 } },
+      { id: 'assistant', label: 'AI assistant panel', box: { x: 81.9, y: 5.7, w: 17.8, h: 93.5 } },
+    ],
   },
   ess: {
     id: 'work-ess',
@@ -125,66 +165,113 @@ export const selectedWork = {
     eyebrow: 'Enterprise / ESS',
     title: 'Self-service software around the employee.',
     desc: 'A connected employee experience that brings everyday HR actions, workforce information, requests, and self-service workflows into one place.',
-    screen: { src: null, alt: 'ESS employee self-service portal', width: 1600, height: 1000 },
-    // Modules visible in the supplied screenshot (PLAN §8), grouped under the plan's annotations.
-    // `marker` is where the annotation sits on the screen, in % of its width and height; move the
-    // markers when the real screenshot replaces the outline.
+    screen: {
+      src: '/work/ess-portal.webp',
+      alt: 'ESS employee self-service portal: profile, company directory, employment, skills and performance, attendance, rewards, approval delegations, org chart, requests, time off, payslips, tasks and courses. Sample data.',
+      width: 1867,
+      height: 956,
+    },
+    // Modules visible in the screenshot, grouped under the plans' annotations (PLAN §8, MOTION §15).
+    // `marker` anchors the numbered label; `regions` are highlighted together.
     areas: [
-      { id: 'profile', label: 'Employee profile', modules: ['Profile', 'Employment'], marker: { x: 25, y: 17 } },
-      { id: 'requests', label: 'Self-service requests', modules: ['Requests', 'Approval delegations'], marker: { x: 25, y: 41 } },
-      { id: 'workforce', label: 'Workforce information', modules: ['Org chart', 'Rewards & benefits', 'Payslips'], marker: { x: 51, y: 41 } },
-      { id: 'performance', label: 'Skills & performance', modules: ['Skills & performance'], marker: { x: 77, y: 41 } },
-      { id: 'time', label: 'Time and attendance', modules: ['Attendance', 'Time off'], marker: { x: 25, y: 69 } },
-      { id: 'learning', label: 'Learning', modules: ['Courses'], marker: { x: 64, y: 69 } },
+      {
+        id: 'profile',
+        label: 'Employee profile',
+        modules: ['Profile', 'Employment'],
+        marker: { x: 3.5, y: 9 },
+        regions: [{ x: 2.5, y: 7.4, w: 95.2, h: 25.1 }, { x: 2.5, y: 47.3, w: 30.9, h: 6.5 }],
+      },
+      {
+        id: 'requests',
+        label: 'Self-service requests',
+        modules: ['Requests', 'Approval delegations'],
+        marker: { x: 35.7, y: 37 },
+        regions: [{ x: 34.7, y: 35.1, w: 30.8, h: 27.3 }, { x: 2.5, y: 79.7, w: 30.9, h: 6.5 }],
+      },
+      {
+        id: 'workforce',
+        label: 'Workforce information',
+        modules: ['Company directory', 'Org chart', 'Rewards & benefits', 'Payslips'],
+        marker: { x: 3.5, y: 37 },
+        regions: [
+          { x: 2.5, y: 35.1, w: 30.9, h: 10.9 },
+          { x: 2.5, y: 87.9, w: 30.9, h: 6.3 },
+          { x: 2.5, y: 71.7, w: 30.9, h: 6.4 },
+          { x: 34.7, y: 85.7, w: 30.8, h: 8.5 },
+        ],
+      },
+      {
+        id: 'performance',
+        label: 'Skills & performance',
+        modules: ['Skills & performance'],
+        marker: { x: 3.5, y: 57 },
+        regions: [{ x: 2.5, y: 55.4, w: 30.9, h: 6.4 }],
+      },
+      {
+        id: 'time',
+        label: 'Time and attendance',
+        modules: ['Attendance', 'Time off'],
+        marker: { x: 35.7, y: 65.5 },
+        regions: [{ x: 2.5, y: 63.5, w: 30.9, h: 6.4 }, { x: 34.7, y: 63.7, w: 30.8, h: 20.6 }],
+      },
+      {
+        id: 'learning',
+        label: 'Learning',
+        modules: ['Courses', 'Academy courses'],
+        marker: { x: 67.8, y: 53.5 },
+        regions: [{ x: 66.8, y: 51.9, w: 30.9, h: 15.5 }, { x: 66.8, y: 68.7, w: 30.9, h: 25.4 }],
+      },
     ],
   },
 }
 
-// PLAN §10. Technology categories, not a logo wall. `items` name tools only where the live site
-// names them (LIVE service copy); `.NET and APIs` and `React` come from the plan's example list
-// and stay draft until the team confirms it wants to market them.
+// MOTION §17 heading, layers and equation. `items` name tools only where the live site names
+// them (LIVE service copy); `.NET` and `React` come from PLAN §10's example list and stay draft
+// until the team confirms it wants to market them.
 export const engineering = {
-  eyebrow: 'Engineering behind the work',
-  title: 'Built to fit your stack.',
-  categories: [
-    { label: '.NET and APIs', draft: true },
-    { label: 'React', draft: true },
-    { label: 'Cloud', items: 'Azure, AWS, GCP' },
-    { label: 'Enterprise integrations' },
-    { label: 'AI and ML' },
-    { label: 'Data' },
-    { label: 'Automation', items: 'Power Platform, Make, n8n, Retool, Bubble' },
+  eyebrow: 'Engineering capability',
+  title: 'When you need more engineering power.',
+  // Listed top to bottom; the stack assembles from the bottom up.
+  layers: [
+    { id: 'product', label: 'Product' },
+    { id: 'frontend', label: 'Frontend', items: 'React', draft: true },
+    { id: 'backend', label: 'Backend / API', items: '.NET and APIs', draft: true },
+    { id: 'data', label: 'Data' },
+    { id: 'cloud', label: 'Cloud / Integration', items: 'Azure, AWS, GCP' },
+    { id: 'ai', label: 'AI / Automation', items: 'Power Platform, Make, n8n, Retool, Bubble' },
   ],
+  result: 'XionTechs engineering team',
+  equation: ['Your idea', 'XionTechs engineering', 'Production software'],
 }
 
-// PLAN §11. No durations, cadences or prices: none of them are confirmed.
+// MOTION §18 stage copy. No durations, cadences or prices: none of them are confirmed.
 export const howWeWork = {
   eyebrow: 'How we work',
   title: 'From idea to production, one step at a time.',
   steps: [
-    { id: 'discover', title: 'Discover', desc: 'Find the workflow or product opportunity worth solving.' },
-    { id: 'build', title: 'Build', desc: 'Turn the idea into a working pilot or product increment.' },
-    { id: 'integrate', title: 'Integrate', desc: 'Connect data, APIs, systems, users, and operational workflows.' },
-    { id: 'scale', title: 'Scale', desc: 'Add capability, automation, and engineering capacity as the business grows.' },
+    { id: 'discover', title: 'Discover', icon: 'Compass', desc: 'Find the workflow, product, or engineering opportunity worth solving.' },
+    { id: 'build', title: 'Build', icon: 'Hammer', desc: 'Turn the idea into a working pilot or product increment.' },
+    { id: 'integrate', title: 'Integrate', icon: 'Cable', desc: 'Connect systems, users, data, and operational workflows.' },
+    { id: 'scale', title: 'Scale', icon: 'TrendingUp', desc: 'Expand capability, automation, and engineering capacity.' },
   ],
 }
 
-// PLAN §12. Evidence-oriented pillars replace the live site's generic values.
-// ("not just features" in the plan became "not only features": no filler words.)
+// MOTION §19. Evidence-oriented pillars replace the live site's generic values.
 export const whyUs = {
   eyebrow: 'Why us',
   title: 'Why XionTechs',
   pillars: [
-    { title: 'Engineering that understands the business', desc: 'We build around workflows, not only features.' },
-    { title: 'AI where it creates leverage', desc: 'We use agents and automation where they can remove repetitive work or accelerate decisions.' },
-    { title: 'Flexible delivery', desc: 'Work with XionTechs for a focused build, a complete product team, or additional engineering capacity.' },
-    { title: 'Built for integration', desc: 'Connect new software with the systems your business already depends on.' },
+    { title: 'Engineering mindset', icon: 'Wrench', desc: 'We build around workflows, products, and real operating needs.' },
+    { title: 'AI where it helps', icon: 'Sparkles', desc: 'We use AI agents and automation where they create meaningful leverage.' },
+    { title: 'Flexible delivery', icon: 'Users', desc: 'Work with XionTechs for a focused build, complete product development, or additional engineering capacity.' },
+    { title: 'Integration-first', icon: 'Cable', desc: 'Connect new systems to the software and workflows already used by the business.' },
   ],
 }
 
 // PLAN §13. A compact human section; no team photos until real ones are approved.
 export const team = {
-  title: 'A small, senior-minded team focused on getting IT done.',
+  // MOTION §20 heading.
+  title: 'A focused engineering team, built to get IT done.',
   // DRAFT: delivery approach summarised from PLAN §11, pending sign-off.
   body: 'Start with one workflow or one product increment, then add capability, automation and engineering capacity as the business grows.',
   draft: true,
@@ -238,6 +325,9 @@ export const finalCta = {
   primary: { label: 'Talk to Us', href: 'mailto:contact@xiontechs.com?subject=Project%20enquiry' },
   primaryNote: 'Opens an email to contact@xiontechs.com',
   secondary: { label: 'See an Agent Work', href: '#ai-agents' },
+  // MOTION §21: the closing completion sequence, then the slogan with "Done" settling in gold.
+  completion: ['Request', 'Build', 'Automate', 'Done'],
+  slogan: ['Get', 'IT', 'Done'],
 }
 
 // PLACEHOLDER: generic capability labels until the team confirms which Azure services each
