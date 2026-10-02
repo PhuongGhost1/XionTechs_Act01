@@ -100,3 +100,26 @@ describe('StaffXP hotspots', () => {
     for (const h of hotspots) expect(h.label.length, h.id).toBeGreaterThan(0)
   })
 })
+
+describe('spotlightReducer unpinning on touch', () => {
+  it('clears the preview left by the focusing tap when the same item is unpinned', () => {
+    // Tap 1: focus sets the preview, click pins. Tap 2 on the same button: click only.
+    const s = run([
+      { type: 'preview', id: 'tasks' },
+      { type: 'pin', id: 'tasks' },
+      { type: 'pin', id: 'tasks' },
+    ])
+    expect(s.pinned).toBeNull()
+    expect(s.preview).toBeNull()
+    expect(activeSpot(s, ['calendar', 'tasks'])).toBeNull()
+  })
+
+  it('keeps a preview of a different item when another item is unpinned', () => {
+    const s = run([
+      { type: 'pin', id: 'tasks' },
+      { type: 'preview', id: 'notices' },
+      { type: 'pin', id: 'tasks' },
+    ])
+    expect(s.preview).toBe('notices')
+  })
+})

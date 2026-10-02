@@ -19,7 +19,7 @@ const GRID = {
 // links to #ai-agents work before the demo has loaded.
 export default function AiAgents() {
   return (
-    <section id="ai-agents" data-tone="dark" aria-labelledby="ai-agents-title" className="relative isolate bg-paper text-ink">
+    <section id="ai-agents" data-tone="dark" aria-labelledby="ai-agents-title" className="relative isolate overflow-x-clip bg-paper text-ink">
       <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[40rem]" style={GRID} />
       <div className="mx-auto max-w-6xl px-6 py-24 md:py-28">
         <Reveal className="grid grid-cols-1 gap-8 lg:grid-cols-[1.25fr_1fr] lg:items-end lg:gap-16">

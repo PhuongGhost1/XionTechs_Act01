@@ -4,7 +4,7 @@ import EngineeringStrip from './EngineeringStrip'
 import FAQ from './FAQ'
 import HowWeWork from './HowWeWork'
 import SelectedWork from './SelectedWork'
-import { SECTIONS_READY } from './sectionsReady'
+import { SECTIONS_READY, takePendingHashTarget } from './sectionsReady'
 import WhyUs from './WhyUs'
 
 // Everything below the AI Agents section, in its own chunk so the first screen loads less
@@ -13,9 +13,9 @@ export default function BelowFold() {
   useEffect(() => {
     window.dispatchEvent(new Event(SECTIONS_READY))
     // A link straight to one of these sections arrives before they exist; scroll once they do.
-    const id = decodeURIComponent(window.location.hash.slice(1))
-    const target = id && document.getElementById(id)
-    if (target) target.scrollIntoView({ block: 'start' })
+    // Only for the target the browser could not reach on load (see pendingHashTarget).
+    const target = takePendingHashTarget()
+    if (target) target.scrollIntoView({ block: 'start', behavior: 'instant' }) // a jump, like a normal page load
   }, [])
 
   return (

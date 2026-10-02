@@ -170,7 +170,7 @@ export const aiAgents = {
 // PLAN §6–9, MOTION §13–16. Two real product stories plus the Agent Demo as the third proof
 // point (no invented third case study). Screenshots are the team's, sanitized before commit:
 // browser chrome cropped, and personal names, staff IDs, class codes and the client's school
-// names replaced with sample values (PROMPT_LOG, 2026-10-02). No metrics or outcomes, and no
+// names replaced with sample values (PROMPT_LOG.md, "2026-10-02 - 3D / motion redesign"). No metrics or outcomes, and no
 // digits in this copy (npm test). Region boxes are % of the screenshot: { x, y, w, h }.
 export const selectedWork = {
   eyebrow: 'Selected work',

@@ -23,6 +23,11 @@ export function executionLog(workflow, run, rawTick, copy) {
       // Odd ticks are travel ticks; around a retry step they carry the failure and the recovery.
       if (run.retries.has((t + 1) / 2)) push(t, 'error', run.fault ?? copy.failed, titleOf((t + 1) / 2))
       if (run.retries.has((t - 1) / 2)) push(t, 'success', copy.recovered, titleOf((t - 1) / 2))
+      // An outcome counts as completed on the tick after its work tick, when its card turns
+      // active and the run is done, so the log never runs ahead of the graph and status line.
+      for (const id of run.steps[(t - 1) / 2] ?? []) {
+        if (nodes[id].type === 'outcome') push(t, 'done', copy.completed, nodes[id].title)
+      }
       continue
     }
     const i = t / 2
@@ -36,7 +41,7 @@ export function executionLog(workflow, run, rawTick, copy) {
       const node = nodes[id]
       if (node.type === 'trigger') push(t, 'signal', copy.received, node.title)
       else if (node.type === 'router') push(t, 'decision', copy.decided, drill ? undefined : run.branchLabel)
-      else if (node.type === 'outcome') push(t, 'done', copy.completed, node.title)
+      else if (node.type === 'outcome') continue // logged as completed on the next tick
       else if (id === decisionId) {
         push(t, 'approval', copy.waiting)
         if (run.decision) push(t, run.decision === 'approve' ? 'approved' : 'rejected', copy[run.decision === 'approve' ? 'approved' : 'rejected'])

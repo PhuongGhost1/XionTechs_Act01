@@ -159,14 +159,26 @@ export default function HeroSystem() {
       </div>
 
       <div className="mt-4 flex min-h-10 items-start justify-between gap-4">
-        {/* The current step's hint, for sighted visitors; the list above carries all of them. */}
-        <p aria-hidden="true" className="min-w-0 text-sm leading-5 text-muted">
-          {caption && (
-            <span key={shown} className="hs-caption block">
-              <span className="font-medium text-ink">{caption.label}</span> · {caption.hint}
-            </span>
-          )}
-        </p>
+        {/* The current step's hint, for sighted visitors; the list above carries all of them.
+            Under reduced motion nothing steps through the nodes and the pointer tips are off,
+            so every hint is listed instead (MOTION §25: no information depends on animation). */}
+        {reduced ? (
+          <ol aria-hidden="true" className="min-w-0 space-y-1 text-sm leading-5 text-muted">
+            {hero.system.map((n) => (
+              <li key={n.id}>
+                <span className="font-medium text-ink">{n.label}</span> · {n.hint}
+              </li>
+            ))}
+          </ol>
+        ) : (
+          <p aria-hidden="true" className="min-w-0 text-sm leading-5 text-muted">
+            {caption && (
+              <span key={shown} className="hs-caption block">
+                <span className="font-medium text-ink">{caption.label}</span> · {caption.hint}
+              </span>
+            )}
+          </p>
+        )}
         {!reduced && (
           <button
             type="button"

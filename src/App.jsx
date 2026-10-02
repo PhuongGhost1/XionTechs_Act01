@@ -1,16 +1,23 @@
-import { lazy, Suspense } from 'react'
+import { lazy, Suspense, useEffect } from 'react'
 import Nav from './components/Nav'
 import Hero from './components/Hero'
 import Solutions from './components/Solutions'
 import AiAgents from './components/AiAgents'
 import Footer from './components/Footer'
 import SectionErrorBoundary from './components/SectionErrorBoundary'
+import { notePendingHashTarget } from './components/sectionsReady'
 
 // Selected Work through Contact load as one chunk right after the first screen (BelowFold.jsx).
 const BelowFold = lazy(() => import('./components/BelowFold'))
 
 // Section order and light/dark rhythm follow the redesign plan v3 (§1, §17).
 export default function App() {
+  // After the first screen renders, before the lower half exists: note a #fragment the browser
+  // could not reach, so BelowFold can scroll to it once it mounts.
+  useEffect(() => {
+    notePendingHashTarget()
+  }, [])
+
   return (
     <div className="min-h-screen">
       <a

@@ -66,7 +66,10 @@ export default function StoryEss() {
   const lastRef = useRef(-1)
   const reduced = useReducedMotion()
   const narrow = useNarrow()
-  const shown = useInView(figRef, { once: true, rootMargin: '0px 0px -20% 0px' }) || reduced
+  // Keyboard focus can land on a gutter label before the figure has scrolled far enough to
+  // reveal itself; focusing inside it reveals it too, so a focused control is never invisible.
+  const [focusShown, setFocusShown] = useState(false)
+  const shown = useInView(figRef, { once: true, rootMargin: '0px 0px -20% 0px' }) || reduced || focusShown
   const [spot, dispatch] = useReducer(spotlightReducer, spotlightInit)
   const active = activeSpot(spot, reduced ? [] : ids)
   const pending = !story.screen.src
@@ -158,6 +161,7 @@ export default function StoryEss() {
         <div className="rounded-[2rem] border border-line bg-surface/70 p-3 [background-image:linear-gradient(rgb(var(--line)/0.6)_1px,transparent_1px),linear-gradient(90deg,rgb(var(--line)/0.6)_1px,transparent_1px)] [background-size:24px_24px] sm:p-6 xl:px-4 xl:py-14">
           <div
             ref={figRef}
+            onFocusCapture={() => setFocusShown(true)}
             className={`relative xl:mx-56 motion-safe:transition-[opacity,transform] motion-safe:duration-section motion-safe:ease-brand ${
               shown ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
             }`}

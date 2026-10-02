@@ -43,6 +43,15 @@ describe('lower-page sections', () => {
       expect(out).toContain(s.desc)
     }
     expect((out.match(/<svg/g) ?? []).length).toBe(howWeWork.steps.length * 3)
+    // Before any scroll (and without JS motion) the first stage is the current one, and only it.
+    const stages = out.split('<li').slice(1)
+    expect(stages).toHaveLength(howWeWork.steps.length)
+    expect(stages[0]).toContain('scale-110 opacity-100')
+    expect(stages[0]).toContain('scale-x-100')
+    for (const st of stages.slice(1)) {
+      expect(st).toContain('scale-75 opacity-0')
+      expect(st).not.toContain('scale-110 opacity-100')
+    }
   })
 
   it('why us: anchors, four pillars with icons, and the team block', () => {

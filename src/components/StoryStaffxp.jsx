@@ -120,7 +120,7 @@ export default function StoryStaffxp() {
               </div>
 
               <div
-                className={`relative -mt-[6%] ml-[4%] w-[64%] md:absolute md:-bottom-[14%] md:-left-[5%] md:ml-0 md:mt-0 md:w-[30%] ${rise} motion-safe:delay-[350ms] ${
+                className={`relative -mt-[6%] ml-[4%] w-[64%] md:absolute md:-bottom-[14%] md:-left-[2%] md:ml-0 md:mt-0 md:w-[30%] ${rise} motion-safe:delay-[350ms] ${
                   shown ? 'opacity-100 [transform:translate3d(0,0,40px)]' : 'opacity-0 [transform:translate3d(40%,-50%,-260px)]'
                 }`}
               >

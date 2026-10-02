@@ -45,6 +45,15 @@ describe('executionLog', () => {
     expect(texts(executionLog(support, rejected, totalTicks(rejected), LOG))).toContain(LOG.rejected)
   })
 
+  it('logs the outcome as completed only when the run is done, not on its work tick', () => {
+    const run = buildRun(support, 0, { decision: 'approve' })
+    const end = totalTicks(run)
+    expect(texts(executionLog(support, run, end - 1, LOG))).not.toContain(LOG.completed)
+    expect(stateAt(run, end - 1).done).toBe(false)
+    expect(executionLog(support, run, end, LOG).at(-1).text).toBe(LOG.completed)
+    expect(stateAt(run, end).done).toBe(true)
+  })
+
   it('logs a retry drill as working, the fault, retrying, recovered (MOTION §11)', () => {
     const run = buildRun(support, 0, { drillId: 'timeout' })
     const r = [...run.retries][0]

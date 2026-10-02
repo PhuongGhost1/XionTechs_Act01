@@ -16,8 +16,17 @@ export function spotlightReducer(state, action) {
     case 'preview':
       if (action.id === state.preview) return state
       return { ...state, preview: action.id, touched: state.touched || action.id != null }
-    case 'pin':
-      return { ...state, pinned: state.pinned === action.id ? null : action.id, touched: true }
+    case 'pin': {
+      // Unpinning also drops a preview of the same item: on touch browsers the tap that focused
+      // the button set it, and no blur follows a second tap, so it would keep the item lit.
+      const unpin = state.pinned === action.id
+      return {
+        ...state,
+        pinned: unpin ? null : action.id,
+        preview: unpin && state.preview === action.id ? null : state.preview,
+        touched: true,
+      }
+    }
     default:
       return state
   }
