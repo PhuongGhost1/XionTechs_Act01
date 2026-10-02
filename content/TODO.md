@@ -56,6 +56,9 @@ to the deployed URL without one of these being resolved.
 - [ ] **CRM platform: real state model and domain** - the card uses the brief's generic
       "New / In Progress / Pending / Completed" states and no industry. Replace with the real
       product's terminology once the team approves what can be shown.
+- [ ] **AI agent project: real evidence** - the card is badged "Illustrative concept - not a
+      delivered client project". If an approved real AI project (or prototype) exists, replace
+      the mock with its screenshots and reword the badge (e.g. "AI workflow prototype").
 
 Once resolved, edit the corresponding value in `src/content/site.js` and remove the
 `PLACEHOLDER` marker/comment.

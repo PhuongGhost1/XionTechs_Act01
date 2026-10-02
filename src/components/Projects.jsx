@@ -3,11 +3,13 @@ import { ArrowRight, ChevronDown, ChevronRight } from 'lucide-react'
 import { projects, sections } from '../content/site'
 import MockPerformance from './MockPerformance'
 import MockCrm from './MockCrm'
+import MockAgentFlow from './MockAgentFlow'
 
 // One illustrative mock-up per project id, until sanitized real screenshots are supplied.
 const mocks = {
   performance: MockPerformance,
   crm: MockCrm,
+  agent: MockAgentFlow,
 }
 
 function MockFrame({ project }) {
@@ -61,6 +63,11 @@ export default function Projects() {
                     </span>
                   )}
                 </div>
+                {p.badge && (
+                  <p className="mt-3 inline-block rounded-full border border-dashed border-accent px-3 py-1 text-xs font-medium text-accent">
+                    {p.badge}
+                  </p>
+                )}
                 <h3 className="mt-3 text-2xl font-semibold">{p.title}</h3>
                 <p className="mt-3 text-muted">{p.desc}</p>
                 <p className="mt-3 text-sm font-medium text-ink">{p.proofPoints.join(' · ')}</p>

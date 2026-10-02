@@ -527,6 +527,44 @@ export const projects = [
       actions: ['Add note', 'Update status'],
     },
   },
+  {
+    // AI flagship card. No real AI project screenshots or sign-off exist yet, so it is badged as
+    // an illustrative concept and points to the (also illustrative) Agent Demo.
+    id: 'agent',
+    draft: true,
+    badge: 'Illustrative concept — not a delivered client project',
+    eyebrow: 'AI engineering',
+    title: 'AI Agent Workflow Automation',
+    desc: 'AI agents that connect business requests, decisions, integrations, and human approval into one workflow.',
+    tags: ['Agent', 'Automation', 'Integration'],
+    proofPoints: ['Agent orchestration', 'Business integration', 'Human-in-the-loop'],
+    detail:
+      'XionTechs builds AI workflows that go beyond chat — connecting specialized agents, business systems, and human decisions to automate real operational work.',
+    stages: ['Business event', 'Triage agent', 'AI decision', 'Specialized agents', 'Human approval', 'Final outcome'],
+    proves: [
+      'AI agent engineering and orchestration',
+      'API and tool integration',
+      'Human-in-the-loop control for sensitive decisions',
+      'Retry, escalation and run visibility',
+    ],
+    note: 'AI is not just a chatbot. It can become part of the workflow.',
+    cta: 'Explore the workflow',
+    link: { label: 'See an agent work', href: '#demo' },
+    mock: {
+      label: 'Agent workflow view',
+      flow: {
+        trigger: 'Business event',
+        triage: 'Triage agent',
+        decision: 'AI decision',
+        agents: [
+          { title: 'Lookup agent', does: 'Integration' },
+          { title: 'Action agent', does: 'Action' },
+        ],
+        approval: 'Human approval',
+        outcome: 'Final outcome',
+      },
+    },
+  },
 ]
 
 export const faqs = [

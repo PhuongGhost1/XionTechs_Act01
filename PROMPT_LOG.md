@@ -195,4 +195,9 @@ just at the end.
   fields and activity. The brief's AI extension (agent summarising customer context) is marked
   conceptual there, so only its positioning line ("We build the platform - and we can add the
   agent.") is shown; no AI feature is drawn into the CRM mock.
+- Project 03 (AI Agent Workflow Automation): the brief asks to keep real project and illustrative
+  demo distinct and to use the real screenshot as source of truth. There is no real AI project
+  evidence in the repo, so the card carries an explicit "Illustrative concept - not a delivered
+  client project" badge, a static node-flow mock (deliberately lighter than the Agent Demo) and
+  a "See an agent work" link to `#demo`. A test keeps the badge and link in place.
 

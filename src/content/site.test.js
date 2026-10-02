@@ -246,6 +246,12 @@ describe('site content rules', () => {
       for (const p of site.projects) expect(p.draft, p.id).toBe(true)
     })
 
+    it('badges the AI card as an illustrative concept that leads to the demo', () => {
+      const agent = site.projects.find((p) => p.id === 'agent')
+      expect(agent.badge).toMatch(/illustrative/i)
+      expect(agent.link.href).toBe('#demo')
+    })
+
     it('shows no numbers, so no invented metric can slip in', () => {
       const offenders = collectStrings(site.projects).filter((s) => /\d/.test(s))
       expect(offenders).toEqual([])
