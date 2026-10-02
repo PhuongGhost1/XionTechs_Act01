@@ -1,0 +1,184 @@
+/* What We Build band visuals (MOTION §7, §22, §25). Each visual's base styles are its final
+   state; keyframes only run while it enters (data-mode="enter", with "pre" holding the first
+   frame until the band is in view) or replays on hover/focus (data-mode="replay"; the band
+   remounts the visual for each replay). Transform and opacity only, nothing loops.
+   Reduced motion renders data-mode="rest"; the media query at the end is a backstop. */
+
+.sv {
+  --sv-start: 150ms; /* flow: before the signal leaves the first node */
+  --sv-travel: 900ms; /* flow: signal travel, first node to last */
+  --sv-replay: 700ms; /* flow and stack: replay signal travel */
+  --sv-stagger: 130ms; /* stack: between blocks */
+}
+
+.sv[data-mode='pre'] * {
+  animation-play-state: paused !important;
+}
+
+/* The line each visual activates while its band is hovered or holds focus. */
+.sv-path,
+.sv-hot-only {
+  transition: opacity var(--dur-base) var(--ease-brand);
+}
+.sv-path {
+  opacity: 0.45;
+}
+.sv-hot-only {
+  opacity: 0;
+}
+.sv[data-hot='true'] .sv-path,
+.sv[data-hot='true'] .sv-hot-only {
+  opacity: 1;
+}
+/* A replay remounts the visual already hot, so the transition above has no "before"; fade the
+   line in with an animation instead. */
+.sv[data-mode='replay'][data-hot='true'] .sv-path {
+  animation: sv-activate var(--dur-base) var(--ease-brand) both;
+}
+.sv[data-mode='replay'][data-hot='true'] .sv-hot-only {
+  animation: sv-fade-in var(--dur-base) var(--ease-brand) both;
+}
+
+.sv-signal {
+  opacity: 0;
+}
+
+/* Flow: signal travel (A), path drawing (E), node activation (B). */
+.sv-flow-line {
+  transform-box: fill-box;
+  transform-origin: left center;
+}
+.sv-flow-node {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.sv[data-mode='pre'] .sv-flow-line,
+.sv[data-mode='enter'] .sv-flow-line {
+  animation: sv-grow-x var(--sv-travel) linear var(--sv-start) both;
+}
+.sv[data-mode='pre'] .sv-flow-signal,
+.sv[data-mode='enter'] .sv-flow-signal {
+  animation:
+    sv-travel-x var(--sv-travel) linear var(--sv-start) both,
+    sv-blink var(--sv-travel) linear var(--sv-start) both;
+}
+.sv[data-mode='pre'] .sv-flow-node,
+.sv[data-mode='enter'] .sv-flow-node {
+  animation: sv-fade-in var(--dur-base) var(--ease-brand) both;
+  animation-delay: calc(var(--sv-start) + var(--sv-travel) * var(--i) / var(--last));
+}
+.sv[data-mode='replay'] .sv-flow-signal {
+  animation:
+    sv-travel-x var(--sv-replay) linear both,
+    sv-blink var(--sv-replay) linear both;
+}
+.sv[data-mode='replay'] .sv-flow-node {
+  animation: sv-ping var(--dur-base) var(--ease-brand) both;
+  animation-delay: calc(var(--sv-replay) * var(--i) / var(--last));
+}
+
+/* Layers: frames slide from loose offsets into an even cascade (D); a replay parts them a few
+   pixels and lets them settle again. The stage keeps a shallow, static tilt. */
+.sv-stage {
+  transform: rotateX(8deg) rotateY(-10deg);
+}
+.sv-frame {
+  transform: translate3d(0, 0, var(--z));
+}
+.sv[data-mode='pre'] .sv-frame,
+.sv[data-mode='enter'] .sv-frame {
+  animation: sv-align var(--dur-section) var(--ease-brand) both;
+  animation-delay: calc(100ms + var(--i) * 90ms);
+}
+.sv[data-mode='replay'] .sv-frame {
+  animation: sv-spread 600ms var(--ease-brand) both;
+}
+
+/* Stack: blocks assemble top-down (H) while the spine draws (E); a replay sends a signal down
+   the spine and lifts each block as it passes. */
+.sv-stack-spine {
+  transform-box: fill-box;
+  transform-origin: center top;
+}
+.sv-stack-node {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.sv[data-mode='pre'] .sv-stack-spine,
+.sv[data-mode='enter'] .sv-stack-spine {
+  animation: sv-grow-y calc(var(--sv-stagger) * var(--last) + 400ms) linear 250ms both;
+}
+.sv[data-mode='pre'] .sv-stack-slab,
+.sv[data-mode='enter'] .sv-stack-slab {
+  animation: sv-drop 500ms var(--ease-spring) both;
+  animation-delay: calc(100ms + var(--sv-stagger) * var(--i));
+}
+.sv[data-mode='pre'] .sv-stack-tick,
+.sv[data-mode='enter'] .sv-stack-tick {
+  animation: sv-fade-in var(--dur-micro) var(--ease-brand) both;
+  animation-delay: calc(450ms + var(--sv-stagger) * var(--i));
+}
+.sv[data-mode='replay'] .sv-stack-signal {
+  animation:
+    sv-travel-y var(--sv-replay) linear both,
+    sv-blink var(--sv-replay) linear both;
+}
+.sv[data-mode='replay'] .sv-stack-slab {
+  animation: sv-lift var(--dur-base) var(--ease-brand) both;
+  animation-delay: calc(var(--sv-replay) * var(--i) / var(--last));
+}
+.sv[data-mode='replay'] .sv-stack-node {
+  animation: sv-ping var(--dur-base) var(--ease-brand) both;
+  animation-delay: calc(var(--sv-replay) * var(--i) / var(--last));
+}
+
+@keyframes sv-grow-x {
+  from { transform: scaleX(0); }
+}
+@keyframes sv-grow-y {
+  from { transform: scaleY(0); }
+}
+@keyframes sv-travel-x {
+  from { transform: translateX(0); }
+  to { transform: translateX(var(--sv-dist)); }
+}
+@keyframes sv-travel-y {
+  from { transform: translateY(0); }
+  to { transform: translateY(var(--sv-dist)); }
+}
+@keyframes sv-blink {
+  0% { opacity: 0; }
+  12%, 85% { opacity: 1; }
+  100% { opacity: 0; }
+}
+@keyframes sv-fade-in {
+  from { opacity: 0; }
+}
+@keyframes sv-activate {
+  from { opacity: 0.45; }
+}
+@keyframes sv-ping {
+  45% { transform: scale(1.25); }
+}
+@keyframes sv-drop {
+  from { opacity: 0; transform: translateY(-10px); }
+}
+@keyframes sv-lift {
+  40% { transform: translateY(-3px); }
+}
+@keyframes sv-align {
+  from { opacity: 0; transform: translate3d(var(--fx), var(--fy), var(--z)); }
+  50% { opacity: 1; }
+  to { opacity: 1; transform: translate3d(0, 0, var(--z)); }
+}
+@keyframes sv-spread {
+  45% { transform: translate3d(var(--rx), var(--ry), var(--z)); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sv,
+  .sv * {
+    animation: none !important;
+    transition: none !important;
+  }
+}
