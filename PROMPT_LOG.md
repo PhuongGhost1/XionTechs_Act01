@@ -201,3 +201,37 @@ just at the end.
   client project" badge, a static node-flow mock (deliberately lighter than the Agent Demo) and
   a "See an agent work" link to `#demo`. A test keeps the badge and link in place.
 
+
+## 2026-10-02 - redesign plan v3 with the Vercel skills (Danh Nguyen + Claude)
+- Prompt: the team installed Vercel's agent skills and wrote
+  `docs/idea/XionTechs_Landing_Page_Redesign_Plan_v3.md`; redesign the landing page from it.
+- The skills landed in `.agents/skills/` (installed with `npx skills`), which Claude Code does not
+  load as skills, so their SKILL.md files were read directly. `web-design-guidelines` and
+  `writing-guidelines` only point at rule files on GitHub; those were fetched and applied:
+  Title Case buttons/nav, sentence-case headings, `…` and curly quotes, explicit image sizes,
+  `prefers-reduced-motion` variants, autoplay motion under five seconds, no em dashes in new body
+  copy. `vercel-react-best-practices` gave the hover/focus preload of the lazy demo chunk.
+  `vercel-react-view-transitions` was not used: it needs React's `<ViewTransition>`, and the
+  project is on React 18.
+- Work was split into one commit per plan phase on `feat/redesign-v3`, branched from
+  `feat/project-03-ai-agent` so the history shows the three-card attempt the plan replaces.
+- **The plan assumed assets the repo does not have**: it says the StaffXP and ESS screenshots
+  are "available now", but none were committed. Rather than invent screenshot-looking images,
+  each product frame draws a shapes-only layout outline labelled "Screenshot pending privacy
+  review" and switches to a real image when `src` is set. Searching the team's client repos for
+  screenshots was ruled out: plan §19 says they need sanitizing and permission first.
+- **Content governance changed on purpose** (plan §21: no development labels in production):
+  copy now carries a source comment (LIVE, PLAN §n, DRAFT, ILLUSTRATIVE/PLACEHOLDER). DRAFT copy
+  is marked only in dev and with `?review`; anything not real (demo scenarios, pending
+  screenshots) is still labelled for every visitor. CLAUDE.md "Content rules" documents this.
+- Where the plan's copy was adjusted: "See an AI agent work through a *real* business workflow"
+  lost "real" because the scenarios are illustrative; "not just features" became "not only
+  features" (filler word); the em dash in the hero intro became a comma.
+- Removed the three-theme picker (plan phase 1). The old Midnight palette lives on as the
+  `data-tone="dark"` token scope, so the demo's tested contrast carries into the dark sections.
+- Verification: `npm test` (114), lint and build at every commit; main chunk 66.8 kB gzip plus
+  the 10.5 kB lazy demo chunk (budget 71 kB). Browser pass at 1280 px and 375 px: no horizontal
+  overflow, demo approve flow and Explore Further work, no console errors. Mistakes caught on
+  the way: the OG image's logo rendered stretched (flex child) until it got a fixed size; a test
+  rewrite briefly left half of an old test behind and wrote a backspace character instead of
+  `\b` into a regex; Vite's dev server cached a half-written module and needed a restart.

@@ -10,7 +10,6 @@ export const company = {
   name: 'XionTechs',
   legalName: 'XionTech Joint Stock Company', // LIVE; spelling to verify (content/TODO.md)
   logo: { src: '/XionTechs-Logo_s.png', width: 250, height: 46 },
-  tagline: 'Get IT Done',
   // PLAN §0 core positioning.
   positioning: 'XionTechs builds AI-enabled software and provides the engineering capability to get real business work done.',
 }
