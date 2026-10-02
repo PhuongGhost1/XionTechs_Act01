@@ -1,0 +1,112 @@
+/* Closing completion (MOTION §21; effects A, B, J). The root (.fc) carries data-state: 'idle' until
+   the visitor reaches it, then 'done'. The finished state is the default; the idle pose applies only
+   while motion is allowed, so reduced motion always shows the lit steps and the slogan.
+   --n is the step count, --fc-step the time between steps, --i a step's index, --w a word's index.
+   Sequence: the line fills while each step lights as the fill reaches it, then "Get", "IT", and
+   finally "Done" lands. */
+
+.fc {
+  --fc-run: calc((var(--n) - 1) * var(--fc-step));
+  --fc-slogan: calc(var(--fc-run) + 250ms);
+}
+
+.fc-steps {
+  grid-template-columns: repeat(var(--n), minmax(0, 1fr));
+}
+
+/* Runs between the centres of the first and last step (each step is centred in its column). */
+.fc-track {
+  position: absolute;
+  top: calc(0.875rem - 1px); /* centre of the h-7 node */
+  left: calc(100% / (2 * var(--n)));
+  right: calc(100% / (2 * var(--n)));
+  height: 2px;
+  background: rgb(var(--line));
+}
+
+.fc-fill {
+  position: absolute;
+  inset: 0;
+  background: rgb(var(--accent));
+  transform-origin: 0 50%;
+  transition: transform var(--fc-run) linear;
+}
+
+.fc-lit {
+  transition:
+    opacity var(--dur-base) var(--ease-brand),
+    transform var(--dur-base) var(--ease-spring);
+  transition-delay: calc(var(--i, 0) * var(--fc-step));
+}
+
+/* One soft ring as the last step completes; it ends invisible. */
+.fc-pulse {
+  opacity: 0;
+}
+
+.fc-slogan {
+  perspective: 900px;
+}
+
+.fc-word,
+.fc-done {
+  display: inline-block;
+}
+
+.fc-word {
+  transition:
+    opacity 600ms var(--ease-brand),
+    transform 600ms var(--ease-brand);
+  transition-delay: calc(var(--fc-slogan) + var(--w, 0) * 150ms);
+}
+
+.fc-done {
+  transform-origin: 50% 100%;
+  transition:
+    opacity 450ms var(--ease-brand),
+    transform 900ms var(--ease-spring);
+  transition-delay: calc(var(--fc-slogan) + 350ms);
+}
+
+@keyframes fc-pulse {
+  from {
+    opacity: 0.6;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(1.9);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .fc[data-state='idle'] .fc-fill {
+    transform: scaleX(0);
+  }
+  .fc[data-state='idle'] .fc-lit {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+  .fc[data-state='idle'] .fc-word {
+    opacity: 0;
+    transform: translate3d(0, 0.3em, 0);
+  }
+  /* "Done" starts a little above and in front of the page, tilted toward the viewer, and settles. */
+  .fc[data-state='idle'] .fc-done {
+    opacity: 0;
+    transform: translate3d(0, -0.35em, 160px) rotateX(-24deg);
+  }
+  .fc[data-state='done'] .fc-pulse {
+    animation: fc-pulse 900ms var(--ease-brand) forwards;
+    animation-delay: calc(var(--fc-run) + 150ms);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fc-fill,
+  .fc-lit,
+  .fc-word,
+  .fc-done {
+    transition: none;
+  }
+}

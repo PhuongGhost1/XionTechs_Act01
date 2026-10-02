@@ -1,0 +1,84 @@
+/* How We Work timeline (MOTION §18). One line runs from the first stage's node to the last; --tl
+   (0..1, written on scroll by ProcessTimeline) scales the gold fill along it and carries the signal
+   dot. Vertical below lg, horizontal from lg. In both, the stages sit at even intervals along the
+   line (equal grid tracks), so stage i is reached at --tl = i / (n - 1). --n is the stage count. */
+
+.ptl {
+  --node: 2.75rem; /* h-11 */
+  --gap-y: 2.5rem;
+  --gap-x: 2rem;
+}
+
+.ptl-list {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  /* Equal rows keep the nodes evenly spaced on the vertical line. */
+  grid-auto-rows: 1fr;
+  row-gap: var(--gap-y);
+}
+
+.ptl-track {
+  position: absolute;
+  z-index: 0;
+  left: calc(var(--node) / 2 - 1px);
+  width: 2px;
+  top: calc(var(--node) / 2);
+  bottom: calc((100% - (var(--n) - 1) * var(--gap-y)) / var(--n) - var(--node) / 2);
+  background: rgb(var(--line));
+}
+
+.ptl-fill {
+  position: absolute;
+  inset: 0;
+  background: rgb(var(--accent));
+  transform-origin: 50% 0;
+  transform: scaleY(var(--tl, 0));
+}
+
+/* The run box is as long as the track, so translating it by --tl × its own size moves the dot
+   from the first node to the last with transforms only. */
+.ptl-run {
+  position: absolute;
+  inset: 0;
+  transform: translate3d(0, calc(var(--tl, 0) * 100%), 0);
+}
+
+.ptl-dot {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: 0.875rem;
+  height: 0.875rem;
+  margin: -0.4375rem 0 0 -0.4375rem;
+  border-radius: 9999px;
+  background: rgb(var(--accent));
+  box-shadow: 0 0 0 5px rgb(var(--accent) / 0.18);
+}
+
+@media (min-width: 1024px) {
+  .ptl-list {
+    grid-template-columns: repeat(var(--n), minmax(0, 1fr));
+    grid-auto-rows: auto;
+    column-gap: var(--gap-x);
+    row-gap: 0;
+  }
+  .ptl-track {
+    top: calc(var(--node) / 2 - 1px);
+    bottom: auto;
+    height: 2px;
+    width: auto;
+    left: calc(var(--node) / 2);
+    right: calc((100% - (var(--n) - 1) * var(--gap-x)) / var(--n) - var(--node) / 2);
+  }
+  .ptl-fill {
+    transform-origin: 0 50%;
+    transform: scaleX(var(--tl, 0));
+  }
+  .ptl-run {
+    transform: translate3d(calc(var(--tl, 0) * 100%), 0, 0);
+  }
+  .ptl-dot {
+    left: 0;
+    top: 50%;
+  }
+}
