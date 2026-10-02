@@ -204,6 +204,8 @@ export const selectedWork = {
       width: 1874,
       height: 954,
     },
+    // DRAFT: heading for the list of annotated regions under the screens.
+    hotspotsTitle: 'On this screen',
     // MOTION §13: only UI visible in the screenshot is annotated.
     hotspots: [
       { id: 'calendar', label: 'Academic calendar', box: { x: 0.7, y: 34.4, w: 19.1, h: 61.1 } },
@@ -226,28 +228,29 @@ export const selectedWork = {
       width: 1867,
       height: 956,
     },
-    // Modules visible in the screenshot, grouped under the plans' annotations (PLAN §8, MOTION §15).
-    // `marker` anchors the numbered label; `regions` are highlighted together.
+    // DRAFT: heading for the annotation list, and a hint where the screen scrolls sideways.
+    areasTitle: 'Modules on this screen',
+    scrollHint: 'Scroll sideways to see the whole screen.',
+    // Modules visible in the screenshot, grouped under the plans' annotations (PLAN §8, MOTION §15),
+    // numbered top to bottom. `side` is the gutter the numbered label sits in; `marker` is where its
+    // connector ends: on the edge of one of the area's regions facing that gutter, reached through
+    // the screen's margins or its own gaps between cards, so the line crosses no content.
+    // `regions` are highlighted together. src/components/StoryMotion.test.js checks the geometry.
     areas: [
       {
         id: 'profile',
         label: 'Employee profile',
         modules: ['Profile', 'Employment'],
-        marker: { x: 3.5, y: 9 },
+        side: 'right',
+        marker: { x: 97.7, y: 19 },
         regions: [{ x: 2.5, y: 7.4, w: 95.2, h: 25.1 }, { x: 2.5, y: 47.3, w: 30.9, h: 6.5 }],
-      },
-      {
-        id: 'requests',
-        label: 'Self-service requests',
-        modules: ['Requests', 'Approval delegations'],
-        marker: { x: 35.7, y: 37 },
-        regions: [{ x: 34.7, y: 35.1, w: 30.8, h: 27.3 }, { x: 2.5, y: 79.7, w: 30.9, h: 6.5 }],
       },
       {
         id: 'workforce',
         label: 'Workforce information',
         modules: ['Company directory', 'Org chart', 'Rewards & benefits', 'Payslips'],
-        marker: { x: 3.5, y: 37 },
+        side: 'left',
+        marker: { x: 2.5, y: 37 },
         regions: [
           { x: 2.5, y: 35.1, w: 30.9, h: 10.9 },
           { x: 2.5, y: 87.9, w: 30.9, h: 6.3 },
@@ -259,21 +262,33 @@ export const selectedWork = {
         id: 'performance',
         label: 'Skills & performance',
         modules: ['Skills & performance'],
-        marker: { x: 3.5, y: 57 },
+        side: 'left',
+        marker: { x: 2.5, y: 58.6 },
         regions: [{ x: 2.5, y: 55.4, w: 30.9, h: 6.4 }],
       },
       {
         id: 'time',
         label: 'Time and attendance',
         modules: ['Attendance', 'Time off'],
-        marker: { x: 35.7, y: 65.5 },
+        side: 'right',
+        // Through the gap between the Courses and Academy courses cards to the Time off card.
+        marker: { x: 65.5, y: 68 },
         regions: [{ x: 2.5, y: 63.5, w: 30.9, h: 6.4 }, { x: 34.7, y: 63.7, w: 30.8, h: 20.6 }],
+      },
+      {
+        id: 'requests',
+        label: 'Self-service requests',
+        modules: ['Requests', 'Approval delegations'],
+        side: 'left',
+        marker: { x: 2.5, y: 83 },
+        regions: [{ x: 34.7, y: 35.1, w: 30.8, h: 27.3 }, { x: 2.5, y: 79.7, w: 30.9, h: 6.5 }],
       },
       {
         id: 'learning',
         label: 'Learning',
         modules: ['Courses', 'Academy courses'],
-        marker: { x: 67.8, y: 53.5 },
+        side: 'right',
+        marker: { x: 97.7, y: 86 },
         regions: [{ x: 66.8, y: 51.9, w: 30.9, h: 15.5 }, { x: 66.8, y: 68.7, w: 30.9, h: 25.4 }],
       },
     ],
