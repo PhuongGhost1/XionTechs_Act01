@@ -4,18 +4,11 @@
 
 export const company = {
   name: 'XionTechs',
-  legalName: 'XionTech Joint Stock Company',
+  legalName: 'XionTech Joint Stock Company', // LIVE; spelling to verify (content/TODO.md)
   logo: { src: '/XionTechs-Logo_s.png', width: 250, height: 46 },
   tagline: 'Get IT Done',
-  // PLACEHOLDER: new positioning copy written for the redesign, pending team sign-off.
-  // The old live-site headline was "Perfect IT Solutions For Your Business".
-  heroHeadline: 'AI agents and smart platforms that get IT done for your business',
-  heroHeadlineAccent: 'get IT done',
-  // "25+ years" is real (live-site stats). The framing sentence is PLACEHOLDER copy.
-  heroSubline:
-    'From your first AI pilot to connected operations at scale — built by a team with 25+ years of engineering leadership.',
-  // Real: office locations from the live site stats.
-  offices: ['Dallas', 'Ho Chi Minh City', 'Da Nang'],
+  // PLAN §0 core positioning.
+  positioning: 'XionTechs builds AI-enabled software and provides the engineering capability to get real business work done.',
 }
 
 // Source: redesign plan v3 §2. Anchor navigation; the demo is a capability, not a product page.
@@ -29,6 +22,50 @@ export const nav = [
 ]
 
 export const navCta = { label: 'Talk to Us', href: '#contact' }
+
+// PLAN §3. `system` is the hero diagram: Request → AI → Business logic → Existing systems → Human.
+export const hero = {
+  eyebrow: 'Get IT Done',
+  headline: 'AI agents and software engineering for the work that matters.',
+  headlineAccent: 'the work that matters',
+  intro:
+    'XionTechs helps businesses turn ideas, workflows and operational problems into production-ready software, from AI agents to complete engineering teams.',
+  primary: { label: 'See What We Build', href: '#work' },
+  secondary: { label: 'Talk to Us', href: '#contact' },
+  system: ['Request', 'AI', 'Business logic', 'Existing systems', 'Human'],
+  systemLabel: 'Diagram: a request goes to AI, then business logic, then your existing systems, then a person.',
+}
+
+// PLAN §4. Three capability bands instead of three equal cards.
+export const solutions = {
+  eyebrow: 'Solutions',
+  title: 'One engineering partner. From AI to software.',
+  bands: [
+    {
+      id: 'agents',
+      title: 'AI agents',
+      icon: 'Bot',
+      desc: 'Agents that understand requests, make decisions, use tools, and hand off exceptions.',
+      examples: ['Workflow automation', 'AI routing and decisions', 'Tool integration', 'Human-in-the-loop'],
+      link: { label: 'See an Agent Work', href: '#ai-agents', preloadDemo: true },
+    },
+    {
+      id: 'software',
+      title: 'Business software',
+      icon: 'LayoutGrid',
+      desc: 'Business applications designed around the way teams actually work.',
+      examples: ['Enterprise platforms', 'CRM and operations', 'Internal tools', 'Workflow systems'],
+      link: { label: 'See Selected Work', href: '#work' },
+    },
+    {
+      id: 'teams',
+      title: 'Engineering teams',
+      icon: 'Users',
+      desc: 'Product, backend, frontend, cloud, and integration engineers when you need to build.',
+      examples: ['Product engineering', 'Custom application development', 'Cloud and APIs', 'Dedicated engineering capacity'],
+    },
+  ],
+}
 
 export const stats = [
   {
@@ -48,106 +85,6 @@ export const stats = [
     label: 'Tech Stack Expertise',
     desc: 'From AI/ML and cloud solutions to microservices and frontend frameworks, enabling innovative solutions for diverse business challenges.',
     icon: 'Cpu',
-  },
-]
-
-export const services = [
-  {
-    title: 'Product Engineering',
-    desc: 'Transform innovative ideas into market-ready digital products with our comprehensive engineering expertise. We build scalable, user-centered solutions designed for commercial success and market differentiation.',
-    icon: 'Layers',
-  },
-  {
-    title: 'AI-Driven Analytics',
-    desc: 'Transform raw data into actionable intelligence using AI and advanced visualization techniques. Our solutions reveal hidden patterns, optimize operations, and enable data-driven decision-making for measurable business outcomes.',
-    icon: 'BarChart3',
-  },
-  {
-    title: 'Product Co-Creation',
-    desc: 'Accelerate innovation through collaboration that combines your domain knowledge with our technical expertise to develop customized solutions aligned with your specific business objectives.',
-    icon: 'Handshake',
-  },
-  {
-    title: 'Staffing Services',
-    desc: 'Access specialized technology talent when needed with flexible solutions that provide skilled professionals who integrate seamlessly with your team to accelerate project delivery.',
-    icon: 'UserPlus',
-  },
-  {
-    title: 'Custom App Development',
-    desc: 'Develop custom solutions aligned with your unique requirements and modernize legacy systems. Our applications enhance efficiency, eliminate manual processes, and drive competitive advantage.',
-    icon: 'Code2',
-  },
-  {
-    title: 'Low-code Solutions',
-    desc: 'Accelerate transformation with modern platforms like Power Platform, Make, n8n, Retool, and Bubble. Our low-code solutions enable faster deployment, reduce costs, and empower teams to create their own applications.',
-    icon: 'Puzzle',
-  },
-  {
-    title: 'AI-Powered Solutions',
-    desc: 'Harness artificial intelligence to transform operations with intelligent automation, predictive analytics, conversational interfaces, and AI-driven process automation that accelerates growth.',
-    icon: 'BrainCircuit',
-  },
-  {
-    title: 'Cloud Computing',
-    desc: 'Deliver expert solutions on Azure, AWS, and GCP for seamless migration, optimization, and integration of cloud resources. We ensure improved scalability, enhanced security, and optimized operational costs.',
-    icon: 'Cloud',
-  },
-]
-
-// Helper: reuse the real service copy inside the pillars so nothing is duplicated.
-const svc = (title) => {
-  const s = services.find((x) => x.title === title)
-  return { title: s.title, desc: s.desc }
-}
-
-// Three solution pillars. `placeholder: true` renders a visible "Draft copy" tag.
-export const pillars = [
-  {
-    id: 'agentic',
-    title: 'AI Agentic Development',
-    icon: 'Bot',
-    // PLACEHOLDER: no captured site copy describes agentic work. Draft framing only.
-    placeholder: true,
-    outcome: 'PLACEHOLDER — Agents that handle routine work end to end, so your team only sees the exceptions.',
-    bullets: [
-      { title: 'PLACEHOLDER — Workflow agents', desc: 'Draft: agents that read requests, check your systems and act, with a human approving the exceptions.' },
-      { title: 'PLACEHOLDER — Conversational assistants', desc: 'Draft: customer- and staff-facing assistants grounded in your own data.' },
-      svc('AI-Powered Solutions'),
-      svc('AI-Driven Analytics'),
-    ],
-    detail: 'PLACEHOLDER — Confirm with the team: typical agent use cases delivered, integration approach, and how outcomes are measured.',
-  },
-  {
-    id: 'platform',
-    title: 'Smart Agent Platform (IoT)',
-    icon: 'Wifi',
-    // PLACEHOLDER: no captured site copy describes an IoT platform. Draft framing only.
-    placeholder: true,
-    outcome: 'PLACEHOLDER — Connect devices, sensors and systems so agents can watch, decide and act on live operations.',
-    bullets: [
-      { title: 'PLACEHOLDER — Device & sensor connectivity', desc: 'Draft: bring machines, sensors and existing systems onto one platform.' },
-      { title: 'PLACEHOLDER — Live monitoring & alerts', desc: 'Draft: anomalies surfaced and routed to the right person or agent.' },
-      { title: 'PLACEHOLDER — Agent-driven actions', desc: 'Draft: agents that schedule maintenance, reorder parts, or escalate.' },
-    ],
-    detail: 'PLACEHOLDER — Confirm with the team: supported protocols, cloud targets, and reference deployments.',
-  },
-  {
-    id: 'engineering',
-    title: 'Engineering & Cloud',
-    icon: 'Layers',
-    placeholder: false,
-    // Real: summarises the live-site service copy below.
-    outcome: 'The product engineering, cloud and staffing expertise that turns a pilot into a product.',
-    bullets: [
-      svc('Product Engineering'),
-      svc('Custom App Development'),
-      svc('Low-code Solutions'),
-      svc('Cloud Computing'),
-      svc('Staffing Services'),
-      svc('Product Co-Creation'),
-    ],
-    detail:
-      'Delivered on Azure, AWS and GCP with modern platforms like Power Platform, Make, n8n, Retool and Bubble, by a team with 25+ years of leadership experience across three offices.',
   },
 ]
 
@@ -628,11 +565,6 @@ export const testimonials = []
 
 // PLACEHOLDER: redesign section copy, pending team sign-off.
 export const sections = {
-  solutions: {
-    eyebrow: 'Solutions',
-    title: 'Three ways we get IT done',
-    intro: "Start with an agent, connect your operations, and lean on a full engineering team when it's time to build.",
-  },
   demo: {
     eyebrow: 'Agent demo',
     title: 'See what an AI agent does for your business',

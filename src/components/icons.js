@@ -20,6 +20,8 @@ import {
   Factory,
   Compass,
   FlaskConical,
+  LayoutGrid,
+  Users,
 } from 'lucide-react'
 
 export const iconMap = {
@@ -42,4 +44,6 @@ export const iconMap = {
   Factory,
   Compass,
   FlaskConical,
+  LayoutGrid,
+  Users,
 }

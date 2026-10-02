@@ -18,8 +18,23 @@ describe('site content rules', () => {
     expect(offenders).toEqual([])
   })
 
-  it('has three pillars and four roadmap stages', () => {
-    expect(site.pillars.map((p) => p.id)).toEqual(['agentic', 'platform', 'engineering'])
+  it('has the three capability bands from the plan', () => {
+    expect(site.solutions.bands.map((b) => b.id)).toEqual(['agents', 'software', 'teams'])
+    for (const b of site.solutions.bands) expect(b.examples.length, b.id).toBeGreaterThan(0)
+  })
+
+  it('draws the five-step hero system', () => {
+    expect(site.hero.system).toEqual(['Request', 'AI', 'Business logic', 'Existing systems', 'Human'])
+    expect(site.hero.headline).toContain(site.hero.headlineAccent)
+  })
+
+  it('links the nav to in-page anchors only, once each', () => {
+    const hrefs = site.nav.map((n) => n.href)
+    expect(new Set(hrefs).size).toBe(hrefs.length)
+    for (const h of [...hrefs, site.navCta.href]) expect(h.startsWith('#'), h).toBe(true)
+  })
+
+  it('has four roadmap stages', () => {
     expect(site.roadmap.map((r) => r.stage)).toEqual(['Explore', 'Pilot', 'Production', 'Scale'])
   })
 
