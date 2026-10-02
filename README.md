@@ -4,8 +4,9 @@ Landing page rebuild for the internal AI build challenge. See [CLAUDE.md](CLAUDE
 for agent context and rules, [PROMPT_LOG.md](PROMPT_LOG.md) for the prompt/decision
 log, and [content/TODO.md](content/TODO.md) for outstanding real-content items.
 
-The design follows the team's brief in
-[docs/idea/XionTechs_Landing_Page_Redesign_Plan_v3.md](docs/idea/XionTechs_Landing_Page_Redesign_Plan_v3.md).
+The design follows the team's briefs in
+[docs/idea/XionTechs_Landing_Page_Redesign_Plan_v3.md](docs/idea/XionTechs_Landing_Page_Redesign_Plan_v3.md)
+and [docs/idea/XionTechs_Landing_Page_3D_Motion_Automation_Plan.md](docs/idea/XionTechs_Landing_Page_3D_Motion_Automation_Plan.md).
 Add `?review` to any URL to see which copy is still a draft.
 
 ## Stack

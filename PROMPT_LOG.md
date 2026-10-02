@@ -235,3 +235,54 @@ just at the end.
   the way: the OG image's logo rendered stretched (flex child) until it got a fixed size; a test
   rewrite briefly left half of an old test behind and wrote a backspace character instead of
   `\b` into a regex; Vite's dev server cached a half-written module and needed a restart.
+
+## 2026-10-02 - 3D / motion redesign (Danh Nguyen + Claude)
+- Prompt: a new branch implementing `docs/idea/XionTechs_Landing_Page_3D_Motion_Automation_Plan.md`
+  (3D, animation, motion, effects), plus three real screenshots supplied in chat: StaffXP sign-in,
+  StaffXP dashboard and the ESS portal. Branch `feat/motion-3d`, stacked on `feat/redesign-v3`.
+- **Screenshots were sanitized before anything was committed.** They showed a dev Azure URL and
+  the user's browser profile, a teacher's first name, two students' names, class codes, an
+  employee's full name and staff ID, the client's school name and the client's course brand. The
+  browser chrome was cropped; the personal and client data were replaced with sample values
+  ("Alex", "Student A/B", "Grade 4 Math", "Alex Morgan", "10001234", "Sample Academy (Main
+  Campus)", "Academy courses"), redrawn in the product's own typeface (IBM Plex Sans, measured
+  and fitted per line) so the screens still read as the real product. Done in a throwaway Python
+  venv in the session scratchpad; the originals never entered the repo. Test records on the
+  dashboard (calendar items, notices) were left as they are and flagged in `content/TODO.md`,
+  along with permission to publish the screens and product names.
+- Decision: "3D" is shallow CSS 3D (perspective, preserve-3d stages, translateZ layers, pointer
+  parallax) plus SVG, with no WebGL and no motion library. The brief prefers CSS/SVG when it is
+  equivalent and requires the page to work without 3D; it also keeps the bundle near budget and
+  keeps text crisp and accessible.
+- Process: the lead built the foundation (content for every section, motion tokens, hooks,
+  `Reveal`, real screenshots), then a workflow ran five agents in parallel, each in its own git
+  worktree with strict file ownership: hero + header, What We Build, AI demo, Selected Work, and
+  the lower page. The lead merged the five branches (no conflicts), then a second workflow
+  reviewed the merged range through six lenses (accessibility and reduced motion, correctness,
+  performance, plan and content honesty, layout in the browser, tests). Each finding went to
+  three independent skeptics told to refute it; 10 of 13 findings survived (two or more of three
+  confirmed) and were fixed in one commit.
+- Where the AI (or its tooling) got it wrong:
+  - The first workflow's worktrees were created from `main` (an old commit), not from the
+    feature branch. Caught within minutes from `git worktree list`; the run was stopped, the
+    worktrees removed, and the agents' instructions now start with an explicit reset to the base.
+  - After merging, `npm run lint` reported 546 errors: ESLint was linting minified `dist/`
+    output inside the agents' worktrees. Lint now ignores `.claude` and `.agents`.
+  - Merged, the main JS chunk was 77.7 kB gzip, over the 71 kB budget. The lower page now loads
+    as one lazy chunk (main 70.1 kB), which needed a way for the nav's active-section observer
+    and `#fragment` links to find sections that arrive later.
+  - Browser QA found the process timeline's travelling dot widening the page by 540 px at 1280 px
+    (its invisible full-track box is moved with a transform). The section now clips it.
+  - Review-confirmed defects: reduced motion hid five of six hero hints from sighted users; a
+    focused ESS label could be invisible; `/#100%` crashed the lazy half (`decodeURIComponent`);
+    the hash scroll fought scroll restoration; a touch unpin left a highlight stuck; the demo's
+    scaled back plane caused sideways scrolling at 1024 px; the StaffXP sign-in layer was cut at
+    the canvas edge; the log said "Completed" one tick before the graph; one test asserted less
+    than its name claimed.
+  - The deferred hash scroll first used smooth scrolling (inherited from `scroll-behavior:
+    smooth`); in a hidden preview pane it never moved. Deep links now jump, like a normal load.
+- Verification: 303 tests, lint and build pass; main JS 70.1 kB gzip, AI demo chunk 13.0 kB,
+  lower-page chunk 9.8 kB. Browser checks at 375, 1024 and 1280 px: no horizontal overflow, hero
+  loop and pause, approval flow and the advanced unlock, StaffXP tour and ESS annotations, the
+  closing "Get IT Done", deep links to first-screen and lazy sections.
+

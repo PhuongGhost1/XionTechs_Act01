@@ -53,6 +53,11 @@ content. If you add a new section, follow the same pattern.
 - DRAFT copy: AI callouts, team body, FAQ answers; `.NET` / `React` in the engineering strip
 
 ## Environment gotchas
+- Parallel agents in git worktrees (`.claude/worktrees/`): a worktree can start from an older
+  commit, so reset it to the intended base first. If you link `node_modules` into a worktree
+  as a junction, remove the junction (`cmd //c rmdir <worktree>\node_modules`) before
+  `git worktree remove`, or the real `node_modules` can be deleted. Remove merged worktrees:
+  their `dist/` folders otherwise show up in lint.
 - This runs on Windows Git Bash — `lsof` is not available. To free port 5173 (or kill
   a stray dev server), use `netstat -ano | grep ":5173" | grep LISTENING` to find the
   PID, then `taskkill //F //PID <pid>`. A `lsof -ti:PORT | xargs kill` one-liner will
@@ -94,14 +99,33 @@ content. If you add a new section, follow the same pattern.
   carry `{ via: x }` to route around a skipped card. All of it is illustrative and tested in
   `src/content/site.test.js`.
 - The Agent Demo opens in its basic state (one scenario, workflow view, play/pause, the
-  approval moment); scenarios, Agent at work, drills, path replay and the run log sit behind
-  "Explore Further" (plan §5). Don't move advanced controls back into the default view.
+  approval moment, a small execution log); scenarios, Agent at work, drills, path replay and
+  the run log sit behind "Explore What Happens Next", which appears only after the visitor's
+  first decision or a finished run (MOTION §10). Don't move advanced controls back into the
+  default view. Run phases live in `src/workflow/phase.js`, status and log words in
+  `src/workflow/log.js` (both pure and tested); a retry drill needs a one-word `fault`.
 - Selected Work (`selectedWork` in `site.js`) tells two real product stories, StaffXP and ESS,
   with the Agent Demo as the third proof point. Never add an invented third case study.
-  Screens use `ProductFrame`: with `src: null` it draws a shapes-only layout outline and
-  says the screenshot is pending privacy review; set `src` to a file in `public/work/` only
-  after the image is sanitized and approved. ESS markers are % positions; re-place them
-  for the real screenshot.
+  The screenshots in `public/work/` are the team's, sanitized before commit (see PROMPT_LOG,
+  2026-10-02 - 3D / motion redesign). Any new screenshot must be sanitized the same way first:
+  crop browser chrome; replace people's names, IDs, class codes and client/school names with
+  sample values; never commit the original. StaffXP `hotspots` and ESS `regions`/`marker` are %
+  boxes measured on those images (geometry tested in `StoryMotion.test.js`, files in
+  `site.test.js`). `ProductFrame` with `src: null` shows a neutral pending placeholder.
+- Motion (MOTION brief): CSS 3D and SVG only, no WebGL and no motion library. 3D depth stays in
+  the hero and the AI section (small depth in StaffXP and the closing CTA). Use the tokens in
+  `src/index.css` (`--dur-*`, `--ease-brand`, `--ease-spring`, `danger`/`success` colours,
+  `shadow-depth-*`, `perspective-*`, `preserve-3d`), the hooks in `src/hooks/` (`useInView`,
+  `useReducedMotion`, `useScrollProgress`, `usePointer`; scroll/pointer callbacks write CSS
+  variables, never React state per frame) and `Reveal` from `ui.jsx`. Every effect must be one
+  of MOTION §31 A-J, trigger once unless deliberately scroll-linked, stop off screen, and show
+  its final state under reduced motion with no information lost. Loops longer than five
+  seconds need a pause control. Section motion logic lives in pure, tested modules
+  (`HeroSystemLayout.js`, `SolutionsMotion.js`, `StoryMotion.js`, `ProcessProgress.js`).
+- Bundle: the main JS chunk budget is 71 kB gzip. Selected Work through Contact load as one
+  lazy chunk (`BelowFold.jsx`); it fires `SECTIONS_READY` so the nav rebuilds its active-section
+  observer, and `sectionsReady.js` handles a `#fragment` that targets a section not yet loaded.
+  New below-the-fold sections go inside `BelowFold`.
 - Links that lead to the demo call `loadAgentDemo` on hover/focus so the lazy chunk preloads.
 - The team installed Vercel's agent skills in `.agents/skills/`. `web-design-guidelines` and
   `writing-guidelines` fetch their rules from GitHub; new UI and copy follow them (Title Case

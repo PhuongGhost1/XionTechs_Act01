@@ -1,6 +1,7 @@
 # Content still needed before release
 
-The redesign follows `docs/idea/XionTechs_Landing_Page_Redesign_Plan_v3.md`. Items below
+The redesign follows `docs/idea/XionTechs_Landing_Page_Redesign_Plan_v3.md` and the 3D / motion
+brief `docs/idea/XionTechs_Landing_Page_3D_Motion_Automation_Plan.md`. Items below
 are either placeholders shown with a visible label, or DRAFT copy that production visitors
 see unmarked (open any build with `?review` to see the Draft markers). Resolve each one in
 `src/content/site.js`, then tick it here.
@@ -13,16 +14,17 @@ see unmarked (open any build with `?review` to see the Draft markers). Resolve e
       FAQ answers, the AI/IoT pillars, the roadmap durations, the CTA band and the three
       theme-demo case studies no longer appear anywhere.
 
-## Evidence: Selected Work (plan §7–9, §19)
+## Evidence: Selected Work (plan §7–9, MOTION §13–15, §30)
 
-- [ ] **StaffXP screenshots**: sanitized dashboard and sign-in screens (no names, staff IDs,
-      school or client branding). Export as WebP to `public/work/staffxp-dashboard.webp` and
-      `public/work/staffxp-sign-in.webp`, then set `src`, `width` and `height` on
-      `selectedWork.staffxp.main` / `.secondary`.
-- [ ] **ESS screenshot**: sanitized employee portal as `public/work/ess-portal.webp`; set
-      `selectedWork.ess.screen.src` and move each `areas[].marker` onto its module.
-- [ ] **Permission to name the products**: confirm "StaffXP" and "ESS" may appear publicly,
-      and that both count as XionTechs-engineered work.
+- [x] StaffXP dashboard, StaffXP sign-in and ESS portal screenshots added to `public/work/`
+      (2026-10-02), sanitized before commit: browser chrome cropped; teacher, student and
+      employee names, the staff ID, class codes and the client's school and course-brand names
+      replaced with sample values. Originals were never committed.
+- [ ] **Permission to publish**: confirm the project owners allow these sanitized screens, the
+      product names "StaffXP" and "ESS", and the visible product copy on the StaffXP sign-in.
+- [ ] **Test data on the StaffXP dashboard**: calendar items ("Test performance…", "HIDE AND SEEK
+      PART 2") and notices ("Test", "test x") are the dev environment's test records. Consider a
+      screenshot of a seeded demo account instead.
 - [ ] **Story tags**: confirm the four StaffXP tags with the project owner (plan §7).
 
 ## Draft copy to sign off
@@ -33,6 +35,12 @@ see unmarked (open any build with `?review` to see the Draft markers). Resolve e
 - [ ] Engineering strip: confirm `.NET and APIs` and `React` are technologies the company
       wants to market (marked "Confirm" in review mode).
 - [ ] Demo run-log heading (`sections.monitor`).
+- [ ] Hero: node hints for "Request" and "Done", and the pause control labels (`hero.motion`).
+- [ ] Agent demo UI words (`aiAgents.run`: phase chips, status lines, execution-log entries) and
+      the drill fault words "Timeout" / "Offline" (`workflows[].drills[].fault`).
+- [ ] Selected Work list headings: "On this screen", "Modules on this screen", and the hint
+      "Scroll sideways to see the whole screen." (`selectedWork.staffxp` / `.ess`).
+- [ ] Final CTA: accessible name of the completion steps (`finalCta.completionLabel`).
 
 ## Release checklist (plan §21)
 
