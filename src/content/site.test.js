@@ -288,6 +288,16 @@ describe('site content rules', () => {
     })
   })
 
+  it('asks the six buyer questions from the plan, each answered', () => {
+    expect(site.faq.items).toHaveLength(6)
+    for (const f of site.faq.items) expect(f.a.length, f.q).toBeGreaterThan(40)
+  })
+
+  it('keeps four evidence-oriented reasons and no booking promise in the CTA', () => {
+    expect(site.whyUs.pillars).toHaveLength(4)
+    expect(collectStrings(site.finalCta).filter((s) => /book/i.test(s))).toEqual([])
+  })
+
   it('lists technology categories once each, tools only where named', () => {
     const labels = site.engineering.categories.map((c) => c.label)
     expect(new Set(labels).size).toBe(labels.length)

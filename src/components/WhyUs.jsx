@@ -1,68 +1,39 @@
-import { useState } from 'react'
-import { CheckCircle2, Plus } from 'lucide-react'
-import { stats, whoWeAre, whyChooseUs, values } from '../content/site'
-import IconBadge from './IconBadge'
-import { iconMap } from './icons'
+import { team, whyUs } from '../content/site'
+import { DraftMark, SectionHeader } from './ui'
 
+// Plan v3 §12–13: four evidence-oriented reasons, then a compact human section.
 export default function WhyUs() {
-  const [openIndex, setOpenIndex] = useState(0)
-
   return (
-    <section id="why-us" data-tone="dark" className="border-t border-line bg-paper text-ink">
-      <div className="mx-auto max-w-6xl px-6 py-20">
-        <p className="text-xs font-medium uppercase tracking-wide text-ink/60">{whyChooseUs.eyebrow}</p>
-        <h2 className="mt-3 max-w-xl text-3xl md:text-4xl">{whyChooseUs.title}</h2>
-        <p className="mt-4 max-w-xl text-ink/60">{whyChooseUs.body}</p>
+    <section id="why-us" data-tone="dark" aria-labelledby="why-title" className="bg-paper text-ink">
+      <div className="mx-auto max-w-6xl px-6 py-24 md:py-32">
+        <SectionHeader eyebrow={whyUs.eyebrow} title={whyUs.title} titleId="why-title" />
 
-        <dl className="mt-12 grid grid-cols-1 gap-8 border-t border-ink/10 pt-10 sm:grid-cols-3">
-          {stats.map((s) => {
-            const Icon = iconMap[s.icon]
-            return (
-              <div key={s.label} className="group">
-                <IconBadge icon={Icon} size="sm" />
-                <dt className="mt-4 font-display text-3xl">{s.value}</dt>
-                <dd className="mt-1 text-sm font-medium text-ink/70">{s.label}</dd>
-                <dd className="mt-2 text-sm text-ink/60">{s.desc}</dd>
-              </div>
-            )
-          })}
-        </dl>
+        <ol className="mt-16 grid grid-cols-1 gap-x-16 border-t border-line md:grid-cols-2">
+          {whyUs.pillars.map((p, i) => (
+            <li key={p.title} className="border-b border-line py-10">
+              <span className="text-sm tabular-nums text-accent">{String(i + 1).padStart(2, '0')}</span>
+              <h3 className="mt-3 font-display text-2xl leading-snug">{p.title}</h3>
+              <p className="mt-3 max-w-md text-pretty text-muted">{p.desc}</p>
+            </li>
+          ))}
+        </ol>
 
-        <div className="mt-16 grid grid-cols-1 gap-12 lg:grid-cols-2">
+        <div className="mt-20 grid grid-cols-1 gap-12 lg:grid-cols-[1.3fr_1fr] lg:items-end lg:gap-20">
           <div>
-            <p className="text-xs font-medium uppercase tracking-wide text-ink/60">{whoWeAre.eyebrow}</p>
-            <h3 className="mt-3 text-2xl">{whoWeAre.title}</h3>
-            <p className="mt-4 text-ink/60">{whoWeAre.body}</p>
-            <ul className="mt-6 space-y-3">
-              {whoWeAre.bullets.map((b) => (
-                <li key={b} className="flex items-start gap-3 text-sm text-ink/70">
-                  <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-accent" />
-                  {b}
-                </li>
-              ))}
-            </ul>
+            <h3 className="font-display text-3xl leading-tight md:text-4xl">{team.title}</h3>
+            <p className="mt-5 max-w-xl text-pretty text-lg text-muted">
+              {team.body}
+              <DraftMark draft={team.draft} />
+            </p>
           </div>
-
-          <div className="divide-y divide-ink/10 border-y border-ink/10">
-            {values.map((v, i) => {
-              const isOpen = openIndex === i
-              return (
-                <div key={v.title}>
-                  <button
-                    className="group flex w-full items-center justify-between py-5 text-left"
-                    onClick={() => setOpenIndex(isOpen ? -1 : i)}
-                    aria-expanded={isOpen}
-                  >
-                    <span className="text-sm font-semibold uppercase tracking-wide">{v.title}</span>
-                    <Plus
-                      className={`ml-4 h-4 w-4 shrink-0 text-ink/70 transition-transform duration-300 ${isOpen ? 'rotate-45' : ''}`}
-                    />
-                  </button>
-                  {isOpen && <p className="pb-5 text-sm text-ink/60">{v.desc}</p>}
-                </div>
-              )
-            })}
-          </div>
+          <dl className="grid grid-cols-2 gap-8 border-t border-line pt-8 lg:border-l lg:border-t-0 lg:pl-12 lg:pt-0">
+            {team.facts.map((f) => (
+              <div key={f.label} className="flex flex-col-reverse justify-end">
+                <dt className="mt-3 text-sm text-muted">{f.label}</dt>
+                <dd className="font-display text-5xl text-accent">{f.value}</dd>
+              </div>
+            ))}
+          </dl>
         </div>
       </div>
     </section>

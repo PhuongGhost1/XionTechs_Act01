@@ -47,7 +47,7 @@ export default function HowWeWork() {
                   {i < last && (
                     <span aria-hidden="true" className="absolute -bottom-9 left-[11px] top-7 w-px bg-line lg:-right-7 lg:bottom-auto lg:left-7 lg:top-[11px] lg:h-px lg:w-auto">
                       <span
-                        className={`block h-full w-full origin-top bg-accent transition-transform duration-500 ease-out lg:origin-left ${
+                        className={`block h-full w-full origin-top bg-accent transition-transform duration-500 ease-out motion-reduce:transition-none lg:origin-left ${
                           i < upTo ? 'scale-100' : 'scale-y-0 lg:scale-x-0 lg:scale-y-100'
                         }`}
                       />

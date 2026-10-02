@@ -5,8 +5,9 @@ import { useInView } from '../hooks/useInView'
 import { useReducedMotion } from '../hooks/useReducedMotion'
 
 // The hero's "connected system": Request → AI → Business logic → Existing systems → Human.
-// A signal steps from node to node a few times while the hero is on screen, then rests with
-// every node lit. Coordinates are node centres in a 400 × 420 canvas.
+// A signal steps through the nodes once while the hero is on screen (under five seconds, so no
+// pause control is needed), then rests with every node lit. Coordinates are node centres in a
+// 400 × 420 canvas.
 const W = 400
 const H = 420
 const LAYOUT = [
@@ -18,7 +19,7 @@ const LAYOUT = [
 ]
 const STEP_MS = 1100
 const REST_MS = 2400
-const CYCLES = 3
+const CYCLES = 1
 const LAST = LAYOUT.length - 1
 
 const pct = (v, total) => `${(v / total) * 100}%`
@@ -47,7 +48,7 @@ export default function HeroSystem() {
   const packet = nodes[shown]
 
   return (
-    <div ref={ref} role="img" aria-label={hero.systemLabel} className="relative mx-auto aspect-[400/420] w-full max-w-sm lg:max-w-md">
+    <div ref={ref} role="img" aria-label={hero.systemLabel} className="relative mx-auto aspect-[400/420] w-full max-w-[20rem] sm:max-w-sm lg:max-w-md">
       <svg viewBox={`0 0 ${W} ${H}`} className="absolute inset-0 h-full w-full" aria-hidden="true">
         <defs>
           <pattern id="hero-dots" width="16" height="16" patternUnits="userSpaceOnUse">

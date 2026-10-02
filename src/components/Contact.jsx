@@ -1,8 +1,11 @@
 import { useState } from 'react'
 import { Copy, Mail, MapPin, Phone } from 'lucide-react'
-import { contact, ctaBand } from '../content/site'
+import { contact, finalCta } from '../content/site'
+import { loadAgentDemo } from './agentDemoLoader'
 import SocialIcon from './SocialIcon'
+import { Eyebrow, PrimaryLink, SecondaryLink } from './ui'
 
+// Plan v3 §15: the closing call to action, with every way to reach the team beside it.
 export default function Contact() {
   const [copied, setCopied] = useState(false)
 
@@ -12,78 +15,90 @@ export default function Contact() {
       setCopied(true)
       setTimeout(() => setCopied(false), 1500)
     } catch {
-      /* clipboard blocked: the address is still visible as text */
+      /* clipboard blocked: the address is still visible and linked */
     }
   }
 
+  const label = 'flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-muted'
+
   return (
-    <section id="contact" data-tone="dark" className="border-t border-line bg-paper text-ink">
-      <div className="mx-auto grid max-w-6xl grid-cols-1 gap-12 px-6 py-20 lg:grid-cols-2">
-        <div>
-          <p className="text-xs font-medium uppercase tracking-wide text-ink/60">Work with us</p>
-          <h2 className="mt-3 text-3xl md:text-4xl">{ctaBand.title}</h2>
-          <p className="mt-4 max-w-md text-ink/60">{ctaBand.body}</p>
-          <a
-            href={`mailto:${contact.email}`}
-            className="mt-8 inline-flex rounded-full bg-primary px-6 py-3 text-sm font-medium text-primaryInk transition hover:bg-primaryHover"
-          >
-            Book a call
-          </a>
+    <section id="contact" data-tone="dark" aria-labelledby="contact-title" className="bg-paper text-ink">
+      <div className="mx-auto max-w-6xl px-6 py-24 md:py-32">
+        <div className="max-w-3xl">
+          <Eyebrow>{finalCta.eyebrow}</Eyebrow>
+          <h2 id="contact-title" className="mt-4 text-5xl leading-[1.05] md:text-6xl">
+            {finalCta.title}
+          </h2>
+          <p className="mt-6 max-w-xl text-pretty text-lg text-muted">{finalCta.intro}</p>
+          <div className="mt-10 flex flex-wrap items-center gap-3">
+            <PrimaryLink href={finalCta.primary.href}>{finalCta.primary.label}</PrimaryLink>
+            <SecondaryLink href={finalCta.secondary.href} onPointerEnter={loadAgentDemo} onFocus={loadAgentDemo}>
+              {finalCta.secondary.label}
+            </SecondaryLink>
+          </div>
+          <p className="mt-4 text-sm text-muted">{finalCta.primaryNote}</p>
         </div>
 
-        <dl className="grid grid-cols-1 gap-8 sm:grid-cols-2">
+        <dl className="mt-20 grid grid-cols-1 gap-10 border-t border-line pt-10 sm:grid-cols-2 lg:grid-cols-[1.2fr_1fr_1.4fr_auto]">
           <div>
-            <dt className="flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-ink/60">
-              <Mail className="h-4 w-4" /> Email
+            <dt className={label}>
+              <Mail aria-hidden="true" className="h-4 w-4" /> Email
             </dt>
-            <dd className="mt-3 flex items-center gap-2 text-sm">
-              <span>{contact.email}</span>
+            <dd className="mt-3 flex items-center gap-2">
+              <a href={`mailto:${contact.email}`} className="break-all text-ink underline-offset-4 hover:text-primary hover:underline">
+                {contact.email}
+              </a>
               <button
                 type="button"
                 onClick={copyEmail}
                 aria-label="Copy email address"
-                className="rounded-full border border-ink/20 p-1.5 text-ink/70 transition hover:border-accent hover:text-accent"
+                className="rounded-full border border-line p-1.5 text-muted transition-colors hover:border-primary hover:text-primary"
               >
-                <Copy className="h-3.5 w-3.5" />
+                <Copy aria-hidden="true" className="h-3.5 w-3.5" />
               </button>
-              {copied && <span className="text-xs text-accent">Copied</span>}
+              <span aria-live="polite" className="text-xs text-primary">
+                {copied ? 'Copied' : ''}
+              </span>
             </dd>
           </div>
           <div>
-            <dt className="flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-ink/60">
-              <Phone className="h-4 w-4" /> Phone
+            <dt className={label}>
+              <Phone aria-hidden="true" className="h-4 w-4" /> Phone
             </dt>
-            <dd className="mt-3 space-y-1 text-sm">
+            <dd className="mt-3 space-y-1">
               {contact.phones.map((p) => (
-                <a key={p} href={`tel:${p.replace(/\s+/g, '')}`} className="block hover:text-accent">
+                <a key={p} href={`tel:${p.replace(/\s+/g, '')}`} className="block tabular-nums text-ink hover:text-primary">
                   {p}
                 </a>
               ))}
             </dd>
           </div>
-          <div className="sm:col-span-2">
-            <dt className="flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-ink/60">
-              <MapPin className="h-4 w-4" /> Offices
+          <div>
+            <dt className={label}>
+              <MapPin aria-hidden="true" className="h-4 w-4" /> Offices
             </dt>
-            <dd className="mt-3 space-y-2 text-sm text-ink/70">
+            <dd className="mt-3 space-y-2 text-sm text-muted">
               {contact.addresses.map((a) => (
                 <p key={a}>{a}</p>
               ))}
             </dd>
           </div>
-          <div className="flex gap-3 sm:col-span-2">
-            {contact.social.map((s) => (
-              <a
-                key={s.label}
-                href={s.href}
-                target="_blank"
-                rel="noreferrer"
-                aria-label={s.label}
-                className="flex h-9 w-9 items-center justify-center rounded-full border border-ink/20 text-ink/70 transition hover:border-primary hover:bg-primary hover:text-primaryInk"
-              >
-                <SocialIcon name={s.icon} />
-              </a>
-            ))}
+          <div>
+            <dt className={label}>Follow</dt>
+            <dd className="mt-3 flex gap-3">
+              {contact.social.map((s) => (
+                <a
+                  key={s.label}
+                  href={s.href}
+                  target="_blank"
+                  rel="noreferrer"
+                  aria-label={`${s.label} (opens in a new tab)`}
+                  className="flex h-10 w-10 items-center justify-center rounded-full border border-line text-muted transition-colors hover:border-primary hover:bg-primary hover:text-primaryInk"
+                >
+                  <SocialIcon name={s.icon} />
+                </a>
+              ))}
+            </dd>
           </div>
         </dl>
       </div>

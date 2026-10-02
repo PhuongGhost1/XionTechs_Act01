@@ -1,17 +1,16 @@
 import Nav from './components/Nav'
 import Hero from './components/Hero'
 import Solutions from './components/Solutions'
-import EngineeringStrip from './components/EngineeringStrip'
-import WhyUs from './components/WhyUs'
-import HowWeWork from './components/HowWeWork'
+import AiAgents from './components/AiAgents'
 import SelectedWork from './components/SelectedWork'
+import EngineeringStrip from './components/EngineeringStrip'
+import HowWeWork from './components/HowWeWork'
+import WhyUs from './components/WhyUs'
 import FAQ from './components/FAQ'
 import Contact from './components/Contact'
 import Footer from './components/Footer'
-import AiAgents from './components/AiAgents'
 
-// Testimonials.jsx is intentionally not rendered: the `testimonials` array is empty until
-// the team supplies real client quotes (see content/TODO.md).
+// Section order and light/dark rhythm follow the redesign plan v3 (§1, §17).
 export default function App() {
   return (
     <div className="min-h-screen">

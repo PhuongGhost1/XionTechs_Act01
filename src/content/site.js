@@ -1,6 +1,10 @@
-// Content sourced from the live xiontechs.com homepage (screenshots + HTML captured 2026-09-22),
-// unless marked PLACEHOLDER. Anything marked PLACEHOLDER must be replaced with real data before
-// demo day (see content/TODO.md).
+// Page copy. Every value comes from one of these sources (see CLAUDE.md, "Content rules"):
+//   LIVE         the live xiontechs.com site, captured 2026-09-22
+//   PLAN §n      the team's redesign brief, docs/idea/XionTechs_Landing_Page_Redesign_Plan_v3.md
+//   DRAFT        written for the redesign from LIVE / PLAN material, pending team sign-off;
+//                flagged `draft: true` and marked on the page in development and with `?review`
+//   ILLUSTRATIVE / PLACEHOLDER   not real; always labelled on the page for every visitor
+// Open items live in content/TODO.md.
 
 export const company = {
   name: 'XionTechs',
@@ -166,26 +170,76 @@ export const howWeWork = {
   ],
 }
 
-export const stats = [
-  {
-    value: '25+',
-    label: 'Years of Leadership Experience',
-    desc: 'Our leadership team brings decades of expertise in IT services and product engineering across multiple industries and technology transformations.',
-    icon: 'Award',
-  },
-  {
-    value: '3',
-    label: 'Strategic Office Locations',
-    desc: 'With presence in Dallas (USA), Ho Chi Minh City and Da Nang (Vietnam) to serve clients 24/7 across global time zones with seamless collaboration.',
-    icon: 'MapPin',
-  },
-  {
-    value: '20+',
-    label: 'Tech Stack Expertise',
-    desc: 'From AI/ML and cloud solutions to microservices and frontend frameworks, enabling innovative solutions for diverse business challenges.',
-    icon: 'Cpu',
-  },
-]
+// PLAN §12. Evidence-oriented pillars replace the live site's generic values.
+// ("not just features" in the plan became "not only features": no filler words.)
+export const whyUs = {
+  eyebrow: 'Why us',
+  title: 'Why XionTechs',
+  pillars: [
+    { title: 'Engineering that understands the business', desc: 'We build around workflows, not only features.' },
+    { title: 'AI where it creates leverage', desc: 'We use agents and automation where they can remove repetitive work or accelerate decisions.' },
+    { title: 'Flexible delivery', desc: 'Work with XionTechs for a focused build, a complete product team, or additional engineering capacity.' },
+    { title: 'Built for integration', desc: 'Connect new software with the systems your business already depends on.' },
+  ],
+}
+
+// PLAN §13. A compact human section; no team photos until real ones are approved.
+export const team = {
+  title: 'A small, senior-minded team focused on getting IT done.',
+  // DRAFT: delivery approach summarised from PLAN §11, pending sign-off.
+  body: 'Start with one workflow or one product increment, then add capability, automation and engineering capacity as the business grows.',
+  draft: true,
+  // LIVE stats, worded so the company itself is not read as decades old (PLAN §13). Both are on
+  // the release checklist in content/TODO.md.
+  facts: [
+    { value: '25+', label: 'Years of leadership experience in IT services and product engineering, across our leadership team' },
+    { value: '3', label: 'Offices: Dallas, Ho Chi Minh City and Da Nang' },
+  ],
+}
+
+// PLAN §14 questions. DRAFT answers, written from the plan's positioning and the live site's
+// service copy, pending team sign-off.
+export const faq = {
+  eyebrow: 'FAQ',
+  title: 'Questions buyers ask before they start.',
+  draft: true,
+  items: [
+    {
+      q: 'What kinds of AI agents can XionTechs build?',
+      a: 'Agents that take a request, work out what it needs, and act on it through your systems: triaging support requests, preparing reorders for approval, or scheduling maintenance. Each agent is built around one workflow rather than a general chatbot.',
+    },
+    {
+      q: 'Can an agent connect to our existing systems?',
+      a: 'Yes. Agents work through the APIs and integrations your systems already offer, so they read and update the same data your team uses. Where a system has no API, the integration is planned with you before anything is built.',
+    },
+    {
+      q: 'Do you also provide traditional software engineering?',
+      a: 'Yes. Alongside AI work, XionTechs builds business software: product engineering, custom applications, cloud and integration work, and dedicated engineering capacity for your team.',
+    },
+    {
+      q: 'Can we start with a small pilot?',
+      a: 'Yes. You can start with one workflow or one product increment and expand once you have seen it working with your own data and people.',
+    },
+    {
+      q: 'How do you keep humans in control of important decisions?',
+      a: 'Agents stop at the steps you mark as needing approval and wait for a person to approve or reject. You can try this in the agent demo above, where you make the approval decision.',
+    },
+    {
+      q: 'Can you work with an existing engineering team?',
+      a: 'Yes. XionTechs can add engineers to your team, take ownership of one part of the product, or build alongside your developers.',
+    },
+  ],
+}
+
+// PLAN §15. "Talk to Us" opens an email; there is no booking flow, so nothing says "book".
+export const finalCta = {
+  eyebrow: 'Get IT Done',
+  title: 'What would you build next?',
+  intro: 'Tell us about the workflow, product, or engineering gap you’re trying to solve.',
+  primary: { label: 'Talk to Us', href: 'mailto:contact@xiontechs.com?subject=Project%20enquiry' },
+  primaryNote: 'Opens an email to contact@xiontechs.com',
+  secondary: { label: 'See an Agent Work', href: '#ai-agents' },
+}
 
 // PLACEHOLDER: generic capability labels until the team confirms which Azure services each
 // step runs on (see content/TODO.md). Rendered with "draft" styling.
@@ -381,84 +435,7 @@ export const agentJourneys = [
   },
 ]
 
-export const whoWeAre = {
-  eyebrow: 'Who We Are',
-  title: 'We Deliver Consumer-Centric Tech Solutions.',
-  body: "XionTechs specializes in delivering consumer-centric technology solutions that empower businesses to thrive in today's digital landscape. Our client-focused approach combines cutting-edge technical expertise with deep industry knowledge, enabling us to create tailored solutions that drive measurable results and sustainable growth.",
-  bullets: [
-    'Identify growth opportunities and expand market presence',
-    'Enhance operational efficiency and reduce waste',
-    'Make informed decisions based on data-driven insights',
-  ],
-  badge: { value: '25', label: 'Years of experience in IT Development Industry' },
-}
-
-export const whyChooseUs = {
-  eyebrow: 'Why Choose Us',
-  title: 'Our Priority, Our Commitment, Our Solutions',
-  body: 'Choose XionTechs for integrated solutions, industry experience, and metric-driven delivery. We bring ideas to life through collaborative creation and a "Get IT Done" attitude.',
-}
-
-export const values = [
-  {
-    title: 'Client Centricity Focus',
-    desc: 'XionTechs emphasizes a client-first approach, focusing on providing exceptional experiences and valuable outcomes.',
-  },
-  {
-    title: 'Integrity & Ethical Standards',
-    // PLACEHOLDER: the live site shows this as a collapsed accordion item with no body text visible.
-    desc: 'PLACEHOLDER — confirm the real supporting copy for this value.',
-  },
-  {
-    title: 'High Quality Delivery',
-    // PLACEHOLDER: same as above — collapsed on the live site, body text not captured.
-    desc: 'PLACEHOLDER — confirm the real supporting copy for this value.',
-  },
-]
-
-// PLACEHOLDER: redesign copy, pending team sign-off. The live-site CTA read
-// "We Make Awesome IT Services For Your Newly Business".
-export const ctaBand = {
-  title: 'Ready to explore your first agent?',
-  body: "Tell us about one workflow that eats your team's time. We'll come back with what an agent could do about it.",
-}
-
-export const faqs = [
-  {
-    q: 'How can we help your business?',
-    a: 'XionTechs offers digital product engineering, co-creation, and staffing services. They provide skilled resources and an integrated platform to bring your product ideas to life.',
-  },
-  {
-    q: "What are XionTechs' advantages?",
-    // PLACEHOLDER: collapsed on the live site, body text not captured.
-    a: 'PLACEHOLDER — confirm the real answer copy.',
-  },
-  {
-    q: 'How is the working process simplified?',
-    // PLACEHOLDER: collapsed on the live site, body text not captured.
-    a: 'PLACEHOLDER — confirm the real answer copy.',
-  },
-]
-
-export const footerBlurb =
-  'We deliver exceptional client experiences with metric-driven results, collaborative creation, and industry expertise, leveraging AI techniques and agile methods to bring innovative solutions and outstanding results to clients.'
-
-export const footerServiceLinks = [
-  'Product Engineering',
-  'Custom Software',
-  'Product Co-Creation',
-  'AI/ML Solutions',
-  'Staffing Services',
-]
-
-export const footerCompanyLinks = [
-  'About Us',
-  'Support Center',
-  'Privacy Policy',
-  'Terms of Service',
-  'Contact us',
-]
-
+// LIVE contact details (office locations are on the release checklist in content/TODO.md).
 export const contact = {
   phones: ['+1 469 322 9899', '+84 908 107 552'],
   email: 'contact@xiontechs.com',
@@ -472,14 +449,7 @@ export const contact = {
   ],
 }
 
-// No testimonials section appears anywhere on the live homepage (confirmed via full-page
-// screenshots) — the "testimonials" markup found in the raw HTML during initial extraction is
-// unrendered leftover WordPress/Elementor theme-demo content (image filenames like
-// testi_2_1.png, a "CTO of Portfolio" title, never actually displayed to visitors). We do not
-// carry it over. This section stays empty/placeholder until the team has real client quotes.
-export const testimonials = []
-
-// PLACEHOLDER: redesign section copy, pending team sign-off.
+// DRAFT: heading for the demo's illustrative run log (shown under Explore Further).
 export const sections = {
   monitor: {
     title: 'Agents are watched, not left alone.',
