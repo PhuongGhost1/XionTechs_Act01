@@ -1,131 +1,243 @@
-import { useEffect, useRef, useState } from 'react'
-import { BrainCircuit, Database, Inbox, UserCheck, Workflow } from 'lucide-react'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { BrainCircuit, Check, CircleCheck, Database, GitBranch, Inbox, Pause, Play, UserRound } from 'lucide-react'
 import { hero } from '../content/site'
 import { useInView } from '../hooks/useInView'
+import { usePointer } from '../hooks/usePointer'
 import { useReducedMotion } from '../hooks/useReducedMotion'
+import { useScrollProgress } from '../hooks/useScrollProgress'
+import {
+  W,
+  H,
+  NODES,
+  EDGES,
+  STEPS,
+  FINAL_STEP,
+  nodeState,
+  arrivesBySignal,
+  edgeState,
+  focusAt,
+  flattenAt,
+  nodePoint,
+  edgePath,
+  nearestNode,
+} from './HeroSystemLayout'
+import './HeroSystem.css'
 
-// The hero's "connected system": Request → AI → Business logic → Existing systems → Human.
-// A signal steps through the nodes once while the hero is on screen (under five seconds, so no
-// pause control is needed), then rests with every node lit. Coordinates are node centres in a
-// 400 × 420 canvas.
-const W = 400
-const H = 420
-const LAYOUT = [
-  { x: 96, y: 58, Icon: Inbox },
-  { x: 282, y: 128, Icon: BrainCircuit, core: true },
-  { x: 118, y: 212, Icon: Workflow },
-  { x: 278, y: 294, Icon: Database },
-  { x: 132, y: 366, Icon: UserCheck },
-]
-const STEP_MS = 1100
-const REST_MS = 2400
-const CYCLES = 1
-const LAST = LAYOUT.length - 1
+// The hero's connected system (MOTION §5): request → AI agent → decision → business system (with
+// the human judgment branch) → done, as a shallow CSS 3D scene. Geometry and the loop timeline
+// live in HeroSystemLayout.js; motion and states are CSS (HeroSystem.css). React state is one
+// step counter and a pause flag; pointer, proximity and scroll write to the DOM directly.
+
+const ICONS = { request: Inbox, agent: BrainCircuit, decision: GitBranch, system: Database, human: UserRound, done: CircleCheck }
+const ARRIVE_MS = 460 // a node lights once the signal travelling to it has arrived
+
+// Without preserve-3d the same system renders flat, with the same content (MOTION §24).
+const SUPPORTS_3D =
+  typeof CSS !== 'undefined' && typeof CSS.supports === 'function' && CSS.supports('transform-style', 'preserve-3d')
 
 const pct = (v, total) => `${(v / total) * 100}%`
+const fixed = (v) => v.toFixed(3)
+const [AGENT_X, AGENT_Y] = nodePoint('agent', 0)
 
 export default function HeroSystem() {
-  const ref = useRef(null)
+  const rootRef = useRef(null)
+  const viewRef = useRef(null)
+  const stageRef = useRef(null)
+  const flatRef = useRef(0)
+  const nearRef = useRef(null)
+
   const reduced = useReducedMotion()
-  const inView = useInView(ref, { threshold: 0.3 })
+  const inView = useInView(rootRef, { threshold: 0.25 })
   const [step, setStep] = useState(0)
-  const [cycle, setCycle] = useState(0)
-  const finished = reduced || cycle >= CYCLES
-  const shown = finished ? LAST : step
+  const [paused, setPaused] = useState(false)
+  const playing = !reduced && !paused && inView
+  const shown = reduced ? FINAL_STEP : step
 
+  // The automation loop: one step value, advanced only while on screen and not paused.
   useEffect(() => {
-    if (finished || !inView) return
-    const atEnd = step === LAST
-    const id = setTimeout(() => {
-      if (!atEnd) return setStep((s) => s + 1)
-      setCycle((c) => c + 1)
-      setStep(0)
-    }, atEnd ? REST_MS : STEP_MS)
+    if (!playing) return
+    const id = setTimeout(() => setStep((s) => (s + 1) % STEPS.length), STEPS[step].ms)
     return () => clearTimeout(id)
-  }, [finished, inView, step])
+  }, [playing, step])
 
-  const nodes = LAYOUT.map((n, i) => ({ ...n, label: hero.system[i].label }))
-  const packet = nodes[shown]
+  // Scrolling away settles the system into a straight workflow: --flat drives the CSS, and the
+  // connector curves are redrawn to follow the nodes.
+  const applyFlat = useCallback((flat) => {
+    const stage = stageRef.current
+    if (!stage) return
+    flatRef.current = flat
+    stage.style.setProperty('--flat', fixed(flat))
+    const paths = Object.fromEntries(EDGES.map((e) => [e.id, edgePath(e, flat)]))
+    stage.querySelectorAll('path[data-edge]').forEach((p) => p.setAttribute('d', paths[p.dataset.edge]))
+    const orbit = stage.querySelector('[data-orbit]')
+    if (orbit) {
+      const [x, y] = nodePoint('agent', flat)
+      orbit.setAttribute('cx', x.toFixed(1))
+      orbit.setAttribute('cy', y.toFixed(1))
+      orbit.setAttribute('opacity', fixed(1 - flat))
+    }
+  }, [])
+
+  const onScroll = useCallback(
+    (p) => {
+      const flat = flattenAt(p)
+      const delta = Math.abs(flat - flatRef.current)
+      if (delta > 0.001 || (delta > 0 && (flat === 0 || flat === 1))) applyFlat(flat)
+    },
+    [applyFlat],
+  )
+  useScrollProgress(rootRef, onScroll, { enabled: !reduced })
+  useEffect(() => {
+    if (reduced) applyFlat(0)
+  }, [reduced, applyFlat])
+
+  // Pointer parallax and proximity: the stage tilts a few degrees and the nearest node lifts and,
+  // after a short delay, shows its hint (CSS). usePointer reports exactly (0, 0) on leave.
+  const onPointer = useCallback((x, y) => {
+    const stage = stageRef.current
+    if (!stage) return
+    stage.style.setProperty('--px', fixed(x))
+    stage.style.setProperty('--py', fixed(y))
+    const near = x === 0 && y === 0 ? null : nearestNode(x, y, flatRef.current)
+    if (near === nearRef.current) return
+    nearRef.current = near
+    stage.querySelectorAll('[data-node]').forEach((el) => {
+      if (el.dataset.node === near) el.dataset.near = 'true'
+      else delete el.dataset.near
+    })
+  }, [])
+  const pointerOn = SUPPORTS_3D && !reduced
+  usePointer(viewRef, onPointer, { enabled: pointerOn })
+  useEffect(() => {
+    if (!pointerOn) onPointer(0, 0)
+  }, [pointerOn, onPointer])
+
+  const focus = focusAt(shown)
+  const caption = focus && hero.system.find((n) => n.id === focus)
 
   return (
-    <div ref={ref} role="img" aria-label={hero.systemLabel} className="relative mx-auto aspect-[400/420] w-full max-w-[20rem] sm:max-w-sm lg:max-w-md">
-      <svg viewBox={`0 0 ${W} ${H}`} className="absolute inset-0 h-full w-full" aria-hidden="true">
-        <defs>
-          <pattern id="hero-dots" width="16" height="16" patternUnits="userSpaceOnUse">
-            <circle cx="1" cy="1" r="1" className="fill-line" />
-          </pattern>
-          <radialGradient id="hero-fade">
-            <stop offset="55%" stopColor="white" />
-            <stop offset="100%" stopColor="white" stopOpacity="0" />
-          </radialGradient>
-          <mask id="hero-mask">
-            <rect width={W} height={H} fill="url(#hero-fade)" />
-          </mask>
-        </defs>
-        <rect width={W} height={H} fill="url(#hero-dots)" mask="url(#hero-mask)" />
-        <circle cx={nodes[1].x} cy={nodes[1].y} r="74" fill="none" strokeWidth="1" className="stroke-accent/25" />
+    <figure
+      ref={rootRef}
+      className="hs relative mx-auto w-full max-w-[21rem] sm:max-w-sm lg:max-w-[28rem]"
+      data-mode={SUPPORTS_3D ? '3d' : 'flat'}
+      data-motion={reduced ? 'reduce' : 'full'}
+      data-playing={playing ? 'true' : 'false'}
+    >
+      <figcaption className="sr-only">{hero.systemLabel}</figcaption>
+      <ol className="sr-only">
+        {hero.system.map((n) => (
+          <li key={n.id}>
+            {n.label}: {n.hint}
+          </li>
+        ))}
+      </ol>
 
-        {/* AI also reads the existing systems directly. */}
-        <line x1={nodes[1].x} y1={nodes[1].y} x2={nodes[3].x} y2={nodes[3].y} strokeWidth="1.5" strokeDasharray="3 5" className="stroke-muted/50" />
-
-        {nodes.slice(1).map((n, i) => {
-          const from = nodes[i]
-          return (
-            <g key={n.label}>
-              <line x1={from.x} y1={from.y} x2={n.x} y2={n.y} strokeWidth="1.5" className="stroke-line" />
-              <line
-                x1={from.x}
-                y1={from.y}
-                x2={n.x}
-                y2={n.y}
-                strokeWidth="2"
-                className="stroke-accent transition-opacity duration-500"
-                style={{ opacity: shown > i ? 1 : 0 }}
-              />
-            </g>
-          )
-        })}
-
-        {!reduced && (
-          <circle
-            r="5"
-            className="fill-accent"
-            style={{ transform: `translate(${packet.x}px, ${packet.y}px)`, transition: `transform ${STEP_MS - 300}ms ease-in-out` }}
-          />
-        )}
-      </svg>
-
-      {nodes.map((n, i) => {
-        const { x, y, label, core } = n
-        const Icon = n.Icon
-        const current = i === shown && !finished
-        const lit = i <= shown
-        return (
-          <div
-            key={label}
-            className="absolute -translate-x-1/2 -translate-y-1/2"
-            style={{ left: pct(x, W), top: pct(y, H) }}
-          >
-            <span
-              aria-hidden="true"
-              className="absolute -inset-1.5 rounded-full ring-4 ring-accent/25 transition-opacity duration-300"
-              style={{ opacity: current ? 1 : 0 }}
-            />
-            <span
-              className={`relative flex items-center gap-2 whitespace-nowrap rounded-full border px-3.5 py-2 text-sm font-medium shadow-sm ${
-                core ? 'border-primary bg-primary text-primaryInk' : 'border-line bg-surface text-ink'
-              }`}
-            >
-              <Icon
-                aria-hidden="true"
-                strokeWidth={1.75}
-                className={`h-4 w-4 transition-colors duration-300 ${core ? '' : lit ? 'text-accent' : 'text-muted'}`}
-              />
-              {label}
-            </span>
+      <div ref={viewRef} aria-hidden="true" className="hs-view relative aspect-square w-full select-none">
+        <div className="hs-camera absolute inset-0">
+          <div ref={stageRef} className="hs-stage absolute inset-0">
+            <div className="hs-grid" />
+            <svg viewBox={`0 0 ${W} ${H}`} className="hs-wires absolute inset-0 h-full w-full overflow-visible">
+              <circle data-orbit="" cx={AGENT_X} cy={AGENT_Y} r="70" className="hs-orbit" />
+              {EDGES.map((e) => {
+                const d = edgePath(e, 0)
+                return (
+                  <g key={e.id} className={e.judgment ? 'hs-edge is-judgment' : 'hs-edge'} data-state={edgeState(e, shown)}>
+                    <path data-edge={e.id} d={d} className="hs-wire" />
+                    <g data-tone="dark">
+                      <path data-edge={e.id} d={d} className="hs-lit" pathLength={e.judgment ? undefined : 100} />
+                      <path data-edge={e.id} d={d} className="hs-pulse" pathLength={100} />
+                    </g>
+                  </g>
+                )
+              })}
+            </svg>
+            {hero.system.map((n, i) => (
+              <SystemNode key={n.id} node={n} index={i} step={shown} />
+            ))}
           </div>
-        )
-      })}
+        </div>
+      </div>
+
+      <div className="mt-4 flex min-h-10 items-start justify-between gap-4">
+        {/* The current step's hint, for sighted visitors; the list above carries all of them. */}
+        <p aria-hidden="true" className="min-w-0 text-sm leading-5 text-muted">
+          {caption && (
+            <span key={shown} className="hs-caption block">
+              <span className="font-medium text-ink">{caption.label}</span> · {caption.hint}
+            </span>
+          )}
+        </p>
+        {!reduced && (
+          <button
+            type="button"
+            onClick={() => setPaused((p) => !p)}
+            aria-label={paused ? hero.motion.play : hero.motion.pause}
+            className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-ink/20 bg-surface text-ink transition-colors duration-micro hover:border-primary hover:text-primary"
+          >
+            {paused ? <Play aria-hidden="true" className="h-4 w-4" /> : <Pause aria-hidden="true" className="h-4 w-4" />}
+          </button>
+        )}
+      </div>
+    </figure>
+  )
+}
+
+const ICON_SIZE = 'h-3.5 w-3.5 sm:h-4 sm:w-4'
+
+function SystemNode({ node, index, step }) {
+  const { id, label, hint, core } = node
+  const { pose, line, depth, tip } = NODES[id]
+  const Icon = ICONS[id]
+  const size = core
+    ? 'gap-1.5 px-3 py-2 font-semibold sm:gap-2 sm:px-4 sm:py-2.5'
+    : 'gap-1.5 px-2.5 py-1.5 font-medium sm:gap-2 sm:px-3.5 sm:py-2'
+  const tone = core ? 'border-primary bg-primary text-primaryInk' : 'border-line bg-surface text-ink'
+  const shadow = depth >= 0.7 ? 'shadow-depth-2' : 'shadow-depth-1'
+
+  return (
+    <div className="hs-wrap" style={{ '--fx': pct(line[0] - pose[0], W), '--fy': pct(line[1] - pose[1], H) }}>
+      <div
+        data-node={id}
+        data-state={nodeState(id, step)}
+        className={id === 'human' ? 'hs-node is-judgment' : 'hs-node'}
+        style={{
+          left: pct(pose[0], W),
+          top: pct(pose[1], H),
+          '--depth': depth,
+          '--i': index,
+          '--arrive': arrivesBySignal(id, step) ? `${ARRIVE_MS}ms` : '0ms',
+        }}
+      >
+        <div className="hs-body">
+          <span data-tone="dark" className="hs-ring" />
+          <span className="hs-depth absolute inset-0 rounded-full shadow-depth-3" />
+          <span
+            className={`hs-pill relative flex items-center whitespace-nowrap rounded-full border text-xs sm:text-sm ${size} ${tone} ${shadow}`}
+          >
+            <span data-tone={core ? 'dark' : undefined} className="hs-icon flex">
+              <Icon strokeWidth={1.75} className={ICON_SIZE} />
+            </span>
+            {label}
+            {id === 'done' && (
+              // The brand gold is the dark palette's primary; data-tone borrows it for the face.
+              <span
+                data-tone="dark"
+                className={`hs-done-face absolute -inset-px flex items-center justify-center rounded-full bg-primary text-primaryInk ${size}`}
+              >
+                <Check strokeWidth={2.5} className={ICON_SIZE} />
+                {label}
+              </span>
+            )}
+          </span>
+        </div>
+        <span
+          data-side={tip.side}
+          data-align={tip.align}
+          className="hs-tip whitespace-nowrap rounded-md bg-ink px-2.5 py-1.5 text-xs font-medium text-paper shadow-depth-2"
+        >
+          {hint}
+        </span>
+      </div>
     </div>
   )
 }

@@ -30,8 +30,10 @@ export const navCta = { label: 'Talk to Us', href: '#contact' }
 // PLAN §3 copy; MOTION §5–6 for the hero system and the slogan sequence.
 // `system` is the hero's connected system (MOTION §5): a signal travels request → agent →
 // decision, branches to a business system (and, when judgment is needed, a human), and ends at
-// done. `hint` is the delayed hover/focus tooltip; MOTION gives the agent, decision, integration
-// and human lines; the request and done lines are DRAFT. Nothing depends on hover.
+// done. `hint` is the caption under the visual as each step runs, the delayed pointer tooltip and
+// a visually hidden list; MOTION gives the agent, decision, integration and human lines; the
+// request and done lines are DRAFT. Nothing depends on hover. `slogan` is the eyebrow's
+// GET → IT → DONE sequence (MOTION §6); `eyebrow` is its text for screen readers.
 export const hero = {
   eyebrow: 'Get IT Done',
   slogan: ['Get', 'IT', 'Done'],
@@ -51,6 +53,8 @@ export const hero = {
   ],
   systemLabel:
     'Diagram: a request reaches an AI agent, which makes a decision, works with a business system, hands judgment calls to a person, and finishes the work.',
+  // DRAFT: labels for the hero system's pause control (its loop runs longer than five seconds).
+  motion: { pause: 'Pause Animation', play: 'Play Animation' },
 }
 
 // PLAN §4. Three capability bands instead of three equal cards.
