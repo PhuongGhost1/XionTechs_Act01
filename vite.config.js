@@ -23,6 +23,7 @@ export default defineConfig({
       input: {
         main: here('index.html'),
         command: here('concepts/command/index.html'),
+        architecture: here('concepts/architecture/index.html'),
       },
     },
   },
