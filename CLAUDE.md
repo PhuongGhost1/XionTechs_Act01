@@ -131,9 +131,3 @@ content. If you add a new section, follow the same pattern.
   `writing-guidelines` fetch their rules from GitHub; new UI and copy follow them (Title Case
   buttons and nav, sentence-case headings, `…` and curly quotes, no `transition: all`,
   reduced-motion variants, explicit image sizes, no em dashes in new body copy).
-
-
-## Concept pages (`/concepts/<name>/`)
-- Design explorations from `docs/idea/0n-*.md` live as separate Vite pages, so the main page is untouched. Concept 01 (X / Command): spec in `docs/concepts/01-command-implementation.md`, code in `src/concepts/command/`, its own Tailwind config `tailwind.command.config.js` (loaded by `command.css` with `@config`; the main config excludes `src/concepts`). Open items: `content/TODO.md`, "Concept 01".
-- The motion rule above (CSS 3D and SVG only, no WebGL) applies to the main page. A concept page may use `three`, but only in a lazy chunk, with a static fallback for reduced motion and no WebGL, and the same honesty rules (illustrative and pending values are labelled).
-- QA: the built-in browser pane scales a 1280 px viewport too small to read; use headless Edge with `puppeteer-core` from PowerShell (Git Bash cannot launch it) and look at the screenshots.
