@@ -1,3 +1,4 @@
+import { HERO_LEG_END } from '../contract/anchors.js'
 import { setActive, setStation } from '../contract/attributes.js'
 import { FRAME, PHONE_MAX_WIDTH, STATIONS, stationById } from '../contract/stations.js'
 
@@ -86,7 +87,10 @@ const lerp = (a, b, t) => a + (b - a) * t
  * `progress` is { standby, premise, deploy, line, work, ledger, done }, each 0..1. A missing key
  * counts as 0. Tracks are applied in page order and a later track that has started wins.
  *
- *   PREMISE  alpha 1 -> 0.35 over its first half, hold
+ *   STANDBY  alpha 1 -> 0.35 over the first HERO_LEG_END of the track (the same leg that carries
+ *            the core from the hero anchor to the premise anchor, see contract/anchors.js), so the
+ *            dimmed core is on the premise anchor, at 0.35, by the premise stop
+ *   PREMISE  alpha holds at 0.35
  *   DEPLOY   k 0 -> 1 over the first third; alpha 0.35 -> 1 over the first 15%
  *   LINE     k 1 -> 2 over the first 15%
  *   WORK     alpha 1 -> 0 over the first 8% (about the first 15% of plate one); k 2 -> 3 across
@@ -98,7 +102,8 @@ export function kAlphaFor(progress = {}) {
   let k = 0
   let alpha = 1
 
-  if (p('premise') > 0) alpha = lerp(1, 0.35, clamp01(p('premise') / 0.5))
+  alpha = lerp(1, 0.35, clamp01(p('standby') / HERO_LEG_END))
+  if (p('premise') > 0) alpha = 0.35
   if (p('deploy') > 0) {
     k = clamp01(p('deploy') / (1 / 3))
     alpha = lerp(0.35, 1, clamp01(p('deploy') / 0.15))

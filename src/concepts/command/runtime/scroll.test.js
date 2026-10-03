@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { HERO_LEG_END } from '../contract/anchors.js'
 import { STATIONS } from '../contract/stations.js'
 import {
   getTickFractions,
@@ -112,13 +113,38 @@ describe('kAlphaFor', () => {
 
   it('shows the X at full strength at the top', () => {
     expect(kAlphaFor({})).toEqual({ k: 0, alpha: 1 })
-    expect(kAlphaFor({ standby: 0.5 })).toEqual({ k: 0, alpha: 1 })
+    expect(kAlphaFor({ standby: 0 })).toEqual({ k: 0, alpha: 1 })
   })
 
-  it('dims to 35% over the first half of PREMISE and holds', () => {
-    expect(kAlphaFor({ standby: 1, premise: 0.25 }).alpha).toBeCloseTo(0.675, 10)
-    expect(kAlphaFor({ standby: 1, premise: 0.5 }).alpha).toBeCloseTo(0.35, 10)
+  it('dims to 35% over the hero -> premise leg (STANDBY) and holds through PREMISE', () => {
+    expect(kAlphaFor({ standby: HERO_LEG_END / 2 }).alpha).toBeCloseTo(0.675, 10)
+    expect(kAlphaFor({ standby: HERO_LEG_END })).toEqual({ k: 0, alpha: 0.35 })
+    expect(kAlphaFor({ standby: 1 })).toEqual({ k: 0, alpha: 0.35 })
+    expect(kAlphaFor({ standby: 1, premise: 0.25 })).toEqual({ k: 0, alpha: 0.35 })
     expect(kAlphaFor({ standby: 1, premise: 1 })).toEqual({ k: 0, alpha: 0.35 })
+  })
+
+  it('is fully dimmed at the premise stop (standby progress 1 - header / track), as the core is placed', () => {
+    for (const [vh, header] of [[900, 64], [844, 48], [600, 64]]) {
+      const standby = trackProgress(vh, header, vh, vh, 'span')
+      expect(kAlphaFor({ standby }).alpha).toBeCloseTo(0.35, 10)
+    }
+  })
+
+  it('is continuous (no pop) from the hero through PREMISE into DEPLOY', () => {
+    const steps = [
+      ...Array.from({ length: 101 }, (_, i) => ({ standby: i / 100 })),
+      ...Array.from({ length: 101 }, (_, i) => ({ standby: 1, premise: i / 100 })),
+      ...Array.from({ length: 101 }, (_, i) => ({ standby: 1, premise: 1, deploy: (i / 100) * 0.3 })),
+    ]
+    let last = kAlphaFor({}).alpha
+    let max = 0
+    for (const raw of steps) {
+      const { alpha } = kAlphaFor(raw)
+      max = Math.max(max, Math.abs(alpha - last))
+      last = alpha
+    }
+    expect(max).toBeLessThan(0.03)
   })
 
   it('morphs L0 to L1 over the first third of DEPLOY and plateaus', () => {

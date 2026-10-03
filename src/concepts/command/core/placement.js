@@ -1,4 +1,4 @@
-import { clamp01, ease, lerp } from '../contract/anchors.js'
+import { HERO_LEG_END, clamp01, ease, lerp } from '../contract/anchors.js'
 
 // Where the core is on screen, without allocating (the render loop calls this every frame).
 //
@@ -12,7 +12,7 @@ import { clamp01, ease, lerp } from '../contract/anchors.js'
  * as { from, to, t }. Mirrors contract/anchors.js coreAnchorSegment.
  */
 export function segmentInto(raw, out) {
-  const p = (id) => clamp01(raw[id] ?? 0)
+  const p = (id) => (Number.isFinite(raw[id]) ? clamp01(raw[id]) : 0)
   if (p('done') > 0) {
     out.from = 'done'
     out.to = 'done'
@@ -32,7 +32,7 @@ export function segmentInto(raw, out) {
   } else {
     out.from = 'hero'
     out.to = 'premise'
-    out.t = clamp01(p('premise') / 0.5)
+    out.t = p('premise') > 0 ? 1 : clamp01(p('standby') / HERO_LEG_END)
   }
   return out
 }

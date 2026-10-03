@@ -21,6 +21,18 @@ import { createElement, useEffect, useRef } from 'react'
 
 export const ANCHOR_NAMES = Object.freeze(['hero', 'premise', 'deploy', 'line', 'done'])
 
+/**
+ * The hero -> premise leg is driven by the STANDBY track (span mode, 0..1 over one track height
+ * after its top reaches the viewport top), NOT by the PREMISE track: the premise stop (the
+ * #premise landing, scrollY = premise top - header) is reached at standby progress
+ * 1 - header / track, about 0.93 on a desktop and 0.89 on a short landscape window, while the
+ * PREMISE track itself has not started yet. The leg finishes at this fraction of STANDBY, so the
+ * dimmed core is exactly on the premise anchor by the time the premise stop is reached, with a
+ * margin for tall headers and short windows. runtime/scroll.js (alpha) and core/placement.js
+ * (position) read the same constant.
+ */
+export const HERO_LEG_END = 0.85
+
 /** @typedef {{ x: number, y: number, width: number, height: number }} Rect */
 
 // ---------------------------------------------------------------------------------------------
@@ -69,19 +81,20 @@ export const rectCenter = (r) => ({ x: r.x + r.width / 2, y: r.y + r.height / 2 
  * progress of every track ({ standby, premise, deploy, line, work, ledger, done }, each 0..1;
  * a missing key counts as 0). It mirrors the k/alpha maps of runtime/scroll.js kAlphaFor.
  *
- *   standby, premise   hero -> premise, over the first half of PREMISE
+ *   standby            hero -> premise, over the first HERO_LEG_END of STANDBY; PREMISE (progress
+ *                      above 0) holds the core on the premise anchor
  *   deploy             premise -> deploy, over the first third of DEPLOY
  *   line               deploy -> line, over the first 15% of THE LINE
  *   work, ledger       line (the core is invisible here)
  *   done               done (the core reappears at the finale)
  */
 export function coreAnchorSegment(progress = {}) {
-  const p = (id) => clamp01(progress[id] ?? 0)
+  const p = (id) => (Number.isFinite(progress[id]) ? clamp01(progress[id]) : 0)
   if (p('done') > 0) return { from: 'done', to: 'done', t: 0 }
   if (p('work') > 0 || p('ledger') > 0) return { from: 'line', to: 'line', t: 0 }
   if (p('line') > 0) return { from: 'deploy', to: 'line', t: clamp01(p('line') / 0.15) }
   if (p('deploy') > 0) return { from: 'premise', to: 'deploy', t: clamp01(p('deploy') / (1 / 3)) }
-  return { from: 'hero', to: 'premise', t: clamp01(p('premise') / 0.5) }
+  return { from: 'hero', to: 'premise', t: p('premise') > 0 ? 1 : clamp01(p('standby') / HERO_LEG_END) }
 }
 
 // ---------------------------------------------------------------------------------------------
