@@ -48,7 +48,7 @@ function Service({ service, checked, onToggle, flash }) {
       <input
         id={inputId}
         type="checkbox"
-        className="svc__input"
+        className="svc__input sr-only"
         checked={checked}
         onChange={() => onToggle(service.id)}
         aria-describedby={service.leaves.length ? subId : undefined}
@@ -88,7 +88,7 @@ export function ServicesPanel({ module: mod, hidden = false, brief }) {
   }
 
   return (
-    <div hidden={hidden} className="svc-panel" data-module={mod.id}>
+    <div id={`${mod.id}-services`} hidden={hidden} className="svc-panel" data-module={mod.id}>
       <fieldset className="svc-fieldset">
         <legend className="svc-panel__legend">
           <span className="sr-only">{mod.label}: </span>

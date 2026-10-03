@@ -14,7 +14,39 @@
   display: flex;
   flex-direction: column;
   gap: var(--sp-6);
-  margin-bottom: var(--sp-12);
+  margin-bottom: var(--sp-8);
+}
+
+/* The 12 px mono caps of the type scale (text-label), shared by every small label in this file. */
+.of-tag,
+.of-tag-full,
+.of-scan__label,
+.of-readout__text,
+.of-reset,
+.of-debug-id,
+.of-check,
+.of-link,
+.of-row__code {
+  font-family: 'Geist Mono Variable', 'Geist Mono Fallback', ui-monospace, monospace;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  letter-spacing: 0.06em;
+}
+
+.of-tag,
+.of-tag-full,
+.of-readout__text,
+.of-reset,
+.of-check,
+.of-link,
+.of-row__code {
+  text-transform: uppercase;
+}
+
+.of-reset,
+.of-check,
+.of-link {
+  font-weight: 500;
 }
 
 /* ------------------------------------------------------------------ */
@@ -25,17 +57,16 @@
   display: flex;
   flex-direction: column;
   gap: var(--sp-3);
-  padding-block: var(--sp-8) var(--sp-12);
+  padding-block: var(--sp-8);
   border-top: 1px solid var(--c-hair);
 }
 
 @media (min-width: 768px) {
   .of-plate {
-    /* About one screen per record (doc 4.6). The content is taller than that at 1440, so this is
-       a floor, not a cap. */
+    /* The content is taller than a screen at 1440 (doc 4.6 says about one), so this is a floor,
+       not a cap. */
     min-height: 95svh;
-    padding-block: var(--sp-12) var(--sp-16);
-    gap: var(--sp-4);
+    padding-block: var(--sp-8) var(--sp-12);
   }
 }
 
@@ -49,12 +80,12 @@
   max-width: 36ch;
 }
 
-/* The giant name (doc 8.2): 16 vw for StaffXP, 22 vw for ESS. The vw multiplier stops growing at
-   a 1600 px viewport, the content maximum, so the name never outgrows its column. Caps have no
+/* The giant name (doc 8.2): the vw multiplier (11 for StaffXP, 15 for ESS, Plate.jsx) stops growing
+   at a 1600 px viewport, the content maximum, so the name never outgrows its column. Caps have no
    descenders, so the line box can sit tight. */
 .of-name {
   margin: 0;
-  font-size: calc(var(--name-vw, 16) * min(1vw, 16px));
+  font-size: calc(var(--name-vw, 11) * min(1vw, 16px));
   line-height: 0.8;
   letter-spacing: -0.055em;
   overflow-wrap: anywhere;
@@ -91,12 +122,9 @@
       'desc name';
   }
 
-  .of-plate[data-mirrored] .of-head__id {
-    justify-self: end;
-    text-align: right;
-  }
-
+  .of-plate[data-mirrored] .of-head__id,
   .of-plate[data-mirrored] .of-name {
+    justify-self: end;
     text-align: right;
   }
 
@@ -214,11 +242,6 @@
   position: absolute;
   display: none;
   pointer-events: none;
-  font-family: 'Geist Mono Variable', 'Geist Mono Fallback', ui-monospace, monospace;
-  font-size: 0.75rem;
-  line-height: 1.4;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
   background: rgb(var(--void) / 0.9);
 }
 
@@ -300,10 +323,7 @@
    (the default --scan-travel) carries the line the whole way. */
 .of-scan {
   position: absolute;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
+  inset: 0;
   border-top: 1px solid rgb(var(--signal));
   pointer-events: none;
   z-index: 6;
@@ -313,10 +333,6 @@
   position: absolute;
   top: 6px;
   padding: 0 4px;
-  font-family: 'Geist Mono Variable', 'Geist Mono Fallback', ui-monospace, monospace;
-  font-size: 0.75rem;
-  line-height: 1.4;
-  letter-spacing: 0.06em;
   color: rgb(var(--ink));
   background: rgb(var(--void) / 0.85);
 }
@@ -341,11 +357,6 @@
 .of-readout__text {
   display: flex;
   flex-direction: column;
-  font-family: 'Geist Mono Variable', 'Geist Mono Fallback', ui-monospace, monospace;
-  font-size: 0.75rem;
-  line-height: 1.4;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
 }
 
 .of-reset {
@@ -354,16 +365,7 @@
   padding: 0 var(--sp-3);
   border: 1px solid var(--c-hair-strong);
   background: rgb(var(--ground));
-  font-family: 'Geist Mono Variable', 'Geist Mono Fallback', ui-monospace, monospace;
-  font-size: 0.75rem;
-  font-weight: 500;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
   color: rgb(var(--ink));
-}
-
-.of-reset[hidden] {
-  display: none;
 }
 
 @media (min-width: 768px) {
@@ -400,29 +402,15 @@
   }
 }
 
-/* ?debug=hotspots: every box drawn with its id and numbers, to check alignment by eye. */
-.of-box[data-debug] {
-  outline: 1px dashed rgb(var(--signal));
-  outline-offset: -1px;
-}
-
-.of-debug-id {
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  z-index: 5;
-  padding: 0 3px;
-  font-family: 'Geist Mono Variable', 'Geist Mono Fallback', ui-monospace, monospace;
-  font-size: 0.75rem;
-  line-height: 1.4;
-  white-space: nowrap;
-  color: rgb(var(--ink));
-  background: rgb(var(--void) / 0.9);
-}
-
 /* ------------------------------------------------------------------ */
 /* Caption and spec list                                                */
 /* ------------------------------------------------------------------ */
+
+.of-shot {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+}
 
 .of-caption {
   display: flex;
@@ -435,18 +423,7 @@
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   gap: var(--sp-6);
-  margin-top: var(--sp-4);
-}
-
-/* Phones: the region index first, so the rows sit right under the window that reacts to them. */
-.of-regions {
-  order: 1;
-}
-.of-facts {
-  order: 2;
-}
-.of-add {
-  order: 3;
+  margin-top: var(--sp-2);
 }
 
 .of-facts {
@@ -455,13 +432,27 @@
   gap: var(--sp-3);
 }
 
-.of-facts > * {
+.of-facts > *,
+.of-regions > p:first-child {
   padding-inline: var(--sp-3);
 }
 
 .of-regions > p:first-child {
-  padding-inline: var(--sp-3);
   padding-bottom: var(--sp-2);
+}
+
+/* Phones: the region index first, so the rows sit right under the window that reacts to them. The
+   same order holds in the side column from 1440. */
+@media (max-width: 1023px), (min-width: 1440px) {
+  .of-regions {
+    order: 1;
+  }
+  .of-facts {
+    order: 2;
+  }
+  .of-add {
+    order: 3;
+  }
 }
 
 @media (min-width: 1024px) {
@@ -472,26 +463,65 @@
       'facts regions'
       'add regions';
     column-gap: var(--sp-16);
-    row-gap: var(--sp-4);
+    row-gap: var(--sp-2);
   }
 
   .of-facts {
     grid-area: facts;
-    order: 0;
   }
   .of-regions {
     grid-area: regions;
-    order: 0;
   }
   .of-add {
     grid-area: add;
-    order: 0;
   }
 
   .of-plate[data-mirrored] .of-spec {
     grid-template-areas:
       'regions facts'
       'regions add';
+  }
+}
+
+/* From 1440 the capture sits left, sticky, and the region index, the facts and ADD TO BRIEF are one
+   column beside it, so a row and the region it names are in the same screen. The capture is about
+   900 px wide there, as wide as at 1024 (page length: a full width capture made a plate two screens). */
+@media (min-width: 1440px) {
+  .of-plate {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 26rem;
+    grid-template-rows: auto 1fr;
+    column-gap: var(--sp-12);
+    align-items: start;
+  }
+
+  .of-head {
+    grid-column: 1 / -1;
+  }
+
+  .of-shot {
+    position: sticky;
+    top: calc(var(--header-h) + var(--sp-6));
+  }
+
+  .of-spec {
+    display: flex;
+    flex-direction: column;
+    margin-top: 0;
+  }
+
+  .of-plate[data-mirrored] {
+    grid-template-columns: 26rem minmax(0, 1fr);
+  }
+
+  .of-plate[data-mirrored] .of-shot {
+    grid-column: 2;
+    grid-row: 2;
+  }
+
+  .of-plate[data-mirrored] .of-spec {
+    grid-column: 1;
+    grid-row: 2;
   }
 }
 
@@ -519,22 +549,40 @@
   isolation: isolate;
 }
 
-/* The panel fill is a pseudo element so that only its opacity animates. */
-.of-row::after {
+/* A mouse has room for denser rows (still above the 24 px target minimum of WCAG 2.2). */
+@media (min-width: 1024px) and (pointer: fine) {
+  .of-row {
+    min-height: 36px;
+    padding-block: 6px;
+  }
+}
+
+/* The panel fill and the active marker (a 2 px yellow bar) are pseudo elements so that only their
+   opacity animates. */
+.of-row::after,
+.of-row::before {
   content: '';
   position: absolute;
-  inset: 0;
-  z-index: -1;
-  background: rgb(var(--panel));
   opacity: 0;
   transition: opacity var(--dur-ui) var(--ease-ui);
 }
 
+.of-row::after {
+  inset: 0;
+  z-index: -1;
+  background: rgb(var(--panel));
+}
+
+.of-row::before {
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: rgb(var(--signal));
+}
+
 .of-row__code {
   flex: none;
-  font-size: 0.75rem;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
   color: rgb(var(--ink-3));
 }
 
@@ -545,33 +593,16 @@
 }
 
 .of-row__label {
-  flex: 0 1 auto;
   max-width: 62%;
   margin-left: auto;
   text-align: right;
-}
-
-/* The active marker is a 2 px yellow bar, so only its opacity animates. */
-.of-row::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  width: 2px;
-  background: rgb(var(--signal));
-  opacity: 0;
-  transition: opacity var(--dur-ui) var(--ease-ui);
 }
 
 .of-row[data-active] {
   color: rgb(var(--ink));
 }
 
-.of-row[data-active]::after {
-  opacity: 1;
-}
-
+.of-row[data-active]::after,
 .of-row[data-active]::before {
   opacity: 1;
 }
@@ -585,11 +616,6 @@
   min-height: 44px;
   padding-inline: var(--sp-3);
   cursor: pointer;
-  font-family: 'Geist Mono Variable', 'Geist Mono Fallback', ui-monospace, monospace;
-  font-size: 0.75rem;
-  font-weight: 500;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
   color: rgb(var(--ink));
 }
 
@@ -644,7 +670,7 @@
   grid-template-columns: auto minmax(0, 1fr);
   align-items: center;
   gap: var(--sp-3) var(--sp-4);
-  padding-block: var(--sp-6);
+  padding-block: var(--sp-4);
   border-top: 1px dashed var(--c-hair-strong);
   border-bottom: 1px dashed var(--c-hair-strong);
 }
@@ -680,7 +706,7 @@
   flex-wrap: wrap;
   align-items: center;
   gap: var(--sp-1) var(--sp-4);
-  padding-top: var(--sp-12);
+  padding-top: var(--sp-8);
 }
 
 /* Text link with a drawn arrow (M15): the stem grows from 24 to 56 px on hover and focus. */
@@ -689,11 +715,6 @@
   align-items: center;
   gap: var(--sp-3);
   min-height: 44px;
-  font-family: 'Geist Mono Variable', 'Geist Mono Fallback', ui-monospace, monospace;
-  font-size: 0.75rem;
-  font-weight: 500;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
   color: rgb(var(--ink));
 }
 

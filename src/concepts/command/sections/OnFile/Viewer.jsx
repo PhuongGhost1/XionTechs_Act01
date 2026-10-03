@@ -29,6 +29,20 @@ import {
 
 const SCAN_MS = 600
 
+// ?debug=hotspots draws every box with its id and numbers. Dev only, so the styles live here and
+// not in the shipped stylesheet.
+const DEBUG_BOX = { outline: '1px dashed rgb(var(--signal))', outlineOffset: -1 }
+const DEBUG_ID = {
+  position: 'absolute',
+  right: 0,
+  bottom: 0,
+  zIndex: 5,
+  padding: '0 3px',
+  whiteSpace: 'nowrap',
+  color: 'rgb(var(--ink))',
+  background: 'rgb(var(--void) / 0.9)',
+}
+
 /**
  * M10, once, when 35 percent of the viewer is visible. Returns what the markup needs:
  * `ref` for the observed element, `phase` ('idle' dim | 'scan' running | 'done' full), `time`.
@@ -166,14 +180,20 @@ export default function Viewer({
                     className="of-box"
                     data-state={state}
                     data-debug={debug ? '' : undefined}
-                    style={{ left: `${box.x}%`, top: `${box.y}%`, width: `${box.w}%`, height: `${box.h}%` }}
+                    style={{
+                      left: `${box.x}%`,
+                      top: `${box.y}%`,
+                      width: `${box.w}%`,
+                      height: `${box.h}%`,
+                      ...(debug ? DEBUG_BOX : null),
+                    }}
                     onPointerEnter={(e) => e.pointerType !== 'touch' && onHover(box.id)}
                     onPointerLeave={() => onHover(null)}
                     onClick={() => onTap(box.id)}
                   >
                     <Tag box={box} active={box.id === activeId} />
                     {debug && (
-                      <span className="of-debug-id">
+                      <span className="of-debug-id" style={DEBUG_ID}>
                         {box.id} {box.x},{box.y},{box.w},{box.h}
                       </span>
                     )}

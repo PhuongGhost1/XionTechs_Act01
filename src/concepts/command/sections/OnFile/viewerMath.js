@@ -27,9 +27,10 @@ export function formatScanTime(date) {
 
 /**
  * The font size (in vw) of a record's giant name. The design asks for 16 vw (StaffXP) and 22 vw
- * (ESS). A longer name, such as the generic "School staff platform" used when NAME_PRODUCTS is
- * false, would not fit a line at that size, so the size shrinks until about 0.72 em per
- * character fits the content width. Short names keep the designed size.
+ * (ESS); Plate.jsx passes 11 and 15 to hold the page-length budget. A longer name, such as the
+ * generic "School staff platform" used when NAME_PRODUCTS is false, would not fit a line at the
+ * base size, so the size shrinks until about 0.72 em per character fits the content width.
+ * Short names keep the base size.
  */
 export function nameSize(name, baseVw, fitVw = 92) {
   const chars = Math.max(1, name.length)

@@ -65,7 +65,7 @@ export default function Plate({ record, index, mirrored = false, nameProducts = 
   const boxes = spots.boxes
   const name = displayName(record, nameProducts)
   const rows = specRows(record, nameProducts)
-  const baseVw = mirrored ? 22 : 16
+  const baseVw = mirrored ? 15 : 11
 
   const [hover, setHover] = useState(null)
   const [focus, setFocus] = useState(null)
@@ -105,24 +105,26 @@ export default function Plate({ record, index, mirrored = false, nameProducts = 
         <p className="of-head__descriptor font-mono text-data text-ink2">{record.descriptor.text}</p>
       </Reveal>
 
-      <Viewer
-        record={record}
-        boxes={boxes}
-        imageSize={spots.image}
-        activeId={activeId}
-        pinnedId={pinnedId}
-        zoomEnabled={zoomEnabled}
-        debug={debugOn}
-        onHover={setHover}
-        onTap={handlers.onTap}
-        onReset={() => setPinned(null)}
-      />
+      <div className="of-shot">
+        <Viewer
+          record={record}
+          boxes={boxes}
+          imageSize={spots.image}
+          activeId={activeId}
+          pinnedId={pinnedId}
+          zoomEnabled={zoomEnabled}
+          debug={debugOn}
+          onHover={setHover}
+          onTap={handlers.onTap}
+          onReset={() => setPinned(null)}
+        />
 
-      <p className="of-caption">
-        <Chip kind="real" />
-        <Chip kind="sample" />
-        <span className="font-mono text-label uppercase text-ink3">{record.image.caption.text}</span>
-      </p>
+        <p className="of-caption">
+          <Chip kind="real" />
+          <Chip kind="sample" />
+          <span className="font-mono text-label uppercase text-ink3">{record.image.caption.text}</span>
+        </p>
+      </div>
 
       <div className="of-spec">
         <dl className="of-facts">

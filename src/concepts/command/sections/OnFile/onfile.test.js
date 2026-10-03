@@ -69,11 +69,11 @@ describe('a plate', () => {
     expect(markup).toContain('sr-only')
   })
 
-  it('mirrors plate 2 and sizes the name at 22 vw against 16 vw', () => {
+  it('mirrors plate 2 and sizes the name at 15 vw against 11 vw', () => {
     const a = html(createElement(Plate, { record: staffxp, index: 0 }))
     const b = html(createElement(Plate, { record: ess, index: 1, mirrored: true }))
-    expect(a).toContain('--name-vw:16')
-    expect(b).toContain('--name-vw:22')
+    expect(a).toContain('--name-vw:11')
+    expect(b).toContain('--name-vw:15')
     expect(b).toContain('data-mirrored=""')
     expect(a).not.toContain('data-mirrored')
     expect(b).toContain('04.2 / DEP-002')

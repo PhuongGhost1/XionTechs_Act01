@@ -137,7 +137,7 @@ export default function Deploy() {
 
   return (
     <section id="deploy" ref={ref} data-track="deploy" aria-labelledby="deploy-title" className="track deploy">
-      <div className="column pb-24 pt-16 md:pt-24">
+      <div className="column pb-16 pt-16 md:pt-20">
         <Label>{STATIONS[2].label}</Label>
         <h2 id="deploy-title" className="mt-6 font-display text-h2 font-medium text-ink">
           <span className="block">{deploy.heading.text}</span>
@@ -145,7 +145,7 @@ export default function Deploy() {
         </h2>
         <p className="mt-6 max-w-measure text-body text-ink2">{deploy.panelHint.text}</p>
 
-        <div className="deploy__grid mt-10 lg:mt-12" role="group" aria-label={deploy.modulesLabel.text}>
+        <div className="deploy__grid mt-8 lg:mt-10" role="group" aria-label={deploy.modulesLabel.text}>
           {/* The instrument: the X in four arms, the active module named beside it, the brief
               count (the one live region of the section). Decoration inside, facts outside. */}
           <div className="deploy-sticky" data-arm={active}>
@@ -194,6 +194,7 @@ export default function Deploy() {
                   type="button"
                   className="deploy-row__btn"
                   aria-current={active === i ? 'true' : undefined}
+                  aria-controls={`${m.id}-services`}
                   onClick={() => choose(i)}
                   onFocus={() => choose(i)}
                   onPointerEnter={(e) => {
