@@ -128,6 +128,12 @@ export default function TokenStory() {
           <Button variant="ghost" href="#work" arrow="down">
             Explore our work
           </Button>
+          <Button variant="outline" size="sm" href="#contact">
+            Header CTA, outlined
+          </Button>
+          <Button variant="primary" size="sm" href="#contact">
+            Header CTA, filled
+          </Button>
         </div>
         <Frame ticks className="max-w-xl p-6">
           <dl className="flex flex-col gap-2">

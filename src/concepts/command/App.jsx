@@ -1,14 +1,16 @@
-import { lazy, Suspense, useEffect, useState } from 'react'
-import { ATTR, setTier } from './contract/attributes.js'
+import { Component, lazy, Suspense, useEffect, useState } from 'react'
+import { ATTR } from './contract/attributes.js'
 import Dock from './frame/Dock.jsx'
+import Hairlines from './frame/Hairlines.jsx'
 import Header from './frame/Header.jsx'
 import MobileBar from './frame/MobileBar.jsx'
 import SignalLine from './frame/SignalLine.jsx'
 import SkipLink from './frame/SkipLink.jsx'
-import { detectTier, readEnvironment } from './runtime/capability.js'
+import { startAmbient } from './runtime/ambient.js'
 import { startFlowWatcher } from './runtime/flow.js'
-import { useHtmlAttribute, useReducedMotion } from './runtime/hooks.js'
+import { useHtmlAttribute } from './runtime/hooks.js'
 import { startScroll } from './runtime/scroll.js'
+import { markChunkFailed, startTier } from './runtime/tier.js'
 import Deploy from './sections/Deploy/index.jsx'
 import Done from './sections/Done/index.jsx'
 import Ledger from './sections/Ledger/index.jsx'
@@ -19,7 +21,14 @@ import Standby from './sections/Standby/index.jsx'
 
 // Composition root of Concept 01 v2. Everything visual lives in frame/ and sections/; this file
 // only wires the page: the seven stations in order inside <main>, the fixed frame around them,
-// the scroll controller, the flow watcher, the capability tier and the lazy WebGL canvas.
+// and the runtime (scroll controller, flow watcher, ambient pauser, tier control).
+//
+// Tier (doc 6.2) is decided by runtime/tier.js and read back here from <html data-tier>, the
+// single source of truth: the capability probe, the MOTION toggle, RAW, the OS reduced-motion
+// setting and the FPS governor (which the canvas starts and which can only lower the tier) all
+// end up in that one attribute. The lazy canvas mounts only when it is not "off", after first
+// paint and an idle moment, and unmounts the moment it becomes "off" (RAW, MOTION off, a lost
+// context, a governor drop). If its chunk fails to load the page stays on the SVG tier.
 //
 // Both lazy chunks stay out of the entry bundle: the canvas (WP2 grows it to the three.js scene,
 // at most 180 kB gzip) and the token story (?tokens, a review page owned by WP0).
@@ -27,50 +36,58 @@ import Standby from './sections/Standby/index.jsx'
 const CoreCanvas = lazy(() => import('./core/CoreCanvas.jsx'))
 const TokenStory = lazy(() => import('./TokenStory.jsx'))
 
-function Page() {
-  const [tier, setTierState] = useState('off')
-  const [canvasReady, setCanvasReady] = useState(false)
-  // The tier depends on these two, so a toggle re-evaluates it.
-  const view = useHtmlAttribute(ATTR.view)
-  const motionOff = useReducedMotion()
+// A failed chunk (offline, a stale deploy) must not blank the page: remember it and render nothing.
+class CanvasBoundary extends Component {
+  state = { failed: false }
 
-  // One scroll controller and one flow watcher for the page's lifetime.
+  static getDerivedStateFromError() {
+    return { failed: true }
+  }
+
+  componentDidCatch() {
+    markChunkFailed()
+  }
+
+  render() {
+    return this.state.failed ? null : this.props.children
+  }
+}
+
+/** Calls `fn` once the browser is idle (or after 200 ms where it has no idle callback). */
+function whenIdle(fn) {
+  if (typeof window.requestIdleCallback === 'function') {
+    const id = window.requestIdleCallback(fn, { timeout: 2000 })
+    return () => window.cancelIdleCallback(id)
+  }
+  const id = window.setTimeout(fn, 200)
+  return () => window.clearTimeout(id)
+}
+
+function Page() {
+  const tier = useHtmlAttribute(ATTR.tier)
+  const [idle, setIdle] = useState(false)
+
+  // The runtime lives as long as the page. Each start is idempotent and StrictMode safe.
   useEffect(() => {
-    const stopScroll = startScroll()
-    const stopFlow = startFlowWatcher()
+    const stops = [startScroll(), startFlowWatcher(), startAmbient(), startTier()]
+    const cancelIdle = whenIdle(() => setIdle(true))
     return () => {
-      stopScroll()
-      stopFlow()
+      cancelIdle()
+      stops.forEach((stop) => stop())
     }
   }, [])
 
-  // Pick the tier from the real device, write data-tier, and re-pick when the view or motion changes.
-  useEffect(() => {
-    const next = detectTier(readEnvironment())
-    setTier(next)
-    setTierState(next)
-  }, [view, motionOff])
-
-  // The canvas boots after first paint and idle (doc 6.3), and only when a tier allows it.
-  useEffect(() => {
-    if (tier === 'off') {
-      setCanvasReady(false)
-      return undefined
-    }
-    const idle = window.requestIdleCallback ?? ((fn) => window.setTimeout(fn, 200))
-    const cancel = window.cancelIdleCallback ?? window.clearTimeout
-    const handle = idle(() => setCanvasReady(true))
-    return () => cancel(handle)
-  }, [tier])
+  const showCanvas = idle && (tier === 'low' || tier === 'high')
 
   return (
     <>
       <SkipLink />
       <Header />
       <SignalLine />
-      {/* The one background: a static dot grid, full bleed (doc 5.4). */}
+      {/* The one background: a static dot grid, full bleed (doc 5.4), and the constant hairline pair. */}
       <div aria-hidden="true" data-decor="" className="bg-dots pointer-events-none fixed inset-0" />
-      <main id="main" tabIndex={-1} className="relative pb-dock pt-header outline-none">
+      <Hairlines />
+      <main id="main" tabIndex={-1} className="relative pb-[calc(var(--dock-h)+var(--bar-h))] pt-header outline-none">
         <Standby />
         <Premise />
         <Deploy />
@@ -81,10 +98,12 @@ function Page() {
       </main>
       <MobileBar />
       <Dock />
-      {canvasReady && tier !== 'off' && (
-        <Suspense fallback={null}>
-          <CoreCanvas tier={tier} />
-        </Suspense>
+      {showCanvas && (
+        <CanvasBoundary>
+          <Suspense fallback={null}>
+            <CoreCanvas tier={tier} />
+          </Suspense>
+        </CanvasBoundary>
       )}
     </>
   )

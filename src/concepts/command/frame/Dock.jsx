@@ -1,25 +1,59 @@
 import { frame } from '../content/index.js'
 import { buildCounter } from '../contract/stations.js'
 import { useActiveStation, useBrief } from '../runtime/hooks.js'
+import Readout from './Readout.jsx'
+import { splitCounter } from './logic.js'
+import Scrubber from './Scrubber.jsx'
+import './frame.css'
 
-// STUB (WP1 replaces this file). The docked rail at the bottom (48 px, 56 plus safe area on
-// phones): the BUILD 00n counter (the section you are in), the brief count, and later the
-// scrubber and the honest render readout (tier, quality, motion).
+// The docked rail along the bottom (doc 4.1, 4.9): 48 px, or 56 px plus the safe area on phones.
+//
+//   BUILD 00n   which section you are in. Only the last digit flips (six hard steps, M12). It is a
+//               UI state, not a claim; the ledger says so in words.
+//   section     the station's name (from 1280)
+//   scrubber    the page as a slider with the station ticks (Scrubber.jsx)
+//   readout     RENDER / QUALITY / MOTION, real values or N/A (from 1024; the menu has it below that)
+//   BRIEF ( n ) the count of what the visitor selected; a link to the composer
+//
+// One pass of the dock fading in is the end of the boot (M01); motion.css removes it under
+// reduced motion. The dock sits on --void, the silence colour, with one hairline above it.
 export default function Dock() {
   const station = useActiveStation()
   const { count } = useBrief()
+  const counter = splitCounter(buildCounter(station.index))
+
   return (
     <div
-      role="presentation"
-      className="fixed inset-x-0 bottom-0 z-30 flex h-dock items-center justify-between border-t border-hair bg-void px-[var(--margin-x)] font-mono text-counter uppercase text-ink2"
+      role="group"
+      aria-label={frame.dockLabel.text}
+      data-frame="dock"
+      className="anim-fade-in fixed inset-x-0 bottom-0 z-30 h-dock border-t border-hair bg-void pb-[env(safe-area-inset-bottom,0px)]"
     >
-      <span>
-        {frame.build.text} {buildCounter(station.index)}
-      </span>
-      <span className="hidden text-ink3 md:inline">{station.label}</span>
-      <span aria-live="polite">
-        {frame.brief.text} ( {count} )
-      </span>
+      <div className="mx-auto flex h-full max-w-content items-center gap-3 px-[var(--margin-x)] font-mono text-counter uppercase md:gap-6">
+        <p className="m-0 shrink-0 font-medium text-ink">
+          <span className="text-ink3">{frame.build.text} </span>
+          {counter.head}
+          {/* Keyed on the digit so only it replays the flip. */}
+          <span key={station.index} className="anim-step-flip inline-block">
+            {counter.tail}
+          </span>
+        </p>
+        <p className="m-0 hidden shrink-0 text-label text-ink3 xl:block">{station.label}</p>
+        <Scrubber className="min-w-0 flex-1" />
+        <Readout className="hidden shrink-0 lg:flex" />
+        <a
+          href="#contact"
+          className="inline-flex h-11 shrink-0 items-center font-medium text-ink hover:underline hover:underline-offset-4 motion-off:transition-none"
+        >
+          <span aria-live="polite" aria-atomic="true">
+            {frame.brief.text} ({' '}
+            <span key={count} className="anim-step-flip inline-block">
+              {count}
+            </span>{' '}
+            )
+          </span>
+        </a>
+      </div>
     </div>
   )
 }

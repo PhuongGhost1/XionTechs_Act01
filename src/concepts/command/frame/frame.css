@@ -1,0 +1,166 @@
+/*
+ * Component CSS of the fixed frame (header, dock, mobile bar, menu, signal line, hairlines):
+ * the few things Tailwind classes cannot say. Colours come from tokens.css only; only transform
+ * and opacity move (visibility flips after the fade so a hidden control is not focusable).
+ * Loaded by frame/Header.jsx.
+ */
+
+/* ---- Header: the 1 px yellow underline of the active word (doc 4.9) ------------------------ */
+
+/* The link is a 44 px target; the underline belongs to its word, so it is exactly as wide as the text. */
+.nav-link__text {
+  position: relative;
+}
+
+.nav-link__text::after {
+  content: '';
+  position: absolute;
+  inset-inline: 0;
+  bottom: -4px;
+  height: 1px;
+  background: rgb(var(--signal));
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform var(--dur-ui) var(--ease-ui);
+}
+
+.nav-link[aria-current] .nav-link__text::after {
+  transform: scaleX(1);
+}
+
+/* ---- Focus rings in the frame sit INSIDE the control. A 44 px control in the 48 px phone header
+   has 2 px to spare, so the usual 3 px offset ring (base.css) would run off the top of the screen. */
+
+[data-frame] :focus-visible,
+[data-frame]:focus-visible {
+  outline-offset: -2px;
+}
+
+/* ---- Segmented toggles (READ | RAW): the pressed segment is underlined, not only brighter ---- */
+
+.seg {
+  position: relative;
+}
+
+.seg::after {
+  content: '';
+  position: absolute;
+  inset-inline: 8px;
+  bottom: 8px;
+  height: 2px;
+  background: rgb(var(--ink));
+  transform: scaleX(0);
+  transition: transform var(--dur-ui) var(--ease-ui);
+}
+
+.seg[aria-pressed='true']::after {
+  transform: scaleX(1);
+}
+
+/* ---- The full-screen menu --------------------------------------------------------------------- */
+
+.menu-panel {
+  overscroll-behavior: contain;
+  animation: menu-in var(--dur-ui) var(--ease-out) both;
+}
+
+@keyframes menu-in {
+  from {
+    opacity: 0;
+  }
+}
+
+/* ---- Mobile CTA bar: hidden while the hero CTA or the composer is on screen ------------------- */
+
+.mobile-bar {
+  transition: opacity var(--dur-ui) var(--ease-out), transform var(--dur-ui) var(--ease-ui),
+    visibility 0s linear 0s;
+}
+
+.mobile-bar[data-hidden='true'] {
+  opacity: 0;
+  transform: translateY(8px);
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity var(--dur-ui) var(--ease-out), transform var(--dur-ui) var(--ease-ui),
+    visibility 0s linear var(--dur-ui);
+}
+
+/* ---- Dock: the page scrubber ------------------------------------------------------------------ */
+
+.scrubber {
+  position: relative;
+  touch-action: none;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.scrubber:focus-visible {
+  outline-offset: -2px;
+}
+
+.scrubber__rail,
+.scrubber__fill {
+  position: absolute;
+  inset-inline: 0;
+  top: 50%;
+  height: 1px;
+}
+
+.scrubber__rail {
+  background: var(--c-hair-strong);
+}
+
+/* Progress so far: scaleX from the left, written by the scroll frame callback. */
+.scrubber__fill {
+  background: rgb(var(--ink-3));
+  transform: scaleX(0);
+  transform-origin: left center;
+}
+
+.scrubber__tick {
+  position: absolute;
+  top: 50%;
+  width: 1px;
+  height: 9px;
+  margin-top: -4px;
+  background: rgb(var(--ink-3));
+}
+
+/* The tick of the station you are in: taller and yellow. A second cue (height), not colour alone. */
+.scrubber__tick[data-active='true'] {
+  height: 15px;
+  margin-top: -7px;
+  background: rgb(var(--signal));
+}
+
+.scrubber__thumb {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 2px;
+  height: 17px;
+  margin-top: -8px;
+  background: rgb(var(--signal));
+  will-change: transform;
+}
+
+/* ---- Signal line (M05): fixed, one pixel, crosses the top once ---------------------------------- */
+
+[data-signal-line] {
+  transform-origin: left center;
+}
+
+/* ---- Hairlines: the page's constant +/- 32 degree pair ----------------------------------------- */
+
+.hairlines {
+  opacity: 0;
+  transition: opacity var(--dur-reveal) var(--ease-out);
+}
+
+/* They arrive after the hero (data-station is 1 or more) and are gone on station 0, where the
+   hero draws its own pair. */
+html[data-station]:not([data-station='0']) .hairlines {
+  opacity: 1;
+}
