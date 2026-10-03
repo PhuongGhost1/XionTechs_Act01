@@ -32,7 +32,7 @@ const service = (id, label, parent, leaves = []) => ({
   leaves,
 })
 
-const mod = (id, index, label, short, definition, services) => ({
+const mod = (id, index, label, short, title, definition, services) => ({
   id,
   kind: 'hub',
   label,
@@ -44,6 +44,8 @@ const mod = (id, index, label, short, definition, services) => ({
   short, // the hub word in the X: CODE, AI, CLOUD, PRODUCT
   // OFFERED states what the live site lists; it is never capacity or availability (doc 5.6).
   state: live(`${id}.state`, 'OFFERED'),
+  // The row word of station 02 is sentence case (doc 5.2); `label` stays the uppercase module name.
+  title: draft(`${id}.title`, title),
   definition: draft(`${id}.definition`, definition),
   groupingDraft: true,
   services,
@@ -66,6 +68,7 @@ export const modules = [
     '01',
     'SOFTWARE ENGINEERING',
     'CODE',
+    'Software engineering',
     'Custom applications and low-code solutions, built around how your team works.',
     [
       service('svc.custom-app', 'Custom App Development', 'mod.software'),
@@ -83,6 +86,7 @@ export const modules = [
     '02',
     'AI SYSTEMS',
     'AI',
+    'AI systems',
     'Intelligent automation and analytics, wired into the systems you already run.',
     [
       service('svc.ai-solutions', 'AI-Powered Solutions', 'mod.ai', [
@@ -99,6 +103,7 @@ export const modules = [
     '03',
     'CLOUD & PLATFORM',
     'CLOUD',
+    'Cloud & platform',
     'Migration, optimisation and integration across Azure, AWS and GCP.',
     [
       service('svc.cloud', 'Cloud Computing', 'mod.cloud', [
@@ -116,6 +121,7 @@ export const modules = [
     '04',
     'PRODUCT DEVELOPMENT',
     'PRODUCT',
+    'Product development',
     'Products engineered and co-created with you, and the people to staff them.',
     [
       service('svc.product-engineering', 'Product Engineering', 'mod.product'),
@@ -133,6 +139,12 @@ export const deploy = {
   added: draft('deploy.added', 'IN BRIEF'),
   // The three markers that make the draft grouping visible in review (open question 4).
   groupingNote: draft('deploy.grouping', 'Grouping of services into modules awaits sign-off.'),
+  // Words of the module rows and the service panel (station 02). All DRAFT, none is a fact.
+  modulesLabel: draft('deploy.modules', 'Modules'),
+  platformsLabel: draft('deploy.platforms', 'PLATFORMS'),
+  coversLabel: draft('deploy.covers', 'COVERS'),
+  countLabel: draft('deploy.count', 'BRIEF'),
+  panelHint: draft('deploy.hint', 'Tick what you need. It goes into the email you send at the end.'),
   fullTag: {
     // "MOD 02 / AI SYSTEMS / OFFERED": the three lines of the full tag are composed in code from
     // the module; only the prefix word is copy.

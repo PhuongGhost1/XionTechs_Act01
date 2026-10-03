@@ -1,0 +1,410 @@
+/*
+ * STANDBY (doc 4.2, 6.1). Plain CSS for what Tailwind classes cannot say: the core box on P, the
+ * four tags on the arm tips with their leader lines, and the boot (M01).
+ *
+ * The numbers arrive as custom properties on section.hero (index.jsx, from placement.js):
+ *   --px --py   P as fractions of the viewport width and height
+ *   --core      the side of the core's square box
+ *   --x --y     (on each tag) the arm tip as fractions of the core box
+ *   --dx --dy   (on each tag) where its leader line ends, relative to the tip
+ * Colours are tokens only. Only transform, opacity, clip-path and stroke-dashoffset move.
+ */
+
+/* ------------------------------------------------------------------ */
+/* Layout                                                               */
+/* ------------------------------------------------------------------ */
+
+/* The visible hero: the viewport between the header and the dock. The legend is pushed to its
+   bottom (margin-top: auto in index.jsx); the text starts where the next rules say. */
+.hero-stage {
+  min-height: calc(100vh - var(--header-h) - var(--dock-h));
+  min-height: calc(100svh - var(--header-h) - var(--dock-h));
+  padding-bottom: 20px;
+}
+
+/* Desktop: the first line, ENGINEERING, is centred on P. That puts it exactly between the NW and
+   SW tags (the gap between them is about half the core's height, the line is shorter), so the
+   longest word never runs into a tag, and the hairlines cross at the end of the word. The 33 px is
+   the label above the headline (16.8 px line plus the 16 px gap). */
+.hero[data-tags='axis'] .hero-stage {
+  padding-top: calc(var(--py) * 100vh - var(--header-h) - 0.46 * var(--fs-display-xl) - 33px);
+  padding-top: calc(var(--py) * 100svh - var(--header-h) - 0.46 * var(--fs-display-xl) - 33px);
+}
+
+/* The hairlines are drawn in viewport pixels from the very top of the page, so they start
+   behind the fixed header (which hides them there). */
+.hero-hairlines {
+  position: absolute;
+  left: 0;
+  top: calc(var(--header-h) * -1);
+  overflow: visible;
+  pointer-events: none;
+}
+
+/* The core and its tags: a square centred on P. */
+.hero-core {
+  position: absolute;
+  /* Above the text stage (z 10) so the tags can be hovered and clicked. The box itself lets
+     pointers through: only the tag buttons catch them. */
+  z-index: 20;
+  pointer-events: none;
+  width: var(--core);
+  height: var(--core);
+  left: calc(var(--px) * 100% - var(--core) / 2);
+  top: calc(var(--py) * 100vh - var(--header-h) - var(--core) / 2);
+  top: calc(var(--py) * 100svh - var(--header-h) - var(--core) / 2);
+}
+
+/* FIG 01 sits in the wedge below P, centred under the core, clear of both hairlines. On a phone
+   there is no room left of P to centre it, so it is right aligned inside the margin. In stack mode
+   the lower tags hang below the core box, hence the larger gap. */
+.hero-fig {
+  position: absolute;
+  z-index: 4;
+  right: var(--margin-x);
+  max-width: min(40ch, calc(100% - 2 * var(--margin-x)));
+  text-align: right;
+  top: calc(var(--py) * 100vh - var(--header-h) + var(--core) / 2 + 28px);
+  top: calc(var(--py) * 100svh - var(--header-h) + var(--core) / 2 + 28px);
+}
+
+@media (min-width: 640px) {
+  .hero-fig {
+    right: auto;
+    left: calc(var(--px) * 100%);
+    transform: translateX(-50%);
+    width: 40ch;
+    text-align: center;
+  }
+}
+
+/* Phone and tablet: the text sits under the core, its tags and the caption, never beside them.
+   The stage may grow past one screen on a short window; that is the honest outcome. */
+.hero[data-tags='stack'] .hero-stage {
+  padding-top: calc(var(--py) * 100vh - var(--header-h) + var(--core) / 2 + 92px);
+  padding-top: calc(var(--py) * 100svh - var(--header-h) + var(--core) / 2 + 92px);
+}
+
+/* ------------------------------------------------------------------ */
+/* M01 boot: the type rises, the core scales in, the full stop lands last */
+/* ------------------------------------------------------------------ */
+
+/* Display type: the token sizes and tracking are a little too big and too tight for capitals at
+   this weight (N and G, I and T touched at 144 px), so the hero tightens less and from 640 px
+   steps down from 10vw to 8.8vw, and also never exceeds 14.5% of the window height: the text is
+   bottom anchored and the core sits at 30% of the height, so on a short window a taller headline
+   would climb into the NW tag. Checked at 1024 to 2560 wide, 720 to 1200 high. */
+.hero {
+  --fs-display-xl: clamp(2.6rem, 13.4vw, 5rem);
+}
+
+@media (min-width: 640px) {
+  .hero {
+    --fs-display-xl: clamp(4.5rem, min(8.8vw, 14.5svh), 9.75rem);
+  }
+}
+
+.hero .hero-title {
+  letter-spacing: -0.035em;
+  line-height: 0.92;
+}
+
+/* After the rise there is no clip left: the keyframe `to` must not stay on the element, or it
+   would shave the overhang of the last letter. */
+.hero-line {
+  display: block;
+  width: fit-content;
+}
+
+.hero-line.anim-clip-rise {
+  animation-fill-mode: backwards;
+}
+
+@keyframes hero-core-in {
+  from {
+    transform: scale(0.6);
+    opacity: 0;
+  }
+}
+
+.hero-core__fig {
+  transform-origin: center;
+  animation: hero-core-in 900ms var(--ease-brand) backwards;
+}
+
+@keyframes hero-stop-land {
+  from {
+    transform: scale(0);
+  }
+}
+
+/* The only blinking caret on the page: the full stop. It lands at 940 ms (the last beat of the
+   1.1 s boot), then blinks in hard steps. Solid under reduced motion (animations are cancelled
+   in motion.css), and paused off screen and in a hidden tab (data-paused on the h1). */
+@keyframes hero-caret {
+  50% {
+    opacity: 0;
+  }
+}
+
+.hero-stop {
+  transform-origin: 50% 100%;
+  animation: hero-stop-land 160ms var(--ease-ui) 940ms backwards, hero-caret 1.06s steps(1, end) 1.1s infinite;
+}
+
+@keyframes hero-tag-in {
+  from {
+    opacity: 0;
+  }
+}
+
+.hero-tags > .hero-tag {
+  animation: hero-tag-in 300ms var(--ease-out) 700ms backwards;
+}
+
+/* ------------------------------------------------------------------ */
+/* The four tags                                                        */
+/* ------------------------------------------------------------------ */
+
+.hero-tags {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  pointer-events: none;
+}
+
+/* Each tag's origin is its arm tip (a zero-size box), so everything inside is relative to it. */
+.hero-tag {
+  position: absolute;
+  left: calc(var(--x) * 100%);
+  top: calc(var(--y) * 100%);
+  width: 0;
+  height: 0;
+}
+
+.hero-leader {
+  position: absolute;
+  left: 0;
+  top: 0;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.hero-leader__ghost {
+  stroke: var(--c-hair-strong);
+  stroke-width: 1;
+}
+
+/* The lit leader draws from the tip to the tag (200 ms) on hover, focus or a touch open. */
+.hero-leader__lit {
+  stroke: rgb(var(--signal));
+  stroke-width: 1;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  transition: stroke-dashoffset 200ms var(--ease-ui);
+}
+
+.hero-tag:hover .hero-leader__lit,
+.hero-tag:focus-within .hero-leader__lit,
+.hero-tag[data-open] .hero-leader__lit {
+  stroke-dashoffset: 0;
+}
+
+.hero-tag__btn {
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: flex;
+  align-items: center;
+  height: 44px;
+  padding: 0 12px;
+  border: 1px solid var(--c-hair-strong);
+  border-radius: 0;
+  background: rgb(var(--ground));
+  color: rgb(var(--ink-2));
+  font-family: 'Geist Mono Variable', 'Geist Mono Fallback', ui-monospace, monospace;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  text-align: left;
+  pointer-events: auto;
+  touch-action: manipulation;
+  transition: color var(--dur-ui) var(--ease-ui), border-color var(--dur-ui) var(--ease-ui);
+}
+
+.hero-tag:hover .hero-tag__btn,
+.hero-tag[data-open] .hero-tag__btn {
+  color: rgb(var(--ink));
+  border-color: rgb(var(--ink-3));
+}
+
+/* Axis mode (desktop): the tag sits on the arm's own line, past the tip, vertically centred on
+   the end of the leader. */
+.hero[data-tags='axis'] .hero-tag[data-p='nw'] .hero-tag__btn {
+  transform: translate(calc(-100% + var(--dx)), calc(-50% + var(--dy)));
+}
+.hero[data-tags='axis'] .hero-tag[data-p='ne'] .hero-tag__btn {
+  transform: translate(var(--dx), calc(-50% + var(--dy)));
+}
+.hero[data-tags='axis'] .hero-tag[data-p='se'] .hero-tag__btn {
+  transform: translate(var(--dx), calc(-50% + var(--dy)));
+}
+.hero[data-tags='axis'] .hero-tag[data-p='sw'] .hero-tag__btn {
+  transform: translate(calc(-100% + var(--dx)), calc(-50% + var(--dy)));
+}
+
+/* Stack mode (phone, tablet): straight above or below the tip, kept inside the screen. West tags
+   end just past the tip; east tags end a little further, so they never run off the right edge. */
+.hero[data-tags='stack'] .hero-tag[data-p='nw'] .hero-tag__btn {
+  transform: translate(calc(-100% + 10px), calc(-100% + var(--dy)));
+}
+.hero[data-tags='stack'] .hero-tag[data-p='ne'] .hero-tag__btn {
+  transform: translate(calc(-100% + 16px), calc(-100% + var(--dy)));
+}
+.hero[data-tags='stack'] .hero-tag[data-p='se'] .hero-tag__btn {
+  transform: translate(calc(-100% + 16px), var(--dy));
+}
+.hero[data-tags='stack'] .hero-tag[data-p='sw'] .hero-tag__btn {
+  transform: translate(calc(-100% + 10px), var(--dy));
+}
+
+/* Belt and braces: nothing in the hero may widen the page, hidden tags included. */
+.hero {
+  overflow-x: clip;
+}
+
+/* The full tag (three lines). Same corner as the short one, so it covers it and grows outward.
+   Its width is capped by the room between its corner and the edge of the screen (below), so the
+   module name wraps rather than leaving the viewport at 320 and at 1024. */
+.hero-tag__full {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: max-content;
+  min-width: calc(100% + 2px);
+  max-width: min(12.5rem, calc(100vw - 32px));
+  padding: 8px 12px;
+  margin: -1px;
+  border: 1px solid rgb(var(--ink-3));
+  background: rgb(var(--ground));
+  white-space: normal;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity var(--dur-ui) var(--ease-ui), visibility 0s linear var(--dur-ui);
+}
+
+/* The ring of a focused tag is drawn on the full tag, which covers the button. */
+.hero-tag__btn:focus-visible {
+  outline-color: transparent;
+}
+
+.hero-tag__btn:focus-visible .hero-tag__full {
+  outline: 2px solid rgb(var(--signal));
+  outline-offset: 3px;
+}
+
+.hero-tag__btn:hover .hero-tag__full,
+.hero-tag__btn:focus-visible .hero-tag__full,
+.hero-tag[data-open] .hero-tag__full {
+  opacity: 1;
+  visibility: visible;
+  transition-delay: 0s;
+}
+
+.hero[data-tags='axis'] [data-p='nw'] .hero-tag__full,
+.hero[data-tags='axis'] [data-p='sw'] .hero-tag__full {
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+}
+.hero[data-tags='axis'] [data-p='ne'] .hero-tag__full,
+.hero[data-tags='axis'] [data-p='se'] .hero-tag__full {
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.hero[data-tags='stack'] [data-p='nw'] .hero-tag__full,
+.hero[data-tags='stack'] [data-p='ne'] .hero-tag__full {
+  right: 0;
+  bottom: 0;
+}
+.hero[data-tags='stack'] [data-p='se'] .hero-tag__full,
+.hero[data-tags='stack'] [data-p='sw'] .hero-tag__full {
+  right: 0;
+  top: 0;
+}
+
+/* Room to the right of an east tag (axis mode): the screen width past P, less half the core, the
+   leader and a 12 px margin. Room to the left of a west tag (stack mode): P less half the core. */
+.hero[data-tags='axis'] [data-p='ne'] .hero-tag__full,
+.hero[data-tags='axis'] [data-p='se'] .hero-tag__full {
+  max-width: max(7rem, min(12.5rem, calc((1 - var(--px)) * 100vw - 0.425 * var(--core) - 61px)));
+}
+
+.hero[data-tags='stack'] [data-p='nw'] .hero-tag__full,
+.hero[data-tags='stack'] [data-p='sw'] .hero-tag__full {
+  max-width: max(7rem, min(12.5rem, calc(var(--px) * 100vw - 0.425 * var(--core) - 6px)));
+}
+
+/* ------------------------------------------------------------------ */
+/* RAW (doc 10.3): the same facts as a plain list. No hairlines, no core, tags in flow. */
+/* ------------------------------------------------------------------ */
+
+html[data-view='raw'] .hero-stage {
+  min-height: 0;
+}
+
+html[data-view='raw'] .hero-hairlines {
+  display: none;
+}
+
+html[data-view='raw'] .hero-core {
+  position: static;
+  width: auto;
+  height: auto;
+  padding: 16px var(--margin-x) 0;
+}
+
+html[data-view='raw'] .hero-tags {
+  position: static;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+html[data-view='raw'] .hero-tag {
+  position: static;
+  width: auto;
+  height: auto;
+}
+
+html[data-view='raw'] .hero-tag__btn {
+  position: static;
+  transform: none !important;
+}
+
+html[data-view='raw'] .hero-tag__full,
+html[data-view='raw'] .hero-leader {
+  display: none;
+}
+
+html[data-view='raw'] .hero-fig {
+  position: static;
+  left: auto;
+  width: auto;
+  max-width: none;
+  transform: none;
+  padding: 8px var(--margin-x) 0;
+  text-align: left;
+}
+
+/* No core to clear: the text starts at the top. */
+html[data-view='raw'] .hero[data-tags] .hero-stage {
+  padding-top: 32px;
+}

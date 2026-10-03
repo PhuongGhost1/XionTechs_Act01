@@ -24,6 +24,10 @@ export const hero = {
     { id: 'hero.tag.cloud', module: 'mod.cloud', placement: 'se', src: 'BRIEF' },
     { id: 'hero.tag.product', module: 'mod.product', placement: 'sw', src: 'BRIEF' },
   ],
+  // Accessible names and the one-line legend title (DRAFT: wording awaits sign-off).
+  tagsLabel: draft('hero.tags.label', 'The four modules'),
+  tagAction: draft('hero.tags.action', 'Open it in What we can deploy'),
+  legendLabel: draft('hero.legend.label', 'Evidence key'),
   figCaption: draft(
     'hero.figCaption',
     'FIG 01 · X CORE · NODES ARE THE SERVICES WE LIST · LAYOUT IS ARTWORK',

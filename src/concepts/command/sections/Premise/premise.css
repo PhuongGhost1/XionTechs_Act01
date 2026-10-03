@@ -1,0 +1,102 @@
+/*
+ * PREMISE (doc 4.3, M06). The word colour is a mix between --ink-dim and --ink driven by --lit,
+ * which the rAF handler in index.jsx sets per word. Unlit words are only ever large (the
+ * statement is 28 px and up), the one place --ink-dim is allowed (doc 5.1).
+ */
+
+/* Phone: the core first, small, at the right; text below. Wide: statement left, core right third. */
+.premise__grid {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.premise__core {
+  order: -1;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.premise__anchor {
+  width: 140px;
+  height: 140px;
+}
+
+@media (min-width: 360px) {
+  .premise__anchor {
+    width: 160px;
+    height: 160px;
+  }
+}
+
+@media (min-width: 768px) {
+  .premise__anchor {
+    width: 200px;
+    height: 200px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .premise__grid {
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+    align-items: center;
+    gap: var(--gutter);
+  }
+
+  .premise__core {
+    order: 0;
+    justify-content: center;
+  }
+
+  .premise__anchor {
+    width: 240px;
+    height: 240px;
+  }
+}
+
+@media (min-width: 1280px) {
+  .premise__anchor {
+    width: 280px;
+    height: 280px;
+  }
+}
+
+/* The words. No JS means --lit is unset and falls back to 1: fully lit. */
+.premise-word {
+  color: rgb(var(--ink));
+  color: color-mix(in srgb, rgb(var(--ink)) calc(var(--lit, 1) * 100%), rgb(var(--ink-dim)));
+}
+
+/* The yellow full stop appears when the last word is lit (its own --lit reaches 1 last). */
+.premise-stop {
+  display: inline-block;
+  opacity: var(--lit, 1);
+  transform: scale(calc(0.5 + 0.5 * var(--lit, 1)));
+  transform-origin: 50% 100%;
+}
+
+/* Everything lit, no information lost: reduced motion, the MOTION toggle off, RAW. The inline
+   --lit set by the handler loses to !important in a stylesheet. */
+html[data-motion='off'] .premise-word,
+html[data-motion='off'] .premise-stop,
+html[data-view='raw'] .premise-word,
+html[data-view='raw'] .premise-stop {
+  --lit: 1 !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html:not([data-motion='on']) .premise-word,
+  html:not([data-motion='on']) .premise-stop {
+    --lit: 1 !important;
+  }
+}
+
+/* RAW: plain flow, no core. (raw.css already hides the anchor.) */
+html[data-view='raw'] .premise__grid {
+  display: block;
+}
+
+html[data-view='raw'] .premise__core {
+  display: none;
+}

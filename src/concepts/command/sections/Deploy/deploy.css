@@ -1,0 +1,524 @@
+/*
+ * DEPLOY (doc 4.4, M07, M16). Module rows, the sticky instrument, the service checkboxes.
+ * Colours are tokens only. Arm and row changes are colour only (160 ms): nothing else moves.
+ *
+ * Markup: .deploy__grid > .deploy-sticky, then four .deploy__item, each holding a .deploy-row (the
+ * button) and its .svc-panel. Phone and tablet: a stack. From 1024 px: a grid, with .deploy__item
+ * dissolved (display: contents) so the rows fill the left column and the panels are lifted into
+ * the right one, under the instrument.
+ */
+
+/* ------------------------------------------------------------------ */
+/* Narrow: the instrument is a sticky bar, each item is a block        */
+/* ------------------------------------------------------------------ */
+
+.deploy__grid {
+  display: flex;
+  flex-direction: column;
+  /* The instrument's size, shared by the figure and by the offset of the panels under it. */
+  --deploy-core: 160px;
+}
+
+@media (max-width: 359px) {
+  .deploy__grid {
+    --deploy-core: 140px;
+  }
+}
+
+@media (min-width: 768px) {
+  .deploy__grid {
+    --deploy-core: 200px;
+  }
+}
+
+/* Spans the full width, so rows slide under it. */
+.deploy-sticky {
+  position: sticky;
+  top: var(--header-h);
+  z-index: 20;
+  margin-inline: calc(var(--margin-x) * -1);
+  padding: 8px var(--margin-x);
+  background: rgb(var(--ground));
+  border-bottom: 1px solid var(--c-hair);
+}
+
+.deploy-instrument {
+  display: flex;
+  align-items: flex-end;
+  gap: 16px;
+}
+
+.deploy-frame {
+  flex: none;
+}
+
+.deploy-anchor {
+  width: var(--deploy-core);
+  height: var(--deploy-core);
+}
+
+.deploy-readout {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 2px;
+  overflow-wrap: anywhere;
+}
+
+.deploy-readout__count {
+  margin-top: 10px;
+}
+
+/* The item: a row and its services, with the active marker (a 2 px bar on the panel colour, which
+   is the token for an active or selected panel). Opacity and colour only. */
+.deploy__item {
+  position: relative;
+  display: flex;
+  min-height: 34vh;
+  min-height: 34svh;
+  flex-direction: column;
+  justify-content: center;
+  gap: 16px;
+  padding: 24px 0 24px 16px;
+  border-top: 1px solid var(--c-hair);
+  transition: background-color var(--dur-ui) var(--ease-ui);
+}
+
+.deploy__item:last-of-type {
+  border-bottom: 1px solid var(--c-hair);
+}
+
+.deploy__item::before,
+.deploy-row::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: rgb(var(--signal));
+  opacity: 0;
+  transition: opacity var(--dur-ui) var(--ease-ui);
+}
+
+.deploy__item[data-active] {
+  background: rgb(var(--panel));
+}
+
+.deploy__item[data-active]::before {
+  opacity: 1;
+}
+
+/* The row's own box only exists on wide screens (below, it is just a wrapper). */
+.deploy-row::before {
+  display: none;
+}
+
+/* ------------------------------------------------------------------ */
+/* Wide: rows left, instrument and services sticky on the right        */
+/* ------------------------------------------------------------------ */
+
+@media (min-width: 1024px) {
+  .deploy__grid {
+    display: grid;
+    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+    column-gap: calc(var(--gutter) * 2);
+    align-items: start;
+    --deploy-core: max(200px, min(300px, 34vh));
+    --deploy-core: max(200px, min(300px, 34svh));
+    /* Room kept under the figure for the tallest panel (see .deploy-sticky). */
+    --deploy-tail: 270px;
+  }
+
+  /* Sticky boxes in one grid are all held inside the grid container, so when the rows end the
+     figure and the panel are pushed up against the same bottom edge. The figure's box therefore
+     includes the room the panel needs under it: the figure leaves first, the panel sits in the
+     reserved space, and they never overlap. The reserved part is empty and lets pointers through
+     to the panel, which comes later in the DOM and so paints above it. */
+  .deploy-sticky {
+    height: calc(var(--deploy-core) + 32px + var(--deploy-tail) + 8px);
+    grid-column: 2;
+    grid-row: 1 / span 4;
+    top: calc(var(--header-h) + 24px);
+    margin-inline: 0;
+    padding: 4px;
+    background: none;
+    border-bottom: 0;
+  }
+
+  .deploy-instrument {
+    gap: 24px;
+  }
+
+  /* The item dissolves: its row goes to the left column, its panel to the right. Its own marker
+     must go too: a pseudo-element of a display: contents box would still be drawn. */
+  .deploy__item {
+    display: contents;
+  }
+
+  .deploy__item::before {
+    display: none;
+  }
+
+  .deploy-row {
+    position: relative;
+    grid-column: 1;
+    display: flex;
+    min-height: 34vh;
+    min-height: 34svh;
+    flex-direction: column;
+    justify-content: center;
+    padding: 24px 0 24px 24px;
+    border-top: 1px solid var(--c-hair);
+    transition: background-color var(--dur-ui) var(--ease-ui);
+  }
+
+  .deploy__item:last-of-type .deploy-row {
+    border-bottom: 1px solid var(--c-hair);
+  }
+
+  .deploy-row::before {
+    display: block;
+  }
+
+  .deploy-row[data-active] {
+    background: rgb(var(--panel));
+  }
+
+  .deploy-row[data-active]::before {
+    opacity: 1;
+  }
+
+  /* All four panels share one cell under the instrument; only the active one is shown (hidden). */
+  .deploy__item > .svc-panel {
+    grid-column: 2;
+    grid-row: 1 / span 4;
+    align-self: start;
+    position: sticky;
+    top: calc(var(--header-h) + 24px + var(--deploy-core) + 24px);
+    margin-top: calc(var(--deploy-core) + 32px);
+    padding: 20px 4px 0;
+    border-top: 1px solid var(--c-hair);
+  }
+
+  /* A short window cannot fit a tall panel under the instrument: the list scrolls inside. */
+  .deploy__item > .svc-panel .svc-list {
+    max-height: calc(100vh - var(--header-h) - var(--dock-h) - var(--deploy-core) - 120px);
+    max-height: calc(100svh - var(--header-h) - var(--dock-h) - var(--deploy-core) - 120px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+    padding: 4px;
+    margin: -4px;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* The row button                                                       */
+/* ------------------------------------------------------------------ */
+
+.deploy-row__btn {
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  gap: 12px;
+  padding: 0;
+  border: 0;
+  background: none;
+  text-align: left;
+  color: rgb(var(--ink-3));
+  transition: color var(--dur-ui) var(--ease-ui);
+}
+
+.deploy-row__btn:hover,
+[data-active] .deploy-row__btn {
+  color: rgb(var(--ink-2));
+}
+
+.deploy-row__meta {
+  display: flex;
+  gap: 16px;
+  font-family: 'Geist Mono Variable', 'Geist Mono Fallback', ui-monospace, monospace;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* The row word: sentence case, one line where it fits (doc 5.2). Inactive rows are ink-3, never
+   ink-dim (doc 10.2). */
+.deploy-row__title {
+  display: block;
+  font-family: 'Geist Variable', 'Geist Fallback', system-ui, sans-serif;
+  font-size: var(--fs-row);
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  overflow-wrap: break-word;
+  color: rgb(var(--ink-3));
+  transition: color var(--dur-ui) var(--ease-ui);
+}
+
+.deploy-row__btn:hover .deploy-row__title,
+[data-active] .deploy-row__title {
+  color: rgb(var(--ink));
+}
+
+@media (min-width: 1024px) {
+  /* The left column is 7 of 12: a little under the token so "Product development" holds a line. */
+  .deploy-row__title {
+    font-size: clamp(2rem, 4.5vw, 4.75rem);
+  }
+}
+
+.deploy-row__def {
+  display: block;
+  max-width: 44ch;
+  font-size: var(--fs-body);
+  line-height: 1.5;
+}
+
+/* ------------------------------------------------------------------ */
+/* Services: real checkboxes                                            */
+/* ------------------------------------------------------------------ */
+
+.svc-panel {
+  min-width: 0;
+}
+
+.svc-fieldset {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+/* Narrow: the panel sits under the definition, set off by a dashed rule. */
+@media (max-width: 1023px) {
+  .deploy__item > .svc-panel {
+    padding-top: 16px;
+    border-top: 1px dashed var(--c-hair-strong);
+  }
+}
+
+.svc-panel__legend {
+  padding: 0;
+  margin-bottom: 4px;
+  font-family: 'Geist Mono Variable', 'Geist Mono Fallback', ui-monospace, monospace;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgb(var(--ink-3));
+}
+
+.svc-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.svc {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  column-gap: 12px;
+  padding-block: 6px;
+}
+
+.svc + .svc {
+  border-top: 1px solid var(--c-hair);
+}
+
+/* The real input stays in the page for keyboards and screen readers; the label draws the box. */
+.svc__input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.svc__label {
+  display: flex;
+  min-height: 44px;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+}
+
+.svc__box {
+  display: grid;
+  flex: none;
+  width: 20px;
+  height: 20px;
+  place-items: center;
+  border: 1px solid rgb(var(--ink-3));
+  color: rgb(var(--on-signal));
+  /* M16: a 2 px yellow ring flashes on the control that was just toggled. */
+  outline: 2px solid transparent;
+  outline-offset: 3px;
+  transition: background-color var(--dur-ui) var(--ease-ui), border-color var(--dur-ui) var(--ease-ui),
+    outline-color var(--dur-ui) var(--ease-ui);
+}
+
+.svc__label:hover .svc__box {
+  border-color: rgb(var(--ink-2));
+}
+
+.svc__input:checked + .svc__label .svc__box {
+  background: rgb(var(--signal));
+  border-color: rgb(var(--signal));
+}
+
+.svc__label[data-flash] .svc__box,
+.svc__input:focus-visible + .svc__label .svc__box {
+  outline-color: rgb(var(--signal));
+}
+
+.svc__tick {
+  width: 12px;
+  height: 12px;
+  opacity: 0;
+  transition: opacity var(--dur-ui) var(--ease-ui);
+}
+
+.svc__input:checked + .svc__label .svc__tick {
+  opacity: 1;
+}
+
+.svc__name {
+  font-size: 1.0625rem;
+  font-weight: 500;
+  line-height: 1.3;
+  color: rgb(var(--ink));
+}
+
+.svc__chip {
+  align-self: center;
+}
+
+/* Platforms and what each service covers, under the name, aligned with it. */
+.svc__sub {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 0 0 8px 32px;
+}
+
+.svc__group {
+  display: flex;
+  align-items: baseline;
+  gap: 4px 14px;
+  font-family: 'Geist Mono Variable', 'Geist Mono Fallback', ui-monospace, monospace;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: rgb(var(--ink-2));
+}
+
+.svc__items {
+  display: flex;
+  min-width: 0;
+  flex-wrap: wrap;
+  gap: 2px 14px;
+}
+
+.svc__lbl {
+  flex: none;
+  min-width: 6.5rem;
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgb(var(--ink-3));
+}
+
+.svc__leaf {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* A leaf is a 3 px dot (doc 5.4). */
+.svc__dot {
+  display: inline-block;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: rgb(var(--ink-3));
+}
+
+@media (max-width: 479px) {
+  .svc__group {
+    flex-direction: column;
+    gap: 2px;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* RAW (doc 10.3): every panel in the page, no sticky, no pins          */
+/* ------------------------------------------------------------------ */
+
+html[data-view='raw'] .deploy__grid {
+  display: block;
+}
+
+html[data-view='raw'] .deploy-sticky {
+  position: static;
+  margin-inline: 0;
+  padding: 0;
+  border-bottom: 0;
+}
+
+html[data-view='raw'] .deploy__item,
+html[data-view='raw'] .deploy__item[data-active] {
+  display: block;
+  min-height: 0;
+  padding-left: 0;
+  background: none;
+}
+
+html[data-view='raw'] .deploy__item::before,
+html[data-view='raw'] .deploy-row::before {
+  display: none;
+}
+
+html[data-view='raw'] .deploy-row[data-active] {
+  background: none;
+}
+
+html[data-view='raw'] .deploy-row {
+  min-height: 0;
+  padding: 0;
+}
+
+html[data-view='raw'] .deploy__item > .svc-panel {
+  position: static;
+  margin-top: 8px;
+  padding: 12px 0 0;
+  border-top: 1px dashed var(--c-hair-strong);
+}
+
+html[data-view='raw'] .deploy__item > .svc-panel .svc-list {
+  max-height: none;
+  overflow: visible;
+}
+
+html[data-view='raw'] .svc-panel[hidden] {
+  display: block;
+}
+
+/* RAW shows which module each legend belongs to (it is screen-reader text everywhere else). */
+html[data-view='raw'] .svc-panel__legend .sr-only {
+  position: static;
+  width: auto;
+  height: auto;
+  margin: 0;
+  overflow: visible;
+  clip: auto;
+  white-space: normal;
+}
