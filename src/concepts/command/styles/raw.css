@@ -1,24 +1,55 @@
 /*
- * READ | RAW (doc 10.3). html[data-view='raw'] re-styles the same DOM as a plain mono spec sheet:
- * no canvas, no pins, display type capped at 28 px, lists with dot leaders, screenshots as
- * framed images. It is the accessibility floor and the proof that the page works without 3D.
+ * READ | RAW (doc 10.3). html[data-view='raw'] re-styles the SAME DOM as a plain mono spec sheet:
+ * no canvas, no pins, no decoration, display type at 28 px or less, one reading column, sections
+ * as dot-leader lists with dashed rules between them, screenshots as plainly framed images. It
+ * is the accessibility floor and the proof that the page works without the 3D.
  *
- * Selectors carry html[data-view='raw'] so they beat the Tailwind utilities (which are class
- * selectors) without !important. WP1 owns this file and extends it per section; sections mark
- * decoration with data-decor and let RAW hide it.
+ * How it stays complete whatever the sections do:
+ *   - It removes things (decor, canvas, pins, motion) and re-scales things (the type tokens,
+ *     the section gap). It never adds copy and never hides a fact: meaningful content is real
+ *     DOM text, and decoration is marked data-decor by the section that owns it.
+ *   - Everything that was scroll-linked shows its final, fully lit state.
+ *   - Selectors carry html[data-view='raw'] so they outrank Tailwind utilities and component CSS
+ *     without !important (except where a section's own rule is itself !important).
+ * The header and the dock stay (they hold the READ | RAW switch and the page status).
  */
+
+/* ------------------------------------------------------------------ */
+/* Tokens: one scale for the whole sheet                               */
+/* ------------------------------------------------------------------ */
+
+html[data-view='raw'] {
+  /* Display sizes come from these variables, so anything built on them follows. */
+  --fs-display-xl: 28px;
+  --fs-finale: 28px;
+  --fs-statement: 24px;
+  --fs-h2: 28px;
+  --fs-row: 22px;
+  --fs-step: 22px;
+  --fs-body: 0.9375rem;
+  /* Stations sit closer together: this is a document, not a stage. */
+  --station-gap: 48px;
+  /* The phone CTA bar is not drawn in RAW, so nothing is reserved for it. */
+  --bar-h: 0px;
+  scroll-behavior: auto;
+}
+
+/* ------------------------------------------------------------------ */
+/* Remove: decoration, canvas, pins, motion                            */
+/* ------------------------------------------------------------------ */
 
 /* Decorative layers go. Meaningful facts are always real DOM text, so nothing is lost. */
 html[data-view='raw'] canvas,
 html[data-view='raw'] [data-decor],
-html[data-view='raw'] [data-core-anchor] svg,
+html[data-view='raw'] [data-core-anchor],
 html[data-view='raw'] .bg-dots,
-html[data-view='raw'] .hatch {
+html[data-view='raw'] .hatch:not([data-chip]),
+html[data-view='raw'] [data-signal-line] {
   display: none !important;
 }
 
-/* The anchors themselves collapse so they leave no empty box. */
-html[data-view='raw'] [data-core-anchor] {
+/* The phone CTA bar would cover the sheet; the hero and the composer carry the CTA. */
+html[data-view='raw'] [data-fixed-cta] {
   display: none;
 }
 
@@ -29,13 +60,33 @@ html[data-view='raw'] .track--pin {
   min-height: 0;
 }
 
-html[data-view='raw'] .stage {
+html[data-view='raw'] .stage,
+html[data-view='raw'] .sticky {
   position: static;
   height: auto;
+  min-height: 0;
   overflow: visible;
 }
 
-/* Everything reads as mono and nothing is taller than 28 px. */
+/* No motion: reveals, rolls, scans and loops all stand at their final state. */
+html[data-view='raw'] *,
+html[data-view='raw'] *::before,
+html[data-view='raw'] *::after {
+  animation: none !important;
+  transition: none !important;
+  scroll-behavior: auto !important;
+}
+
+html[data-view='raw'] [data-reveal],
+html[data-view='raw'] [data-reveal='out'] {
+  opacity: 1;
+  transform: none;
+}
+
+/* ------------------------------------------------------------------ */
+/* Type: one mono voice                                                */
+/* ------------------------------------------------------------------ */
+
 html[data-view='raw'] body {
   font-family: 'Geist Mono Variable', 'Geist Mono Fallback', ui-monospace, monospace;
   font-size: 0.9375rem;
@@ -56,23 +107,80 @@ html[data-view='raw'] [class*='text-step'] {
   line-height: 1.15;
   letter-spacing: -0.02em;
   font-weight: 500;
+  /* Display type is uppercase only in the hero, the finale and the steps (doc 5.2); keep what it is. */
+  text-wrap: balance;
 }
 
-/* Reveal and word-lighting states do not apply: all text is lit and visible. */
-html[data-view='raw'] [data-reveal],
-html[data-view='raw'] [data-reveal='out'] {
-  opacity: 1;
-  transform: none;
+html[data-view='raw'] [class*='text-statement'],
+html[data-view='raw'] [class*='text-row'],
+html[data-view='raw'] [class*='text-step'] {
+  font-size: 22px;
 }
 
-/* Spec rows and lists keep their dot leaders; plain lists get a mono marker. */
+/* Display type that a section sizes itself (a clamp() or a vw size in a class, or its own CSS
+   class) is held to the same scale. Add a line here when a section ships a new display size;
+   the audit is: no text above 28 px in RAW. */
+html[data-view='raw'] [class*='text-[clamp'],
+html[data-view='raw'] [class*='text-['][class*='vw]'],
+html[data-view='raw'] .deploy-row__title {
+  font-size: 22px;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+/* Sentences are not stretched into columns of 100+ characters. */
+html[data-view='raw'] main p {
+  max-width: 78ch;
+}
+
+/* ------------------------------------------------------------------ */
+/* Layout: one reading column, dashed rules between stations           */
+/* ------------------------------------------------------------------ */
+
+/* Flush left under the logo, like a document: the tags and captions that sections place from the
+   left margin then line up with the text. */
+html[data-view='raw'] .column {
+  max-width: 76rem;
+  margin-inline: 0;
+}
+
+html[data-view='raw'] main > section {
+  border-top: 1px dashed var(--c-hair-strong);
+}
+
+html[data-view='raw'] main > section:first-child {
+  border-top: 0;
+}
+
+/* Station padding comes from --station-gap (48 px here). Sections that pad themselves with
+   viewport heights lose that in RAW. */
+html[data-view='raw'] main > section > .column {
+  padding-block: var(--station-gap);
+}
+
+html[data-view='raw'] main {
+  padding-bottom: var(--dock-h);
+}
+
+/* ------------------------------------------------------------------ */
+/* Lists and facts                                                     */
+/* ------------------------------------------------------------------ */
+
 html[data-view='raw'] ol,
 html[data-view='raw'] ul {
   list-style: none;
 }
 
+/* Spec rows and lists keep their dot leaders. */
 html[data-view='raw'] [data-leader] {
   border-bottom: 1px dotted var(--c-hair-strong);
+}
+
+/* Links in running text are underlined (colour is not the only cue). Buttons and nav keep their look. */
+html[data-view='raw'] main a:not([data-fill]):not([class*='border']):not([class*='group']) {
+  text-decoration: underline;
+  text-decoration-color: var(--c-hair-strong);
+  text-underline-offset: 4px;
 }
 
 /* Screenshots stay, as plain framed images. */
@@ -80,9 +188,4 @@ html[data-view='raw'] img:not([data-logo]) {
   max-width: 100%;
   height: auto;
   border: 1px solid var(--c-hair-strong);
-}
-
-/* The mobile bar and any floating chrome would cover the sheet. */
-html[data-view='raw'] [data-fixed-cta] {
-  position: static;
 }

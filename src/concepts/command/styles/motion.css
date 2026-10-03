@@ -226,9 +226,39 @@
   transition-duration: var(--dur-ui);
 }
 
-/* Loops stop off screen and while the tab is hidden: the owner sets data-paused. */
-[data-paused],
-[data-paused] * {
+/* Boot, last beat (M01): the dock fades in. Opacity only; at rest it is fully visible. */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+.anim-fade-in {
+  animation: fade-in var(--dur-reveal) var(--ease-out) both;
+}
+
+/*
+ * Pausing. Three markers, one rule:
+ *   data-paused        set by whoever owns a PAUSE control (the failure beat, the line)
+ *   data-offscreen     set by runtime/ambient.js on a loop that is outside the viewport
+ *   html[data-tab-hidden]  set by runtime/ambient.js while the tab is hidden
+ * A paused animation keeps its place and resumes from it. The selectors carry an id-weight
+ * `:not(#pause)` so they outrank ANY other rule that sets the `animation` shorthand (which would
+ * otherwise reset animation-play-state to running), and the declaration is !important so they
+ * also win against a later `animation` rule of the same weight. Nothing but another !important
+ * rule with an id selector could beat them.
+ */
+html:not(#pause) [data-paused],
+html:not(#pause) [data-paused] *,
+html:not(#pause) [data-paused]::before,
+html:not(#pause) [data-paused]::after,
+html:not(#pause) [data-offscreen],
+html:not(#pause) [data-offscreen] *,
+html:not(#pause) [data-offscreen]::before,
+html:not(#pause) [data-offscreen]::after,
+html[data-tab-hidden]:not(#pause) *,
+html[data-tab-hidden]:not(#pause) *::before,
+html[data-tab-hidden]:not(#pause) *::after {
   animation-play-state: paused !important;
 }
 

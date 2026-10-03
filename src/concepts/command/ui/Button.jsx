@@ -1,9 +1,11 @@
 import { cx } from './cx.js'
 
-// <Button variant="primary|ghost" arrow="right|down" href flow>: a system command (doc 4.9, M15).
-// 48 px high, 0 radius, mono caps. Renders <a> when `href` is given, otherwise <button type=button>.
+// <Button variant="primary|ghost|outline" size="md|sm" arrow="right|down" href flow>: a system
+// command (doc 4.9, M15). 0 radius, mono caps. 48 px high (`md`), or 44 px (`sm`, the header's
+// size: still a full 44 px target). Renders <a> when `href` is given, otherwise <button type=button>.
 //   primary  yellow fill, navy text. One per viewport.
-//   ghost    1 px outline, white text.
+//   ghost    1 px neutral outline, white text.
+//   outline  1 px yellow outline, white text: the header CTA before the WORK station (doc 4.9).
 //   arrow    a drawn arrow whose stem extends on hover and focus (160 ms, transform only).
 //   flow     adds data-flow: hovering or focusing it raises the core's data flow (runtime/flow.js).
 // The label is the child; arrows are drawn, never typed (the font has no arrow glyphs in range).
@@ -40,9 +42,15 @@ function Arrow({ direction }) {
 const LOOK = {
   primary: 'bg-signal text-onSignal',
   ghost: 'border border-hairStrong text-ink hover:bg-panel focus-visible:bg-panel',
+  outline: 'border border-signal text-ink hover:bg-signalWash focus-visible:bg-signalWash',
 }
 
-export function Button({ variant = 'primary', arrow, href, flow = false, className, children, ...rest }) {
+const SIZE = {
+  md: 'h-12 px-6',
+  sm: 'h-11 px-4',
+}
+
+export function Button({ variant = 'primary', size = 'md', arrow, href, flow = false, className, children, ...rest }) {
   const Tag = href ? 'a' : 'button'
   const tagProps = href ? { href } : { type: 'button' }
   return (
@@ -51,8 +59,9 @@ export function Button({ variant = 'primary', arrow, href, flow = false, classNa
       data-fill={variant === 'primary' ? 'signal' : undefined}
       data-flow={flow ? '' : undefined}
       className={cx(
-        'group inline-flex h-12 items-center gap-3 rounded-none px-6 font-mono text-label font-medium uppercase',
+        'group inline-flex items-center gap-3 rounded-none font-mono text-label font-medium uppercase',
         'transition-colors duration-ui ease-ui motion-off:transition-none',
+        SIZE[size] ?? SIZE.md,
         LOOK[variant] ?? LOOK.primary,
         className,
       )}

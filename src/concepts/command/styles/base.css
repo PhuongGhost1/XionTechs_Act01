@@ -3,8 +3,25 @@
  * helper classes (.bg-dots .hatch .dash .track .stage) that Tailwind utilities cannot express.
  * Colours come from tokens.css only.
  */
+/*
+ * The height of the fixed bottom CTA bar (frame/MobileBar.jsx). It stacks on top of the dock on
+ * phones and does not exist from 768 px up. It is reserved at the end of the page and under every
+ * pinned stage, whether or not the bar is showing, so the layout never moves with it and the bar
+ * never covers text at rest.
+ */
+:root {
+  --bar-h: 56px;
+}
+
+@media (min-width: 768px) {
+  :root {
+    --bar-h: 0px;
+  }
+}
+
 @layer base {
   html {
+    -webkit-tap-highlight-color: transparent;
     background: rgb(var(--ground));
     color-scheme: dark;
     -webkit-text-size-adjust: 100%;
@@ -152,7 +169,10 @@
 }
 
 .track[data-track='standby'] {
-  --track-h: var(--track-standby);
+  /* The hero fills exactly the space between the header and the dock (doc 5.3 "100 svh" is the
+     viewport, of which the frame takes its share), so its last line is never behind the dock.
+     It is a minimum: a tall headline at 200% zoom still grows the track. */
+  --track-h: calc(100svh - var(--header-h) - var(--dock-h));
 }
 .track[data-track='premise'] {
   --track-h: var(--track-premise);
@@ -173,12 +193,12 @@
   --track-h: var(--track-done);
 }
 
-/* The pinned stage: native sticky, one viewport minus the frame. svh so a mobile toolbar does
-   not make it jitter. */
+/* The pinned stage: native sticky, one viewport minus the frame (header, dock and, on phones,
+   the CTA bar). svh so a mobile toolbar does not make it jitter. */
 .stage {
   position: sticky;
   top: var(--header-h);
-  height: calc(100svh - var(--header-h) - var(--dock-h));
+  height: calc(100svh - var(--header-h) - var(--dock-h) - var(--bar-h));
   overflow: clip;
 }
 
