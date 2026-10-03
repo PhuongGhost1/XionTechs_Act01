@@ -3,6 +3,18 @@
 Written so someone can continue on another machine with no memory of the session that built it.
 Read this first, then `00-direction.md` (the design, the law) and `01-contract-notes.md` (exact APIs).
 
+## 0. Status update (2026-10-03, later the same day)
+
+Section 4.1 (all known defects), the 10-lens review (4.2, run as 5 combined lenses, findings fixed) and 4.3 housekeeping
+are DONE and committed. Lint clean, 811 tests, build ok, `node scripts/command-qa.mjs` passes at 320 to 1920 (CSS 13.95 kB
+of 14, WebGL chunk 148 kB of 180, entry JS 46 kB). Page at 1440x900 is about 12,300 px (target 10,350): ON FILE 2,810 px
+(a 697 px capture plus its spec sheet cannot fit one screen) and mobile DEPLOY about 2,230 px remain long. Still open:
+the team decisions listed in PROMPT_LOG (station name "SELECTED DEPLOYMENTS", unverified process/module wording without a
+DRAFT mark in production), the WebGL canvas has been verified only through probes and software WebGL (a human should look at
+it on a real GPU with `?tier=high`), and the header MOTION control is cut at 200% text on 768 and 1024 px. The decisions in
+section 5 and the questions in section 6 were confirmed by the team (see `content/TODO.md` for what is still pending).
+Sections 3 to 4 below describe the state BEFORE this pass; keep them for history.
+
 ## 1. What this is
 
 A fresh redesign ("zero-state") of the XionTechs landing page as a separate page, `/concepts/command/`,
