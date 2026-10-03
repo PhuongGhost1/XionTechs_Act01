@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en" style="background:#071B34;color-scheme:dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>XionTechs | X / Command concept</title>
+    <meta
+      name="description"
+      content="XionTechs is an engineering and AI team. Custom software, intelligent systems, cloud platforms and staffing. Concept page X / Command."
+    />
+    <meta name="theme-color" content="#071B34" />
+    <meta name="color-scheme" content="dark" />
+    <meta name="robots" content="noindex" />
+    <!-- No favicon request until the identity is regenerated (design doc, open question 14). -->
+    <link rel="icon" href="data:," />
+    <!-- Geist, the display and body face. Vite rewrites this URL to the hashed file in the build. -->
+    <link
+      rel="preload"
+      href="/node_modules/@fontsource-variable/geist/files/geist-latin-wght-normal.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <script>
+      // Pre-paint state (design doc 10.3, 11.3 item 3). Runs before first paint so READ | RAW and
+      // MOTION never flash. It writes the same two attributes as contract/attributes.js and reads
+      // the same keys (xt-view, xt-motion). Every storage access is guarded: it can throw.
+      ;(function () {
+        var d = document.documentElement
+        var store = function (key) {
+          try {
+            return localStorage.getItem(key)
+          } catch (e) {
+            return null
+          }
+        }
+        var view = 'read'
+        try {
+          if (new URLSearchParams(location.search).get('view') === 'raw') view = 'raw'
+        } catch (e) {}
+        if (view === 'read' && store('xt-view') === 'raw') view = 'raw'
+        var reduced = false
+        try {
+          reduced = matchMedia('(prefers-reduced-motion: reduce)').matches
+        } catch (e) {}
+        var saved = store('xt-motion')
+        // Off when the OS asks for reduced motion, unless the visitor deliberately turned it on.
+        var motion = reduced ? (saved === 'on' ? 'on' : 'off') : saved === 'off' ? 'off' : 'on'
+        d.setAttribute('data-view', view)
+        d.setAttribute('data-motion', motion)
+      })()
+    </script>
+  </head>
+  <body>
+    <noscript>
+      <!-- Without JavaScript nothing is hidden, and the facts are here (design doc 10.2). The
+           service names and contact details mirror content/; content.test.js keeps them in step. -->
+      <style>
+        [data-reveal] {
+          opacity: 1 !important;
+          transform: none !important;
+        }
+      </style>
+      <main class="mx-auto flex max-w-2xl flex-col gap-6 px-4 py-12 text-ink2">
+        <h1 class="font-display text-h2 font-medium text-ink">XionTechs</h1>
+        <p>An engineering and AI team. This page needs JavaScript for its interactive parts. What we offer and how to reach us:</p>
+        <ul class="flex flex-col gap-1 text-ink">
+          <li>Custom App Development</li>
+          <li>Low-code Solutions</li>
+          <li>AI-Powered Solutions</li>
+          <li>AI-Driven Analytics</li>
+          <li>Cloud Computing</li>
+          <li>Product Engineering</li>
+          <li>Product Co-Creation</li>
+          <li>Staffing Services</li>
+        </ul>
+        <p class="font-mono text-data text-ink">
+          <a href="mailto:contact@xiontechs.com">contact@xiontechs.com</a><br />
+          <a href="tel:+14693229899">+1 469 322 9899</a><br />
+          <a href="tel:+84908107552">+84 908 107 552</a>
+        </p>
+      </main>
+    </noscript>
+    <div id="root"></div>
+    <script type="module" src="/src/concepts/command/main.jsx"></script>
+  </body>
+</html>
