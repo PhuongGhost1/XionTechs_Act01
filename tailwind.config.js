@@ -2,7 +2,7 @@
 const token = (name) => `rgb(var(--${name}) / <alpha-value>)`
 
 export default {
-  content: ['./index.html', './src/**/*.{js,jsx}'],
+  content: ['./index.html', './src/**/*.{js,jsx}', '!./src/concepts/**'],
   theme: {
     extend: {
       colors: {
