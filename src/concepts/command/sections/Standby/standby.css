@@ -7,6 +7,9 @@
  *   --core      the side of the core's square box
  *   --x --y     (on each tag) the arm tip as fractions of the core box
  *   --dx --dy   (on each tag) where its leader line ends, relative to the tip
+ * Each tag also gets two flags from its placement (nw ne se sw): --w is 1 on the west tags, --n is
+ * 1 on the north tags. Every placement rule below is ONE rule that reads those flags, instead of
+ * one rule per placement.
  * Colours are tokens only. Only transform, opacity, clip-path and stroke-dashoffset move.
  */
 
@@ -14,11 +17,10 @@
 /* Layout                                                               */
 /* ------------------------------------------------------------------ */
 
-/* The visible hero: the viewport between the header and the dock. The legend is pushed to its
-   bottom (margin-top: auto in index.jsx); the text starts where the next rules say. */
+/* The visible hero: the viewport between the header and the dock (--track-h, base.css). The legend
+   is pushed to its bottom (margin-top: auto in index.jsx); the text starts where the next rules say. */
 .hero-stage {
-  min-height: calc(100vh - var(--header-h) - var(--dock-h));
-  min-height: calc(100svh - var(--header-h) - var(--dock-h));
+  min-height: var(--track-h);
   padding-bottom: 20px;
 }
 
@@ -27,8 +29,13 @@
    longest word never runs into a tag, and the hairlines cross at the end of the word. The 33 px is
    the label above the headline (16.8 px line plus the 16 px gap). */
 .hero[data-tags='axis'] .hero-stage {
-  padding-top: calc(var(--py) * 100vh - var(--header-h) - 0.46 * var(--fs-display-xl) - 33px);
   padding-top: calc(var(--py) * 100svh - var(--header-h) - 0.46 * var(--fs-display-xl) - 33px);
+}
+
+/* Phone and tablet: the text sits under the core, its tags and the caption, never beside them.
+   The stage may grow past one screen on a short window; that is the honest outcome. */
+.hero[data-tags='stack'] .hero-stage {
+  padding-top: calc(var(--py) * 100svh - var(--header-h) + var(--core) / 2 + 92px);
 }
 
 /* The hairlines are drawn in viewport pixels from the very top of the page, so they start
@@ -51,7 +58,6 @@
   width: var(--core);
   height: var(--core);
   left: calc(var(--px) * 100% - var(--core) / 2);
-  top: calc(var(--py) * 100vh - var(--header-h) - var(--core) / 2);
   top: calc(var(--py) * 100svh - var(--header-h) - var(--core) / 2);
 }
 
@@ -64,7 +70,6 @@
   right: var(--margin-x);
   max-width: min(40ch, calc(100% - 2 * var(--margin-x)));
   text-align: right;
-  top: calc(var(--py) * 100vh - var(--header-h) + var(--core) / 2 + 28px);
   top: calc(var(--py) * 100svh - var(--header-h) + var(--core) / 2 + 28px);
 }
 
@@ -78,13 +83,6 @@
   }
 }
 
-/* Phone and tablet: the text sits under the core, its tags and the caption, never beside them.
-   The stage may grow past one screen on a short window; that is the honest outcome. */
-.hero[data-tags='stack'] .hero-stage {
-  padding-top: calc(var(--py) * 100vh - var(--header-h) + var(--core) / 2 + 92px);
-  padding-top: calc(var(--py) * 100svh - var(--header-h) + var(--core) / 2 + 92px);
-}
-
 /* ------------------------------------------------------------------ */
 /* M01 boot: the type rises, the core scales in, the full stop lands last */
 /* ------------------------------------------------------------------ */
@@ -96,6 +94,8 @@
    would climb into the NW tag. Checked at 1024 to 2560 wide, 720 to 1200 high. */
 .hero {
   --fs-display-xl: clamp(2.6rem, 13.4vw, 5rem);
+  /* Belt and braces: nothing in the hero may widen the page, hidden tags included. */
+  overflow-x: clip;
 }
 
 @media (min-width: 640px) {
@@ -184,6 +184,14 @@
   height: 0;
 }
 
+.hero-tag[data-p$='w'] {
+  --w: 1;
+}
+
+.hero-tag[data-p^='n'] {
+  --n: 1;
+}
+
 .hero-leader {
   position: absolute;
   left: 0;
@@ -243,38 +251,16 @@
 }
 
 /* Axis mode (desktop): the tag sits on the arm's own line, past the tip, vertically centred on
-   the end of the leader. */
-.hero[data-tags='axis'] .hero-tag[data-p='nw'] .hero-tag__btn {
-  transform: translate(calc(-100% + var(--dx)), calc(-50% + var(--dy)));
-}
-.hero[data-tags='axis'] .hero-tag[data-p='ne'] .hero-tag__btn {
-  transform: translate(var(--dx), calc(-50% + var(--dy)));
-}
-.hero[data-tags='axis'] .hero-tag[data-p='se'] .hero-tag__btn {
-  transform: translate(var(--dx), calc(-50% + var(--dy)));
-}
-.hero[data-tags='axis'] .hero-tag[data-p='sw'] .hero-tag__btn {
-  transform: translate(calc(-100% + var(--dx)), calc(-50% + var(--dy)));
+   the end of the leader. West tags also pull back by their own width. */
+.hero[data-tags='axis'] .hero-tag__btn {
+  transform: translate(calc(var(--w, 0) * -100% + var(--dx)), calc(-50% + var(--dy)));
 }
 
-/* Stack mode (phone, tablet): straight above or below the tip, kept inside the screen. West tags
-   end just past the tip; east tags end a little further, so they never run off the right edge. */
-.hero[data-tags='stack'] .hero-tag[data-p='nw'] .hero-tag__btn {
-  transform: translate(calc(-100% + 10px), calc(-100% + var(--dy)));
-}
-.hero[data-tags='stack'] .hero-tag[data-p='ne'] .hero-tag__btn {
-  transform: translate(calc(-100% + 16px), calc(-100% + var(--dy)));
-}
-.hero[data-tags='stack'] .hero-tag[data-p='se'] .hero-tag__btn {
-  transform: translate(calc(-100% + 16px), var(--dy));
-}
-.hero[data-tags='stack'] .hero-tag[data-p='sw'] .hero-tag__btn {
-  transform: translate(calc(-100% + 10px), var(--dy));
-}
-
-/* Belt and braces: nothing in the hero may widen the page, hidden tags included. */
-.hero {
-  overflow-x: clip;
+/* Stack mode (phone, tablet): straight above (north) or below the tip, kept inside the screen.
+   West tags end just past the tip (10 px); east tags end a little further (16 px), so they never
+   run off the right edge. */
+.hero[data-tags='stack'] .hero-tag__btn {
+  transform: translate(calc(-100% + 16px - var(--w, 0) * 6px), calc(var(--n, 0) * -100% + var(--dy)));
 }
 
 /* The full tag (three lines). Same corner as the short one, so it covers it and grows outward.
@@ -316,39 +302,33 @@
   transition-delay: 0s;
 }
 
-.hero[data-tags='axis'] [data-p='nw'] .hero-tag__full,
-.hero[data-tags='axis'] [data-p='sw'] .hero-tag__full {
-  right: 0;
-  top: 50%;
-  transform: translateY(-50%);
-}
-.hero[data-tags='axis'] [data-p='ne'] .hero-tag__full,
-.hero[data-tags='axis'] [data-p='se'] .hero-tag__full {
+/* Axis: beside the button, centred on it, growing away from P. Stack: under or over it. */
+.hero[data-tags='axis'] .hero-tag__full {
   left: 0;
   top: 50%;
   transform: translateY(-50%);
 }
-
-.hero[data-tags='stack'] [data-p='nw'] .hero-tag__full,
-.hero[data-tags='stack'] [data-p='ne'] .hero-tag__full {
+.hero[data-tags='axis'] [data-p$='w'] .hero-tag__full {
+  left: auto;
   right: 0;
-  bottom: 0;
 }
-.hero[data-tags='stack'] [data-p='se'] .hero-tag__full,
-.hero[data-tags='stack'] [data-p='sw'] .hero-tag__full {
+
+.hero[data-tags='stack'] .hero-tag__full {
   right: 0;
   top: 0;
+}
+.hero[data-tags='stack'] [data-p^='n'] .hero-tag__full {
+  top: auto;
+  bottom: 0;
 }
 
 /* Room to the right of an east tag (axis mode): the screen width past P, less half the core, the
    leader and a 12 px margin. Room to the left of a west tag (stack mode): P less half the core. */
-.hero[data-tags='axis'] [data-p='ne'] .hero-tag__full,
-.hero[data-tags='axis'] [data-p='se'] .hero-tag__full {
+.hero[data-tags='axis'] [data-p$='e'] .hero-tag__full {
   max-width: max(7rem, min(12.5rem, calc((1 - var(--px)) * 100vw - 0.425 * var(--core) - 61px)));
 }
 
-.hero[data-tags='stack'] [data-p='nw'] .hero-tag__full,
-.hero[data-tags='stack'] [data-p='sw'] .hero-tag__full {
+.hero[data-tags='stack'] [data-p$='w'] .hero-tag__full {
   max-width: max(7rem, min(12.5rem, calc(var(--px) * 100vw - 0.425 * var(--core) - 6px)));
 }
 
@@ -360,7 +340,9 @@ html[data-view='raw'] .hero-stage {
   min-height: 0;
 }
 
-html[data-view='raw'] .hero-hairlines {
+html[data-view='raw'] .hero-hairlines,
+html[data-view='raw'] .hero-tag__full,
+html[data-view='raw'] .hero-leader {
   display: none;
 }
 
@@ -387,11 +369,6 @@ html[data-view='raw'] .hero-tag {
 html[data-view='raw'] .hero-tag__btn {
   position: static;
   transform: none !important;
-}
-
-html[data-view='raw'] .hero-tag__full,
-html[data-view='raw'] .hero-leader {
-  display: none;
 }
 
 html[data-view='raw'] .hero-fig {

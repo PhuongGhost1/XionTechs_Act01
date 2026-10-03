@@ -227,10 +227,11 @@ function Arms({ name, active, hatch }) {
                     d={pathOf(poly, BOX, BOX)}
                     strokeWidth="1"
                     strokeDasharray={dashed ? '3 3' : undefined}
+                    strokeOpacity={on && !strand ? 0.6 : undefined}
                     {...NS}
                     className={cx(
                       'transition-colors duration-ui ease-ui',
-                      on ? (strand ? 'stroke-signal' : 'stroke-signal/60') : strand ? 'stroke-hairStrong' : dashed ? 'stroke-hairStrong' : 'stroke-ghost',
+                      on ? 'stroke-signal' : strand ? 'stroke-hairStrong' : dashed ? 'stroke-hairStrong' : 'stroke-ghost',
                     )}
                   />
                 )
@@ -239,8 +240,9 @@ function Arms({ name, active, hatch }) {
               d={dotsPath(dots.byArm[arm], BOX, BOX)}
               strokeWidth="1.5"
               strokeLinecap="round"
+              strokeOpacity={on ? 0.8 : 0.55}
               {...NS}
-              className={cx('transition-colors duration-ui ease-ui', on ? 'stroke-signal/80' : 'stroke-ink3/55')}
+              className={cx('transition-colors duration-ui ease-ui', on ? 'stroke-signal' : 'stroke-ink3')}
             />
             {nodes
               .filter((n) => n.arm === arm)
@@ -281,16 +283,17 @@ function LineArt({ w, h }) {
   return (
     <>
       <path d={`M${x0} ${y}H${x1}`} strokeWidth="1" {...NS} className="stroke-hairStrong" />
-      <path d={ticks.join('')} strokeWidth="1" {...NS} className="stroke-ink3/45" />
+      <path d={ticks.join('')} strokeWidth="1" strokeOpacity="0.45" {...NS} className="stroke-ink3" />
       {/* The four clusters have collapsed: trace dust along the line, thickest near REQUEST. */}
-      <path d={dotsPath(free, w, h)} strokeWidth="1.5" strokeLinecap="round" {...NS} className="stroke-ink3/45" />
+      <path d={dotsPath(free, w, h)} strokeWidth="1.5" strokeLinecap="round" strokeOpacity="0.45" {...NS} className="stroke-ink3" />
       {dust.map((n) => (
         <circle
           key={n.id}
           cx={layout.pos[n.id][0] * w}
           cy={layout.pos[n.id][1] * h}
           r={n.kind === 'service' ? 2.2 : 1.5}
-          className={n.kind === 'service' ? 'fill-ink2/70' : 'fill-ink3/70'}
+          fillOpacity="0.7"
+          className={n.kind === 'service' ? 'fill-ink2' : 'fill-ink3'}
         />
       ))}
       {LINE_STOPS.slice(1).map((sx, i) => (
@@ -312,7 +315,7 @@ function FieldArt({ w, h, hatch }) {
     <>
       {/* The page's two diagonals: the points gather along them before they converge. */}
       <path d={`M0 0L${w} ${h}M0 ${h}L${w} 0`} strokeWidth="1" {...NS} className="stroke-ghost" />
-      <path d={dotsPath(all, w, h)} strokeWidth="1.5" strokeLinecap="round" {...NS} className="stroke-ink3/50" />
+      <path d={dotsPath(all, w, h)} strokeWidth="1.5" strokeLinecap="round" strokeOpacity="0.5" {...NS} className="stroke-ink3" />
       {nodes.map((n) => (
         <Node key={n.id} node={n} x={layout.pos[n.id][0] * w} y={layout.pos[n.id][1] * h} unit={0.9} hatch={hatch} />
       ))}
@@ -374,7 +377,7 @@ export function CoreFigure({ layout = 'x', active, className }) {
       <defs>
         {/* Illustrative: 45 degree hatch, 1 px lines every 5 px (doc 5.5). */}
         <pattern id={hatch} width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
-          <line x1="0" y1="0" x2="0" y2="5" strokeWidth="1" className="stroke-ink2/60" />
+          <line x1="0" y1="0" x2="0" y2="5" strokeWidth="1" strokeOpacity="0.6" className="stroke-ink2" />
         </pattern>
       </defs>
       {(layout === 'x' || layout === 'arms') && <Arms name={layout} active={lit} hatch={hatch} />}

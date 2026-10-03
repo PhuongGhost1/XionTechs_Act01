@@ -11,7 +11,7 @@ import { EvidenceDot } from '../../ui/Evidence.jsx'
 import { FullStop } from '../../ui/FullStop.jsx'
 import { Label } from '../../ui/Label.jsx'
 import { requestArm } from '../Deploy/arm.js'
-import { hairlineSegments, heroPlacement, leaderEnd, tipOf } from './placement.js'
+import { hairlineSegments, heroPlacement, leaderEnd, litArm, tipOf } from './placement.js'
 import { usePaused } from './usePaused.js'
 import { useViewport } from './useViewport.js'
 import './standby.css'
@@ -114,7 +114,7 @@ export default function Standby() {
   // tap. Both light the matching arm in the figure; neither re-renders per frame.
   const [hover, setHover] = useState(-1)
   const [opened, setOpened] = useState(-1)
-  const lit = hover >= 0 ? hover : opened
+  const lit = litArm(hover, opened)
 
   // Hairlines through P at the page angle, edge to edge (doc 6.1). P is in viewport pixels, and
   // the SVG is drawn in viewport pixels from the very top of the page, so they agree.
@@ -235,10 +235,10 @@ export default function Standby() {
       </div>
 
       {/* The core and its four tags share one box, centred on P. */}
-      <div className="hero-core" data-arm={lit >= 0 ? lit : undefined}>
+      <div className="hero-core" data-arm={lit}>
         <CoreAnchor name="hero" className="absolute inset-0">
           <div className="hero-core__fig h-full w-full">
-            <CoreFigure layout="x" active={lit >= 0 ? lit : undefined} />
+            <CoreFigure layout="x" active={lit} />
           </div>
         </CoreAnchor>
         <ul ref={tagsRef} aria-label={hero.tagsLabel.text} className="hero-tags">

@@ -58,3 +58,13 @@ export function hairlineSegments(lines, px, py) {
     `M${px.toFixed(2)} ${py.toFixed(2)}L${x2.toFixed(2)} ${y2.toFixed(2)}`,
   ])
 }
+
+/**
+ * The arm to light in the figure and the canvas: a hovered or focused tag wins over a tag a touch
+ * visitor opened with a first tap. Indexes are module order (0 CODE, 1 AI, 2 CLOUD, 3 PRODUCT);
+ * a negative index means none. Returns undefined when nothing is lit.
+ */
+export function litArm(hover, opened) {
+  if (hover >= 0) return hover
+  return opened >= 0 ? opened : undefined
+}

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { HERO_P, heroHairlines } from '../../core/geometry.js'
-import { LEADER_LENGTH, STACK_GAP, TABLET_P, hairlineSegments, heroPlacement, leaderEnd, tipOf } from './placement.js'
+import { LEADER_LENGTH, STACK_GAP, TABLET_P, hairlineSegments, heroPlacement, leaderEnd, litArm, tipOf } from './placement.js'
 
 describe('hero placement', () => {
   it('follows the sizes of doc 10.1', () => {
@@ -59,5 +59,20 @@ describe('hairline segments', () => {
     const segs = hairlineSegments(heroHairlines(vw, vh), px, py)
     expect(segs).toHaveLength(4)
     for (const s of segs) expect(s.startsWith(`M${px.toFixed(2)} ${py.toFixed(2)}L`)).toBe(true)
+  })
+})
+
+describe('litArm', () => {
+  it('lights nothing when no tag is hovered, focused or opened', () => {
+    expect(litArm(-1, -1)).toBeUndefined()
+  })
+
+  it('lights the hovered or focused tag, index 0 (CODE) included', () => {
+    for (const i of [0, 1, 2, 3]) expect(litArm(i, -1)).toBe(i)
+  })
+
+  it('lets hover and focus win over a tag a touch visitor opened', () => {
+    expect(litArm(2, 0)).toBe(2)
+    expect(litArm(-1, 3)).toBe(3)
   })
 })
