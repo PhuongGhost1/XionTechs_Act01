@@ -1,0 +1,268 @@
+/* Sheet 06, "Selected work". Plain CSS (no @tailwind), colours only through the --bp-* tokens.
+   Everything here is either an annotation on the ESS screenshot, the agent flow's travelling signal, or the
+   hover bar of the sheet index. Nothing loops except the signal, which obeys Pause Motion
+   (html[data-motion='paused']) and prefers-reduced-motion. */
+
+/* ------------------------------------------------------------------ sheet index */
+.wk-index__link {
+  position: relative;
+  display: flex;
+  align-items: baseline;
+  gap: 1rem;
+  padding-block: 1.25rem;
+  color: rgb(var(--bp-text));
+  text-decoration: none;
+}
+.wk-index__link::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -1px;
+  height: 3px;
+  background: rgb(var(--bp-signal));
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 360ms var(--bp-ease);
+}
+.wk-index__link:hover::before,
+.wk-index__link:focus-visible::before {
+  transform: scaleX(1);
+}
+.wk-index__arrow {
+  flex: none;
+  transition: transform var(--bp-dur) var(--bp-ease);
+}
+.wk-index__link:hover .wk-index__arrow--down,
+.wk-index__link:focus-visible .wk-index__arrow--down {
+  transform: translateY(3px);
+}
+.wk-index__link:hover .wk-index__arrow--up,
+.wk-index__link:focus-visible .wk-index__arrow--up {
+  transform: translateY(-3px);
+}
+
+/* ------------------------------------------------------------------ ESS annotation drawing */
+/* A numbered label. Navy outline on paper; yellow fill when its area is active (hover, focus or pinned). */
+.wk-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: 1px solid rgb(var(--bp-line));
+  background: rgb(var(--bp-bg));
+  color: rgb(var(--bp-text));
+  letter-spacing: 0.02em;
+  transition: background-color var(--bp-dur) var(--bp-ease);
+}
+.wk-badge[data-on='true'] {
+  background: rgb(var(--bp-signal));
+  color: rgb(var(--bp-on-signal));
+}
+/* Centred with margins, not transform: the page-wide reduced-motion reset clears transforms on .bp-fade. */
+.wk-badge--fig {
+  --s: 28px;
+  position: absolute;
+  z-index: 3;
+  width: var(--s);
+  height: var(--s);
+  margin: calc(var(--s) / -2) 0 0 calc(var(--s) / -2);
+  cursor: pointer;
+}
+.wk-badge--list {
+  width: 1.75rem;
+  height: 1.75rem;
+  margin-top: 0.1rem;
+}
+@media (max-width: 767px) {
+  .wk-badge--fig {
+    --s: 22px;
+  }
+}
+
+/* The leader: a hairline from the label to the marker. Grows from the label (transform-origin is inline). */
+.wk-leader {
+  position: absolute;
+  z-index: 2;
+  height: 1px;
+  margin-top: -0.5px;
+  pointer-events: none;
+  transform: scaleX(0);
+  transition:
+    transform 900ms var(--bp-ease) var(--d, 0ms),
+    height var(--bp-dur) var(--bp-ease);
+}
+[data-in='true'] .wk-leader {
+  transform: scaleX(1);
+}
+.wk-leader[data-on='true'] {
+  height: 2px;
+  margin-top: -1px;
+}
+
+/* The marker where a leader meets the screen: a small yellow square with a navy outline. */
+.wk-marker {
+  position: absolute;
+  z-index: 2;
+  width: 7px;
+  height: 7px;
+  /* centred on its point, nudged outwards so it sits just outside the card edge and never covers its text */
+  margin: -3.5px 0 0 calc(-3.5px + var(--nudge, 0px));
+  border: 1px solid rgb(var(--bp-line));
+  background: rgb(var(--bp-signal));
+  pointer-events: none;
+}
+
+/* Tracing paper over the screen with a window cut for the active area's regions. */
+.wk-veil {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+.wk-veil path {
+  fill: rgb(var(--bp-bg));
+  opacity: 0;
+  transition: opacity 320ms var(--bp-ease);
+}
+.wk-veil path[data-on='true'] {
+  opacity: 0.82;
+}
+
+/* A highlighted region: a navy hairline box just outside the window, a small yellow corner marker. */
+.wk-region {
+  position: absolute;
+  z-index: 2;
+}
+.wk-region::before {
+  content: '';
+  position: absolute;
+  left: -9px;
+  top: -9px;
+  width: 9px;
+  height: 9px;
+  border: 1px solid rgb(var(--bp-line));
+  background: rgb(var(--bp-signal));
+  opacity: 0;
+  transition: opacity var(--bp-dur) var(--bp-ease);
+}
+.wk-region::after {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  border: 1.5px solid rgb(var(--bp-line));
+  opacity: 0;
+  transition: opacity var(--bp-dur) var(--bp-ease);
+}
+.wk-region[data-on='true']::before,
+.wk-region[data-on='true']::after {
+  opacity: 1;
+}
+
+/* One entry of the area list: a yellow bar on the left edge when active. */
+.wk-area {
+  position: relative;
+  transition: background-color var(--bp-dur) var(--bp-ease);
+}
+.wk-area::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: -1px;
+  bottom: -1px;
+  width: 3px;
+  background: rgb(var(--bp-signal));
+  transform: scaleY(0);
+  transform-origin: center top;
+  transition: transform 280ms var(--bp-ease);
+}
+.wk-area[data-on='true']::before {
+  transform: scaleY(1);
+}
+.wk-area__btn:focus-visible {
+  outline-offset: -3px;
+}
+
+/* ------------------------------------------------------------------ agent flow (illustrative) */
+.wk-flow text {
+  font-kerning: normal;
+}
+.wk-flow__title {
+  font-size: 13px;
+  letter-spacing: 0.05em;
+}
+.wk-flow__mono {
+  letter-spacing: 0.05em;
+}
+.wk-flow__head {
+  stroke-dasharray: 2.5 2;
+  stroke-linejoin: round;
+}
+
+/* The one live signal: a yellow square that travels the whole path, through the person and back. Motion path
+   in SVG user units. Before the sheet plots it waits invisible; paused it freezes where it is. */
+/* Reduced motion shows this instead: the signal at rest on the corner of the last node, so it covers no text. */
+.wk-signal-rest {
+  display: none;
+}
+.wk-signal {
+  opacity: 0;
+  offset-rotate: 0deg;
+  offset-distance: 0%;
+  transform-box: view-box;
+  transform-origin: 0 0;
+}
+[data-in='true'] .wk-signal {
+  animation: wk-travel var(--wk-travel, 9s) linear 2800ms infinite both;
+}
+[data-motion='paused'] .wk-signal {
+  animation-play-state: paused;
+}
+@keyframes wk-travel {
+  0% {
+    offset-distance: 0%;
+    opacity: 0;
+  }
+  4% {
+    opacity: 1;
+  }
+  96% {
+    opacity: 1;
+  }
+  100% {
+    offset-distance: 100%;
+    opacity: 0;
+  }
+}
+@supports not (offset-path: path('M0 0')) {
+  .wk-signal {
+    display: none;
+  }
+}
+
+/* ------------------------------------------------------------------ reduced motion: final states */
+@media (prefers-reduced-motion: reduce) {
+  .wk-leader,
+  .wk-veil path,
+  .wk-region::before,
+  .wk-region::after,
+  .wk-area,
+  .wk-area::before,
+  .wk-badge,
+  .wk-index__link::before,
+  .wk-index__arrow {
+    transition: none !important;
+  }
+  .wk-leader {
+    transform: scaleX(1) !important;
+  }
+  .wk-signal {
+    display: none;
+  }
+  .wk-signal-rest {
+    display: block;
+  }
+}
