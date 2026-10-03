@@ -1,0 +1,317 @@
+/* Sheet 04, Process. Plain CSS (no @tailwind): the drawing's motion, and the stage index. Colour is always a
+   token (`--bp-*`), so `data-band` re-scopes it. */
+
+/* ------------------------------------------------------------------ the drawing
+   `--st` is the stage being shown. Each item carries `--from` (first stage), optionally `--until` (last stage it
+   is fully drawn) and `--rest` (how much of it remains after). `--on` runs 0 -> 1 as `--st` passes `--from`;
+   `--off` runs 1 -> 0 as `--st` passes `--until`. Everything below is a function of those two numbers, so a
+   change of stage animates through ordinary CSS transitions. */
+.pd {
+  --p: 0; /* cut the scroll variable off here: the drawing never restyles on scroll */
+  --st: var(--stage);
+  --gap: var(--gap-now);
+  --gr: var(--gr-now);
+  display: block;
+  overflow: hidden;
+  max-width: 100%;
+  font-family: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+/* The stacked drawing shows the stage before its own until it enters the viewport, then plots the difference. */
+.pd[data-frozen] {
+  --st: calc(var(--stage) - 1);
+  --gap: var(--gap-prev);
+  --gr: var(--gr-prev);
+}
+[data-in='true'] .pd[data-frozen] {
+  --st: var(--stage);
+  --gap: var(--gap-now);
+  --gr: var(--gr-now);
+}
+
+/* Delays apply when building forward. Going back (scrolling up) everything leaves at once. */
+.pd[data-dir='fwd'] .pd-e {
+  --dd: var(--d, 0ms);
+}
+.pd[data-dir='back'] .pd-e {
+  --dd: 0ms;
+}
+
+.pd-e {
+  --on: clamp(0, calc(var(--st) - var(--from, 0) + 1), 1);
+  --off: clamp(0, calc(var(--until, 99) - var(--st) + 1), 1);
+  --keep: calc(var(--rest, 0) + (1 - var(--rest, 0)) * var(--off));
+  opacity: calc(var(--on) * var(--keep) * var(--alpha, 1));
+  transition: opacity 700ms var(--bp-ease) var(--dd, 0ms);
+}
+/* Plotted lines: the stroke draws on, the line pops in at its delay (so a hidden hairline never leaves a dot
+   behind), and the `until` fade is carried by stroke-opacity. */
+.pd-draw {
+  stroke-dasharray: 1;
+  stroke-dashoffset: calc(1 - var(--on));
+  opacity: var(--on);
+  stroke-opacity: calc(var(--keep) * var(--alpha, 1));
+  transition:
+    stroke-dashoffset 1000ms var(--bp-ease) var(--dd, 0ms),
+    opacity 1ms linear var(--dd, 0ms),
+    stroke-opacity 600ms var(--bp-ease);
+}
+.pd[data-dir='back'] .pd-draw {
+  transition:
+    stroke-dashoffset 500ms var(--bp-ease),
+    opacity 400ms linear,
+    stroke-opacity 400ms var(--bp-ease);
+}
+.pd-rise {
+  transform: translateY(calc(var(--on) * var(--h) * -1px));
+  transition:
+    opacity 600ms var(--bp-ease) var(--dd, 0ms),
+    transform 900ms var(--bp-ease) var(--dd, 0ms);
+}
+.pd-grow {
+  transform: scaleY(var(--on));
+  vector-effect: non-scaling-stroke;
+  transition:
+    opacity 600ms var(--bp-ease) var(--dd, 0ms),
+    transform 900ms var(--bp-ease) var(--dd, 0ms);
+}
+.pd-pillar {
+  transform: scaleY(var(--gr));
+  vector-effect: non-scaling-stroke;
+  transition:
+    opacity 600ms var(--bp-ease) var(--dd, 0ms),
+    transform 1100ms var(--bp-ease);
+}
+.pd-slab {
+  transform: translateY(calc(var(--n) * var(--gap) * var(--K) * -1px));
+  transition: transform 1100ms var(--bp-ease);
+}
+.pd-arrive {
+  transform: translate(calc((1 - var(--on)) * var(--ax) * 1px), calc((1 - var(--on)) * var(--ay) * 1px));
+  transition:
+    opacity 600ms var(--bp-ease) var(--dd, 0ms),
+    transform 1000ms var(--bp-ease) var(--dd, 0ms);
+}
+
+/* Line types, as on the legend of the page: solid navy = decided or structural, dashed = not yet decided,
+   yellow = measurement and the live joint. */
+.pd-s {
+  fill: none;
+  stroke: rgb(var(--bp-line));
+  stroke-width: 1.25;
+  stroke-linejoin: round;
+}
+.pd-s--hair {
+  stroke-width: 0.8;
+}
+.pd-s--rule {
+  stroke: rgb(var(--bp-rule));
+  stroke-width: 1;
+}
+.pd-s--axis {
+  stroke-opacity: 0.4;
+  stroke-width: 0.8;
+}
+.pd-s--dash {
+  stroke-dasharray: 5 4;
+}
+.pd-s--frame {
+  stroke-width: 1.8;
+}
+.pd-s--tick {
+  stroke-width: 1.25;
+}
+.pd-s--sig {
+  stroke: rgb(var(--bp-signal));
+  stroke-width: 2.6;
+}
+.pd-s--plate {
+  fill: rgb(var(--bp-bg2) / 0.7);
+  stroke: none;
+}
+.pd-s--edge {
+  fill: rgb(var(--bp-bg2) / 0.95);
+  stroke-width: 1;
+}
+.pd-s--face {
+  fill: rgb(var(--bp-bg) / 0.86);
+}
+.pd-s--mark {
+  fill: rgb(var(--bp-signal));
+  stroke-width: 1;
+}
+.pd-bubble {
+  fill: rgb(var(--bp-bg));
+  stroke: rgb(var(--bp-line));
+  stroke-width: 1;
+}
+
+.pd-t {
+  fill: rgb(var(--bp-text));
+  font-weight: 500;
+  letter-spacing: 0.08em;
+}
+.pd-t--mute {
+  fill: rgb(var(--bp-mute));
+}
+.pd-bg {
+  fill: rgb(var(--bp-bg));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pd,
+  .pd * {
+    transition: none !important;
+  }
+  .pd[data-frozen] {
+    --st: var(--stage);
+    --gap: var(--gap-now);
+    --gr: var(--gr-now);
+  }
+}
+
+/* ------------------------------------------------------------------ the pinned stage (desktop) */
+.pr-row {
+  position: relative;
+  display: block;
+  width: 100%;
+  padding: 0.95rem 0.5rem 0.95rem 1.5rem;
+  text-align: left;
+  color: rgb(var(--bp-mute));
+  background: transparent;
+  cursor: pointer;
+  transition:
+    color var(--bp-dur) var(--bp-ease),
+    background-color var(--bp-dur) var(--bp-ease);
+}
+.pr-row:hover {
+  color: rgb(var(--bp-text));
+  background: rgb(var(--bp-bg2) / 0.6);
+}
+.pr-row[aria-current='step'] {
+  color: rgb(var(--bp-text));
+}
+.pr-row__mark {
+  position: absolute;
+  left: 0;
+  top: 0.95rem;
+  bottom: 0.95rem;
+  width: 4px;
+  background: rgb(var(--bp-signal));
+  outline: 1px solid rgb(var(--bp-line));
+  transform: scaleY(0);
+  transform-origin: center top;
+  transition: transform 420ms var(--bp-ease);
+}
+.pr-row[aria-current='step'] .pr-row__mark {
+  transform: scaleY(1);
+}
+.pr-row__desc {
+  display: block;
+  max-width: 44ch;
+  margin-top: 0.35rem;
+  font-size: 0.9375rem;
+  line-height: 1.45;
+}
+/* Not opacity: a faded label drops below 4.5:1. Muted text on the idle rows, full text on the current one. */
+.pr-row__dimline {
+  color: rgb(var(--bp-mute));
+  transition: color var(--bp-dur) var(--bp-ease);
+}
+.pr-row[aria-current='step'] .pr-row__dimline,
+.pr-row:hover .pr-row__dimline {
+  color: rgb(var(--bp-text));
+}
+.pr-row__dimline .sig {
+  stroke: rgb(var(--bp-mute));
+  transition: stroke var(--bp-dur) var(--bp-ease);
+}
+.pr-row[aria-current='step'] .pr-row__dimline .sig {
+  stroke: rgb(var(--bp-signal));
+}
+@media (max-height: 820px) {
+  .pr-row {
+    padding-block: 0.6rem;
+  }
+  .pr-row__mark {
+    top: 0.6rem;
+    bottom: 0.6rem;
+  }
+  .pr-row__desc {
+    font-size: 0.875rem;
+    line-height: 1.35;
+    margin-top: 0.2rem;
+  }
+}
+
+/* The progress rule along the foot of the drawing: one tick per stage, a yellow marker at the scroll position. */
+.pr-ruler {
+  position: relative;
+  height: 2.25rem;
+  margin-inline: 0;
+}
+.pr-ruler__track {
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 1px;
+  background: rgb(var(--bp-rule));
+}
+.pr-ruler__fill {
+  position: absolute;
+  left: 0;
+  top: -1px;
+  height: 3px;
+  width: calc(var(--p, 0) * 100%);
+  background: rgb(var(--bp-line));
+}
+.pr-ruler__mark {
+  position: absolute;
+  top: -5px;
+  left: calc(var(--p, 0) * (100% - 10px));
+  width: 10px;
+  height: 10px;
+  background: rgb(var(--bp-signal));
+  outline: 1px solid rgb(var(--bp-line));
+}
+.pr-ruler__tick {
+  position: absolute;
+  top: -4px;
+  width: 1px;
+  height: 9px;
+  background: rgb(var(--bp-line));
+}
+.pr-ruler__tick > span {
+  position: absolute;
+  top: 14px;
+  left: 6px;
+  color: rgb(var(--bp-mute));
+  transition: color var(--bp-dur) var(--bp-ease);
+}
+.pr-ruler__tick[data-active='true'] > span {
+  color: rgb(var(--bp-text));
+}
+.pr-ruler__tick--end {
+  right: 0;
+  left: auto;
+}
+
+/* The drawing's frame keeps the drawing's own proportions, as wide as the column allows and no taller than the
+   screen. The ruler and the caption share its width. */
+.pr-figure {
+  width: min(100%, calc((100vh - 14rem) * var(--ar, 1.4)));
+}
+.pr-frame {
+  aspect-ratio: var(--ar, 1.4);
+}
+.pr-caption {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  column-gap: 1.5rem;
+  row-gap: 0.15rem;
+  min-height: 2.9rem;
+  align-content: start;
+}
+@media (max-height: 820px) {
+  .pr-hint {
+    display: none;
+  }
+}
