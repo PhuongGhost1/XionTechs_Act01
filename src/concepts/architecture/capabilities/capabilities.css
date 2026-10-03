@@ -1,0 +1,457 @@
+/* Sheet 03, "Capability layers": six horizontal bands. Plain CSS (no @tailwind), colours only through the --bp-*
+   tokens. A band plots itself through its own Plot (`data-in`), and opens through `data-open`. */
+
+.cap {
+  --bp-draw: 1100ms;
+}
+
+.cap-stack {
+  position: relative;
+}
+.cap-dim {
+  display: none;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -40px;
+  width: 22px;
+  pointer-events: none;
+}
+@media (min-width: 1024px) {
+  .cap-dim {
+    display: block;
+  }
+}
+.cap-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.cap-band {
+  position: relative;
+}
+.cap-h3 {
+  margin: 0;
+  font: inherit;
+}
+
+/* Hairline above every band (and below the last), drawn from the left. */
+.cap-rule {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 1px;
+  background: rgb(var(--bp-line));
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 1000ms var(--bp-ease);
+  pointer-events: none;
+}
+.cap-rule--end {
+  top: auto;
+  bottom: 0;
+}
+[data-in='true'] .cap-rule {
+  transform: scaleX(1);
+}
+/* The open band is marked by a yellow measuring line over its hairline. */
+.cap-sig {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -1px;
+  height: 3px;
+  background: rgb(var(--bp-signal));
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 560ms var(--bp-ease);
+  pointer-events: none;
+}
+.cap-band[data-open='true'] .cap-sig {
+  transform: scaleX(1);
+}
+
+/* ------------------------------------------------------------------ the header button */
+.cap-head {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 6fr) minmax(0, 3fr) 48px;
+  grid-template-areas: 'num txt glyph tog';
+  align-items: center;
+  gap: 0 24px;
+  width: calc(100% + 32px);
+  margin: 0 -16px;
+  padding: 26px 16px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 260ms var(--bp-ease);
+  -webkit-tap-highlight-color: transparent;
+}
+@media (hover: hover) {
+  .cap-head:hover {
+    background-color: rgb(var(--bp-bg2));
+  }
+}
+.cap-head:focus-visible {
+  outline: 2px solid rgb(var(--bp-line));
+  outline-offset: -4px;
+}
+
+/* The huge outlined number; it fills in when the band is open. */
+.cap-num {
+  grid-area: num;
+  font-size: clamp(4.5rem, 2.2rem + 5.6vw, 8.75rem);
+  color: transparent;
+  -webkit-text-stroke: 1.5px rgb(var(--bp-line));
+  paint-order: stroke fill;
+  transition: color 360ms var(--bp-ease);
+  user-select: none;
+}
+.cap-band[data-open='true'] .cap-num {
+  color: rgb(var(--bp-line));
+}
+.cap-text {
+  grid-area: txt;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  min-width: 0;
+}
+.cap-name {
+  font-size: clamp(2rem, 1.2rem + 2.3vw, 3.4rem);
+  color: rgb(var(--bp-text));
+}
+.cap-desc {
+  max-width: 46ch;
+  font-size: 1.0625rem;
+  line-height: 1.5;
+  color: rgb(var(--bp-mute));
+}
+.cap-glyph {
+  grid-area: glyph;
+  justify-self: end;
+  width: 100%;
+  max-width: 214px;
+}
+.cap-glyph-svg {
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+/* ------------------------------------------------------------------ the plus that becomes the X */
+.cap-tog {
+  grid-area: tog;
+  position: relative;
+  justify-self: end;
+  width: 44px;
+  height: 44px;
+  transition: transform 460ms var(--bp-ease);
+}
+.cap-tog i {
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  top: 21px;
+  height: 2px;
+  background: rgb(var(--bp-line));
+}
+.cap-tog i:nth-of-type(2) {
+  transform: rotate(90deg);
+}
+.cap-tog b {
+  position: absolute;
+  left: 16px;
+  top: 16px;
+  width: 12px;
+  height: 12px;
+  background: rgb(var(--bp-signal));
+  border: 1px solid rgb(var(--bp-line));
+}
+.cap-band[data-open='true'] .cap-tog {
+  transform: rotate(45deg);
+}
+.cap-tog--hint {
+  width: 28px;
+  height: 28px;
+  flex: none;
+  justify-self: auto;
+  transform: scale(0.7);
+}
+
+/* ------------------------------------------------------------------ the panel: architecture expanding */
+.cap-panel {
+  display: grid;
+  grid-template-rows: 0fr;
+  visibility: hidden;
+  transition:
+    grid-template-rows 560ms var(--bp-ease),
+    visibility 0s linear 560ms;
+}
+.cap-band[data-open='true'] .cap-panel {
+  grid-template-rows: 1fr;
+  visibility: visible;
+  transition-delay: 0s;
+}
+.cap-panel__in {
+  min-height: 0;
+  overflow: hidden;
+  /* room for the registration crosses that sit half outside the drawing frame */
+  margin-inline: -12px;
+  padding-inline: 12px;
+}
+.cap-body {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 5fr) minmax(0, 5fr);
+  gap: 0 24px;
+  padding: 4px 0 52px;
+}
+.cap-body > * {
+  opacity: 0;
+  transform: translateY(10px);
+  transition:
+    opacity 360ms var(--bp-ease),
+    transform 360ms var(--bp-ease);
+}
+.cap-band[data-open='true'] .cap-body > * {
+  opacity: 1;
+  transform: none;
+  transition-duration: 520ms;
+  transition-delay: 160ms;
+}
+.cap-lists {
+  grid-column: 2;
+}
+.cap-fig {
+  grid-column: 3;
+  margin: 0;
+}
+
+.cap-keys {
+  margin: 14px 0 0;
+  padding: 0;
+  list-style: none;
+  max-width: 34rem;
+}
+.cap-keys li {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 11px 0;
+  border-top: 1px solid rgb(var(--bp-rule));
+  font-size: 1.0625rem;
+  line-height: 1.4;
+  color: rgb(var(--bp-text));
+}
+.cap-keys li:last-child {
+  border-bottom: 1px solid rgb(var(--bp-rule));
+}
+.cap-key {
+  flex: none;
+  display: inline-grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border: 1px solid rgb(var(--bp-line));
+  border-radius: 50%;
+  letter-spacing: 0;
+}
+.cap-tools {
+  margin-top: 28px;
+}
+.cap-tools ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 0;
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.cap-tools li {
+  padding-right: 14px;
+  margin-right: 14px;
+  border-right: 1px solid rgb(var(--bp-line));
+  font-size: 0.9375rem;
+  line-height: 1.2;
+  color: rgb(var(--bp-text));
+}
+.cap-tools li:last-child {
+  padding-right: 0;
+  margin-right: 0;
+  border-right: 0;
+}
+
+/* The framed drawing with its registration crosses. */
+.cap-frame {
+  position: relative;
+  max-width: 440px;
+  padding: 18px 20px;
+  border: 1px solid rgb(var(--bp-rule));
+}
+.cap-fig figcaption {
+  max-width: 440px;
+  margin-top: 12px;
+  color: rgb(var(--bp-mute));
+}
+.cap-cross {
+  position: absolute;
+  color: rgb(var(--bp-line));
+  background: rgb(var(--bp-bg));
+}
+.cap-cross--a {
+  left: -8px;
+  top: -8px;
+}
+.cap-cross--b {
+  right: -8px;
+  top: -8px;
+}
+.cap-cross--c {
+  left: -8px;
+  bottom: -8px;
+}
+.cap-cross--d {
+  right: -8px;
+  bottom: -8px;
+}
+
+/* ------------------------------------------------------------------ the glyph line language */
+.gl {
+  fill: none;
+  stroke: rgb(var(--bp-line));
+  stroke-width: 1;
+  stroke-linejoin: miter;
+}
+.gl--soft {
+  stroke-width: 0.8;
+  opacity: 0.5;
+}
+.gl--sig {
+  stroke: rgb(var(--bp-signal));
+  stroke-width: 2;
+}
+.gl--bg {
+  fill: rgb(var(--bp-bg));
+}
+.gl--fillsig {
+  fill: rgb(var(--bp-signal));
+}
+.gl-solid {
+  fill: rgb(var(--bp-line));
+  stroke: none;
+}
+.gl-num {
+  fill: rgb(var(--bp-text));
+  font-family: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 10.5px; /* user units: about 11px or more on screen from 320 px up */
+  font-weight: 600;
+}
+@media (min-width: 480px) {
+  .gl-num {
+    font-size: 9.5px;
+  }
+}
+@media (min-width: 1024px) {
+  .gl-num {
+    font-size: 8.5px;
+  }
+}
+/* The large drawing plots itself when its band opens, and starts over when it is closed. */
+.gl-draw {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+}
+.cap-band[data-open='true'] .gl-draw {
+  stroke-dashoffset: 0;
+  transition: stroke-dashoffset var(--bp-draw) var(--bp-ease) calc(var(--d, 0ms) + 220ms);
+}
+.gl-fade {
+  opacity: 0;
+}
+.cap-band[data-open='true'] .gl-fade {
+  opacity: 1;
+  transition: opacity 600ms var(--bp-ease) calc(var(--d, 0ms) + 220ms);
+}
+
+/* ------------------------------------------------------------------ small screens */
+@media (max-width: 1023.98px) {
+  .cap-body {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+  .cap-lists {
+    grid-column: 1;
+  }
+  .cap-fig {
+    grid-column: 2;
+  }
+}
+@media (max-width: 767.98px) {
+  .cap-head {
+    grid-template-columns: auto minmax(0, 1fr) 40px;
+    grid-template-areas:
+      'num glyph tog'
+      'txt txt txt';
+    row-gap: 12px;
+    padding: 20px 16px 22px;
+  }
+  .cap-num {
+    font-size: 4.25rem;
+  }
+  .cap-glyph {
+    max-width: 128px;
+  }
+  .cap-name {
+    font-size: 2rem;
+  }
+  .cap-desc {
+    font-size: 1rem;
+  }
+  .cap-body {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 32px 0;
+    padding-bottom: 40px;
+  }
+  .cap-lists,
+  .cap-fig {
+    grid-column: 1;
+  }
+  .cap-frame {
+    padding: 12px;
+  }
+}
+
+/* ------------------------------------------------------------------ reduced motion: drawn, open, still */
+@media (prefers-reduced-motion: reduce) {
+  .cap .bp-dim--y .bp-dim__label {
+    transform: translate(-50%, -50%) rotate(-90deg) !important;
+  }
+  .cap-rule,
+  .cap-sig,
+  .cap-head,
+  .cap-num,
+  .cap-tog,
+  .cap-panel,
+  .cap-body > *,
+  .gl-draw,
+  .gl-fade {
+    transition: none !important;
+  }
+  .cap-rule {
+    transform: none !important;
+  }
+  .gl-draw {
+    stroke-dashoffset: 0 !important;
+  }
+  .gl-fade {
+    opacity: 1 !important;
+  }
+  .cap-body > * {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}

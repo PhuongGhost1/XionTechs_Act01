@@ -1,0 +1,554 @@
+/* Sheet 02, "The architecture": a building section. Plain CSS (no @tailwind), colours only through the --bp-*
+   tokens. The drawing plots itself when `.arch-drawing` gets data-in="true" (its own observer, because the sheet is
+   taller than the viewport and the drawing sits low on it). */
+
+.arch {
+  --datum: 104px; /* the annotation column on the left: rail, level symbol, code */
+  --dimw: 52px; /* the dimension column on the right */
+  --slab: 12px;
+  --slab-deep: 30px; /* the foundation slab */
+  --row: 116px;
+  --bubbles: 40px; /* the strip of grid bubbles above the roof */
+  --bp-draw: 1100ms;
+}
+@media (max-width: 767.98px) {
+  .arch {
+    --datum: 44px;
+    --dimw: 34px;
+    --slab: 10px;
+    --slab-deep: 24px;
+    --row: 132px;
+    --bubbles: 36px;
+  }
+}
+
+.arch-drawing {
+  position: relative;
+  padding-right: var(--dimw);
+}
+.arch-defs {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+}
+.arch-hatch-line {
+  stroke: rgb(var(--bp-line));
+  stroke-width: 1;
+  opacity: 0.7;
+}
+
+/* ------------------------------------------------------------------ continuous members: rail, walls */
+.arch-rail,
+.arch-wall,
+.arch-level-line,
+.arch-ext {
+  position: absolute;
+  background: rgb(var(--bp-line));
+  pointer-events: none;
+}
+.arch-rail {
+  left: 10px;
+  top: var(--bubbles);
+  bottom: 0;
+  width: 1px;
+  transform: scaleY(0);
+  transform-origin: center top;
+  transition: transform 1200ms var(--bp-ease);
+}
+.arch-wall {
+  top: var(--bubbles);
+  bottom: 0;
+  width: 2px;
+  transform: scaleY(0);
+  transform-origin: center top;
+  transition: transform 1200ms var(--bp-ease) var(--d, 0ms);
+}
+.arch-wall--l {
+  left: calc(var(--datum) - 1px);
+}
+.arch-wall--r {
+  right: calc(var(--dimw) - 1px);
+}
+.arch-ext {
+  height: 1px;
+  left: 8px;
+  right: 6px;
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 700ms var(--bp-ease) var(--d, 0ms);
+}
+.arch-ext--t {
+  top: 0;
+}
+.arch-ext--b {
+  bottom: 0;
+}
+.arch-dimcol {
+  position: absolute;
+  top: var(--bubbles);
+  bottom: 0;
+  right: 0;
+  width: var(--dimw);
+  pointer-events: none;
+}
+.arch-dimcol__line {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: calc(50% + 2px);
+  width: 22px;
+  margin-left: -11px;
+}
+[data-in='true'] .arch-rail,
+[data-in='true'] .arch-wall {
+  transform: scaleY(1);
+}
+[data-in='true'] .arch-ext,
+[data-in='true'] .arch-level-line {
+  transform: scaleX(1);
+}
+
+/* ------------------------------------------------------------------ a level */
+.arch-levels {
+  position: relative;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.arch-row {
+  position: relative;
+}
+.arch-hit {
+  display: grid;
+  grid-template-columns: var(--datum) minmax(0, 34%) minmax(0, 1fr);
+  width: 100%;
+  min-height: var(--row);
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  position: relative;
+  transition: background-color 260ms var(--bp-ease);
+  -webkit-tap-highlight-color: transparent;
+}
+.arch-hit:focus-visible {
+  outline: 2px solid rgb(var(--bp-line));
+  outline-offset: -3px;
+}
+.arch-row[data-active='true'] .arch-hit {
+  background-color: rgb(var(--bp-bg2));
+}
+@media (max-width: 767.98px) {
+  .arch-hit {
+    grid-template-columns: var(--datum) minmax(0, 1fr) 24%;
+  }
+}
+
+.arch-datum {
+  position: relative;
+}
+.arch-level-line {
+  left: 10px;
+  right: 0;
+  bottom: -1px;
+  height: 1px;
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 800ms var(--bp-ease) var(--d, 0ms);
+}
+/* The station on the rail where a level sits: paper while at rest, yellow while the load path passes. */
+.arch-node {
+  position: absolute;
+  left: 6.5px;
+  bottom: -4.5px;
+  width: 8px;
+  height: 8px;
+  background: rgb(var(--bp-bg));
+  border: 1px solid rgb(var(--bp-line));
+  transition: background-color 200ms linear var(--td, 0ms);
+}
+.arch-row[data-lit='true'] .arch-node {
+  background: rgb(var(--bp-signal));
+}
+/* The level symbol: a filled triangle standing on the level line. */
+.arch-tri {
+  position: absolute;
+  left: 26px;
+  bottom: 0;
+  width: 12px;
+  height: 9px;
+  background: rgb(var(--bp-line));
+  clip-path: polygon(0 0, 100% 0, 50% 100%);
+}
+.arch-code {
+  position: absolute;
+  left: 44px;
+  bottom: 5px;
+  padding: 1px 4px;
+  margin-left: -4px;
+  color: rgb(var(--bp-text));
+  background: transparent;
+  transition: background-color 200ms var(--bp-ease);
+}
+.arch-row[data-active='true'] .arch-code {
+  background: rgb(var(--bp-signal));
+  color: rgb(var(--bp-on-signal));
+}
+/* A level held by a press keeps a hairline ring round its code, so it reads differently from a passing hover. */
+.arch-row[data-pinned='true'] .arch-code {
+  box-shadow: 0 0 0 1px rgb(var(--bp-line));
+}
+@media (max-width: 767.98px) {
+  .arch-node {
+    left: 3.5px;
+  }
+  .arch-pad {
+    x: -11px;
+    width: 22px;
+  }
+  .arch-level-line {
+    left: 7px;
+  }
+  .arch-tri {
+    left: 17px;
+  }
+  .arch-code {
+    left: 14px;
+    bottom: 14px;
+  }
+}
+
+.arch-text {
+  container-type: inline-size;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 14px 20px 14px 24px;
+}
+.arch-name {
+  font-size: clamp(1.7rem, 1.1rem + 1.6vw, 2.9rem);
+  color: rgb(var(--bp-text));
+}
+/* The longest name, Infrastructure, is about 8 em wide: size every name from the room it has. */
+@supports (font-size: 1cqw) {
+  .arch-name {
+    font-size: min(2.9rem, 11.4cqw);
+  }
+}
+.arch-desc {
+  max-width: 38ch;
+  font-size: 0.9375rem;
+  line-height: 1.45;
+  color: rgb(var(--bp-mute));
+}
+@media (max-width: 767.98px) {
+  .arch-text {
+    padding: 12px 12px 12px 12px;
+  }
+  .arch-name {
+    font-size: clamp(1rem, 5.2vw, 1.55rem);
+  }
+  @supports (font-size: 1cqw) {
+    .arch-name {
+      font-size: min(1.7rem, 11.4cqw);
+    }
+  }
+  .arch-desc {
+    font-size: 0.8125rem;
+    line-height: 1.4;
+  }
+}
+
+/* Grid bubbles above the roof. */
+.arch-grid {
+  display: grid;
+  grid-template-columns: var(--datum) minmax(0, 34%) minmax(0, 1fr);
+  height: var(--bubbles);
+}
+.arch-grid__bay {
+  grid-column: 3;
+  position: relative;
+  display: block;
+}
+.arch-grid__bay > svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.arch-bubble {
+  fill: rgb(var(--bp-bg));
+  stroke: rgb(var(--bp-line));
+  stroke-width: 1;
+}
+.arch-bubble-text {
+  fill: rgb(var(--bp-text));
+  font-size: 11px;
+  letter-spacing: 0;
+}
+@media (max-width: 767.98px) {
+  .arch-grid {
+    grid-template-columns: var(--datum) minmax(0, 1fr) 24%;
+  }
+}
+
+/* The structural bay and the lines in it. */
+.arch-bay-cell {
+  position: relative;
+  display: block;
+}
+.arch-bay,
+.arch-slab > svg,
+.arch-found__a > svg,
+.arch-found__b > svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.arch-ln {
+  fill: none;
+  stroke: rgb(var(--bp-line));
+  stroke-width: 1;
+}
+.arch-ln.bp-draw {
+  transition:
+    stroke-dashoffset var(--bp-draw) var(--bp-ease) var(--d, 0ms),
+    stroke 220ms var(--bp-ease),
+    stroke-width 220ms var(--bp-ease);
+}
+.arch-crisp {
+  shape-rendering: crispEdges;
+}
+.arch-row[data-active='true'] .arch-ln {
+  stroke-width: 1.5;
+}
+.arch-row[data-active='true'] .arch-diag {
+  stroke: rgb(var(--bp-signal));
+  stroke-width: 2.5;
+}
+.arch-row[data-active='true'] .arch-sig {
+  stroke: rgb(var(--bp-signal));
+  stroke-width: 2;
+}
+.arch-row[data-active='true'] .arch-plug {
+  fill: rgb(var(--bp-signal));
+}
+.arch-joint,
+.arch-plug {
+  fill: rgb(var(--bp-bg));
+  stroke: rgb(var(--bp-line));
+  stroke-width: 1;
+}
+.arch-joint.bp-fade {
+  transition:
+    opacity 700ms var(--bp-ease) var(--d, 0ms),
+    fill 220ms var(--bp-ease);
+}
+.arch-row[data-active='true'] .arch-joint {
+  fill: rgb(var(--bp-signal));
+}
+.arch-pad {
+  stroke: rgb(var(--bp-line));
+  stroke-width: 1;
+}
+.arch-pad.bp-fade {
+  transition: opacity 700ms var(--bp-ease) var(--d, 0ms);
+}
+
+/* The slab: a cut element, so it carries the hatch. */
+.arch-slab {
+  position: relative;
+  display: block;
+  height: var(--slab);
+  margin-left: var(--datum);
+}
+.arch-slab--deep {
+  height: var(--slab-deep);
+}
+.arch-slab-fill {
+  stroke: none;
+}
+
+/* The foundation pads and the ground line under the last level. */
+.arch-found {
+  position: relative;
+  display: grid;
+  grid-template-columns: var(--datum) minmax(0, 34%) minmax(0, 1fr);
+  height: 18px;
+}
+.arch-found__a,
+.arch-found__b {
+  position: relative;
+  display: block;
+}
+.arch-found__a {
+  grid-column: 2;
+}
+.arch-found__b {
+  grid-column: 3;
+}
+@media (max-width: 767.98px) {
+  .arch-found {
+    grid-template-columns: var(--datum) minmax(0, 1fr) 24%;
+  }
+}
+.arch-ground {
+  position: absolute;
+  left: calc(var(--datum) - 30px);
+  right: -26px;
+  top: 100%;
+  height: 10px;
+  margin-top: -1px;
+  pointer-events: none;
+}
+.arch-ground > svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+/* The yellow load path: one segment per row, along the left rail. */
+.arch-trace {
+  position: absolute;
+  left: 8.5px;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: rgb(var(--bp-signal));
+  transform: scaleY(0);
+  transform-origin: center top;
+  transition: transform 160ms linear var(--td, 0ms);
+  pointer-events: none;
+}
+.arch-row[data-lit='true'] .arch-trace {
+  transform: scaleY(1);
+  transition-duration: 200ms;
+}
+@media (max-width: 767.98px) {
+  .arch-trace {
+    left: 5.5px;
+  }
+}
+.arch-origin {
+  position: absolute;
+  left: 5.5px;
+  top: calc(var(--bubbles) - 4px);
+  width: 9px;
+  height: 9px;
+  background: rgb(var(--bp-bg));
+  border: 1px solid rgb(var(--bp-line));
+  transition: background-color 200ms linear;
+}
+.arch-drawing[data-lit='true'] .arch-origin {
+  background: rgb(var(--bp-signal));
+}
+@media (max-width: 767.98px) {
+  .arch-origin {
+    left: 2.5px;
+  }
+}
+.arch-pathchip {
+  position: absolute;
+  left: 22px;
+  top: calc(var(--bubbles) - 11px);
+  padding: 1px 6px;
+  background: rgb(var(--bp-signal));
+  color: rgb(var(--bp-on-signal));
+  opacity: 0;
+  transition: opacity 200ms var(--bp-ease);
+  pointer-events: none;
+  white-space: nowrap;
+}
+.arch-drawing[data-lit='true'] .arch-pathchip {
+  opacity: 1;
+}
+@media (max-width: 767.98px) {
+  .arch-pathchip {
+    display: none;
+  }
+}
+
+/* The overall width: a yellow dimension under the ground line, with extension lines up to the section. */
+.arch-measure {
+  position: absolute;
+  top: 100%;
+  left: var(--datum);
+  right: var(--dimw);
+  margin-top: 34px;
+}
+.arch-mext {
+  position: absolute;
+  top: -22px;
+  height: 34px;
+  width: 1px;
+  background: rgb(var(--bp-line));
+  transform: scaleY(0);
+  transform-origin: center top;
+  transition: transform 600ms var(--bp-ease) var(--d, 0ms);
+}
+.arch-mext--l {
+  left: -1px;
+}
+.arch-mext--r {
+  right: -1px;
+}
+[data-in='true'] .arch-mext {
+  transform: scaleY(1);
+}
+
+/* The key swatches under the drawing. */
+.arch-key-tri {
+  display: inline-block;
+  width: 12px;
+  height: 9px;
+  background: rgb(var(--bp-line));
+  clip-path: polygon(0 0, 100% 0, 50% 100%);
+}
+.arch-key-load {
+  display: inline-block;
+  width: 3px;
+  height: 22px;
+  background: rgb(var(--bp-signal));
+}
+
+/* ------------------------------------------------------------------ reduced motion: everything drawn */
+@media (prefers-reduced-motion: reduce) {
+  /* architecture.css sets transform: none !important on every dimension label, which also drops the centring and
+     the rotation; put them back for the labels on this sheet. */
+  .arch .bp-dim--x .bp-dim__label {
+    transform: translate(-50%, -50%) !important;
+  }
+  .arch .bp-dim--y .bp-dim__label {
+    transform: translate(-50%, -50%) rotate(-90deg) !important;
+  }
+  .arch-rail,
+  .arch-wall,
+  .arch-ext,
+  .arch-mext,
+  .arch-level-line {
+    transform: none !important;
+    transition: none !important;
+  }
+  .arch-trace,
+  .arch-hit,
+  .arch-node,
+  .arch-code,
+  .arch-origin,
+  .arch-pathchip,
+  .arch-ln,
+  .arch-joint {
+    transition: none !important;
+  }
+}
