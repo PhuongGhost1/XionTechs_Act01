@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { content } from '../content/index.js'
-import { LAYOUTS, buildGraph, edgesFor, nodesFor } from './graph.js'
+import { ARM_ORDER } from './geometry.js'
+import { LABEL_CAP, LAYOUTS, buildGraph, edgesFor, labelCandidates, nodesFor, shapesFor } from './graph.js'
 
 // WP2 owns this file and extends it (layouts, positions). It starts with the properties of the
 // derived graph that the other packages rely on.
@@ -60,5 +61,27 @@ describe('buildGraph', () => {
   it('names products according to NAME_PRODUCTS', () => {
     expect(graph.byId.get('dep-001').label).toBe('StaffXP')
     expect(graph.byId.get('dep-002').label).toBe('ESS')
+  })
+
+  it('gives every node an arm, depth and order; hubs follow ARM_ORDER', () => {
+    const hubs = graph.nodes.filter((n) => n.kind === 'hub')
+    expect(hubs.map((h) => h.short.toLowerCase())).toEqual(ARM_ORDER)
+    expect(hubs.map((h) => h.arm)).toEqual([0, 1, 2, 3])
+    for (const n of graph.nodes) {
+      expect(Number.isInteger(n.arm), n.id).toBe(true)
+      expect(n.depth, n.id).toBeGreaterThanOrEqual(0)
+      if (n.kind !== 'core' && n.kind !== 'method') expect(n.arm, n.id).toBeGreaterThanOrEqual(0)
+    }
+    expect(graph.byId.get('dep-003').arm).toBe(1) // the demo hangs off the AI arm
+    expect(graph.byId.get('dep-001').arm).toBe(3)
+  })
+
+  it('draws shapes by layout and never offers more than the label cap', () => {
+    expect(shapesFor(graph, 'x')).toHaveLength(33)
+    expect(shapesFor(graph, 'line').map((n) => n.kind)).toEqual(['core', ...Array(6).fill('method')])
+    expect(shapesFor(graph, 'mark')).toHaveLength(0)
+    expect(labelCandidates(graph, 'x').length).toBeLessThanOrEqual(LABEL_CAP)
+    expect(labelCandidates(graph, 'x').every((n) => ['hub', 'service', 'record'].includes(n.kind))).toBe(true)
+    expect(labelCandidates(graph, 'line')).toEqual([])
   })
 })

@@ -1,0 +1,22 @@
+/*
+ * CoreFigure's own CSS (the few things Tailwind classes cannot say). Colours come from tokens only.
+ *
+ * Hand-over to WebGL (doc 6.3): once CoreCanvas has painted its first frame it writes
+ * <html data-webgl="drawn">, and every figure fades out over 300 ms; if the canvas goes away the
+ * attribute is removed and the figures fade back in. With data-motion=off there is no fade
+ * (motion.css cancels transitions), the figure is simply hidden or shown.
+ */
+.core-figure {
+  opacity: 1;
+  transition: opacity 300ms var(--ease-out);
+}
+
+html[data-webgl='drawn'] .core-figure {
+  opacity: 0;
+}
+
+/* The packets' own pause rule: they set the `animation` shorthand (motion.css .anim-packet), so
+   the pause has to be at least as specific. The figure sets data-paused while it is off screen. */
+.core-figure[data-paused] .anim-packet {
+  animation-play-state: paused;
+}
