@@ -55,6 +55,30 @@ see unmarked (open any build with `?review` to see the Draft markers). Resolve e
 - [ ] Workflow capability labels in the demo ("AI model", "Integration", …) stay generic
       until the team confirms the real services per step.
 
+## Concept 01: X / Command (`/concepts/command/`)
+
+A design exploration from `docs/idea/01-X-Command.md`, built as a separate page. Spec:
+`docs/concepts/01-command-implementation.md`. Open items before it could replace the main page:
+
+- [ ] **Official logo**: only a 250 × 46 px navy PNG exists so far; a larger one is coming from the team. The
+      concept uses a generated white-wordmark copy (`public/concepts/command/logo-reversed.png`, set in
+      `content.js` `brand.logo`) at natural size. When the large logo arrives: regenerate the reversed copy
+      and update the size.
+- [x] ~~Brand yellow~~: team said to pick whatever looks good. The concept uses the brief's `#F5C400`
+      (`--c-signal` in `command.css`).
+- [x] ~~Stack decision~~: the `CLAUDE.md` rules on `feat/motion-3d` belong to the earlier concept, not this one.
+      This concept follows the docs: `three` for the data core (lazy chunk; off for reduced motion, no WebGL,
+      data saver).
+- [ ] **StaffXP status and stack**: the brief's example says "Production" and ".NET / React / AI / Cloud".
+      Neither is confirmed. The concept reuses the real screenshots already in `public/work/` (team said to
+      use them for now) and shows stack and status as "Pending confirmation".
+- [ ] **Engineering signals**: only `25+` years of leadership and `3` offices (see the offices item above)
+      are stated on the live site. Real counts for projects delivered and engineers are placeholders.
+- [ ] **Status panel**: the hero panel (98 %, build `#4821`, Online) is an illustrative interface and is labelled.
+- [x] ~~Lab page~~: skipped for now (no such page exists); the link is left out of the navigation.
+- [ ] **Module names**: the brief mixes `AI / Code / Data / Cloud` (scroll sequence) with Software engineering /
+      AI systems / Cloud & platform / Product development (modules). The concept uses the second set.
+
 ## Not on the page (kept out on purpose)
 
 - Testimonials: the live site's markup is unrendered theme-demo content. Add a section only
