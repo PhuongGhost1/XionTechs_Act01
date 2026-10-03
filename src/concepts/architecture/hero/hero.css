@@ -1,0 +1,458 @@
+/* Sheet 01, the hero. Plain CSS (the lead's architecture.css already carries the tokens and the .bp-* utilities).
+   Three layouts, chosen in Hero.jsx and written to data-layout on the sheet:
+     flow   below 1024 px: copy, then the figure, then the layer list. No sticky stage.
+     split  1024 px and up with reduced motion: copy and figure side by side, the model already open.
+     stage  1024 px and up: a tall stage with one sticky child; scroll drives the model. */
+
+.hero {
+  background: rgb(var(--bp-bg));
+}
+.hero-pin {
+  position: relative;
+  padding-top: 3.5rem; /* clear the fixed header */
+}
+.hero-grid {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  padding-bottom: 2.25rem;
+}
+.hero-head {
+  padding-top: 1.1rem;
+}
+
+/* ------------------------------------------------------------------ copy */
+.hero-copy {
+  position: relative;
+  padding-top: 2rem;
+}
+.hero-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  color: rgb(var(--bp-mute));
+}
+.hero-eyebrow__mark {
+  width: 0.5rem;
+  height: 0.5rem;
+  flex: none;
+  background: rgb(var(--bp-signal));
+  outline: 1px solid rgb(var(--bp-line));
+}
+.hero-title {
+  margin-top: 1.1rem;
+  font-size: clamp(3.6rem, 18.5vw, 7.25rem);
+  color: rgb(var(--bp-text));
+}
+.hero-intro {
+  margin-top: 1.5rem;
+  max-width: 34ch;
+  color: rgb(var(--bp-mute));
+}
+.hero-ctas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.9rem 1rem;
+  margin-top: 2.1rem;
+  padding-bottom: 1rem; /* room for the hover dimension line under a button */
+}
+.hero-hint {
+  display: none;
+}
+
+/* ------------------------------------------------------------------ figure */
+.hero-figure {
+  position: relative;
+  margin: 2.5rem 0 0;
+}
+.hero-fig {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 5 / 7;
+  max-height: 80svh;
+  border: 1px solid rgb(var(--bp-rule));
+}
+.hero-frame {
+  position: absolute;
+  inset: 0;
+}
+.hero-art {
+  position: absolute;
+  inset: 0;
+  overflow: hidden; /* the canvas and the drawing are clipped by the frame */
+}
+.hero-svg,
+.hero-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.hero-svg {
+  transition: opacity 450ms var(--bp-ease);
+}
+.hero-canvas {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 450ms var(--bp-ease);
+}
+.hero-fig[data-gl='on'] .hero-canvas {
+  opacity: 1;
+}
+.hero-fig[data-gl='on'] .hero-svg {
+  opacity: 0;
+  transition-delay: 320ms; /* the canvas is fully in before the drawing leaves */
+}
+
+/* SVG drawing: the five tracing-paper slabs */
+.hero-paper {
+  fill-opacity: 0.68;
+}
+.hero-line {
+  fill: none;
+  stroke: rgb(var(--bp-line));
+  stroke-width: 1.15px;
+  stroke-linejoin: miter;
+}
+.hero-line--slab {
+  stroke-width: 1.5px;
+}
+.hero-line--conn {
+  stroke-width: 1px;
+  stroke-opacity: 0.8;
+}
+.hero-marker {
+  fill: rgb(var(--bp-signal));
+  stroke: rgb(var(--bp-line));
+  stroke-width: 1px;
+}
+.hero-trail {
+  fill: none;
+  stroke: rgb(var(--bp-signal));
+  stroke-width: 2.5px;
+}
+.hero-signal {
+  fill: rgb(var(--bp-signal));
+  stroke: rgb(var(--bp-line));
+  stroke-width: 1.5px;
+}
+
+/* Level 0 loader: plain text until the drawing starts plotting */
+.hero-loader {
+  position: absolute;
+  left: 50%;
+  top: 46%;
+  margin: 0;
+  transform: translate(-50%, -50%);
+  white-space: nowrap;
+  color: rgb(var(--bp-mute));
+  letter-spacing: 0.1em;
+  transition: opacity 500ms var(--bp-ease) 700ms;
+}
+.hero[data-in='true'] .hero-loader {
+  opacity: 0;
+}
+
+/* ------------------------------------------------------------------ overlay */
+.hero-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.hero-guides {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.hero-ext line {
+  stroke: rgb(var(--bp-line));
+  stroke-width: 1px;
+  stroke-opacity: 0.45;
+}
+.hero-leaders line {
+  stroke: rgb(var(--bp-line));
+  stroke-width: 1px;
+  opacity: 0;
+}
+.hero-leaders circle {
+  fill: rgb(var(--bp-line));
+  opacity: 0;
+}
+.hero-triad line {
+  stroke: rgb(var(--bp-line));
+  stroke-width: 1.25px;
+}
+.hero-triad circle {
+  fill: none;
+  stroke: rgb(var(--bp-line));
+  stroke-width: 1.25px;
+}
+.hero-triad .hero-triad__dot {
+  fill: rgb(var(--bp-line));
+  stroke: none;
+}
+.hero-triad text {
+  fill: rgb(var(--bp-mute));
+  font-size: 11px;
+  letter-spacing: 0.06em;
+}
+.hero-label {
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  height: 18px;
+  opacity: 0;
+  white-space: nowrap;
+  color: rgb(var(--bp-text));
+}
+.hero-label__idx {
+  color: rgb(var(--bp-mute));
+}
+.hero-hud {
+  position: absolute;
+  left: 20px;
+  top: 18px;
+  display: grid;
+  grid-template-columns: auto auto;
+  column-gap: 1rem;
+  row-gap: 2px;
+  margin: 0;
+  color: rgb(var(--bp-mute));
+}
+.hero-hud dd {
+  margin: 0;
+  min-width: 7.5em;
+  color: rgb(var(--bp-text));
+}
+.hero-dim {
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+.hero-dim--x {
+  height: 22px;
+}
+.hero-dim--y {
+  width: 22px;
+}
+.hero-overlay[data-compact='true'] .hero-hud :nth-last-child(-n + 2),
+.hero-overlay[data-compact='true'] .hero-dim--y,
+.hero-overlay[data-compact='true'] .hero-label,
+.hero-overlay[data-compact='true'] .hero-leaders {
+  display: none;
+}
+.hero-cross {
+  position: absolute;
+  color: rgb(var(--bp-line));
+}
+.hero-cross--tl {
+  left: 0;
+  top: 0;
+  transform: translate(-50%, -50%);
+}
+.hero-cross--tr {
+  right: 0;
+  top: 0;
+  transform: translate(50%, -50%);
+}
+.hero-cross--bl {
+  left: 0;
+  bottom: 0;
+  transform: translate(-50%, 50%);
+}
+.hero-cross--br {
+  right: 0;
+  bottom: 0;
+  transform: translate(50%, 50%);
+}
+.hero-caption {
+  margin-top: 0.75rem;
+}
+
+/* ------------------------------------------------------------------ layer list (text equivalent of the figure) */
+.hero-layers-wrap {
+  padding-bottom: 3rem;
+}
+.hero-layers {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid rgb(var(--bp-line));
+}
+.hero-layer {
+  display: grid;
+  grid-template-columns: 2.5rem minmax(0, 1fr);
+  column-gap: 0.5rem;
+  row-gap: 0.15rem;
+  padding: 1rem 0;
+  border-bottom: 1px solid rgb(var(--bp-rule));
+}
+.hero-layer__no {
+  grid-row: span 2;
+  padding-top: 0.2rem;
+  color: rgb(var(--bp-mute));
+}
+.hero-layer__name {
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+.hero-layer__desc {
+  color: rgb(var(--bp-mute));
+  font-size: 0.9375rem;
+  line-height: 1.5;
+}
+/* The stage layout keeps the list for assistive technology only; the labels in the figure do the visual job. */
+.hero[data-layout='stage'] .hero-layers-wrap {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* ------------------------------------------------------------------ tablet and up (still the flow layout) */
+@media (min-width: 640px) {
+  .hero-fig {
+    aspect-ratio: 1 / 1;
+  }
+  .hero-title {
+    font-size: clamp(5rem, 15vw, 9rem);
+  }
+  .hero-layer {
+    grid-template-columns: 2.5rem 11rem minmax(0, 1fr);
+    align-items: baseline;
+  }
+  .hero-layer__no {
+    grid-row: auto;
+  }
+}
+
+/* ------------------------------------------------------------------ desktop: split and stage */
+@media (min-width: 1024px) {
+  .hero-grid {
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    grid-template-rows: auto minmax(0, 1fr);
+    column-gap: 1.5rem;
+    min-height: calc(100svh - 3.5rem);
+    padding-bottom: 1.25rem;
+  }
+  .hero-head {
+    grid-column: 1 / -1;
+    grid-row: 1;
+    padding-bottom: 0.9rem;
+  }
+  .hero-copy {
+    grid-column: 1;
+    grid-row: 2;
+    container-type: inline-size;
+    display: flex;
+    flex-direction: column;
+    justify-content: safe center;
+    padding: 0 0 2.5rem;
+  }
+  /* ARCHITECT is 4.53em wide in this face, so 21.6cqw fills the column exactly. The viewport height caps it: the
+     four lines (3.6em) plus the eyebrow, intro and buttons (about 392px with the sheet header) must fit the pin. */
+  .hero-title {
+    font-size: clamp(3.25rem, min(8.4vw, calc((100vh - 392px) / 3.6)), 10.5rem); /* fallback without container units */
+    font-size: clamp(3.25rem, min(21.6cqw, calc((100svh - 392px) / 3.6)), 10.5rem);
+  }
+  .hero-grid {
+    container-type: inline-size; /* so the figure can stop growing on a very tall screen (cqw below) */
+  }
+  .hero-figure {
+    grid-column: 2;
+    grid-row: 2;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 34rem;
+    max-height: 72cqw; /* the frame is never taller than about 1.2 times its width; it is centred when capped */
+    margin-block: auto;
+  }
+  .hero-fig {
+    flex: 1 1 0;
+    min-height: 0;
+    aspect-ratio: auto;
+    max-height: none;
+  }
+  .hero-caption {
+    position: absolute;
+    left: 20px;
+    bottom: 14px;
+    margin: 0;
+  }
+  .hero[data-layout='stage'] .hero-stage {
+    height: 340svh;
+  }
+  .hero[data-layout='stage'] .hero-pin {
+    position: sticky;
+    top: 3.5rem;
+    height: calc(100svh - 3.5rem);
+    padding-top: 0;
+  }
+  .hero[data-layout='stage'] .hero-grid {
+    height: 100%;
+    min-height: 0;
+  }
+  .hero[data-layout='stage'] .hero-figure {
+    min-height: 0;
+  }
+  .hero[data-layout='split'] .hero-pin {
+    min-height: 100svh;
+  }
+
+  .hero[data-layout='stage'] .hero-hint {
+    position: absolute;
+    left: 0;
+    bottom: 1.4rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin: 0;
+    color: rgb(var(--bp-mute));
+    opacity: max(0, calc(1 - var(--p, 0) * 12));
+  }
+  .hero-hint__rule {
+    display: block;
+    width: 2.5rem;
+    height: 1px;
+    background: rgb(var(--bp-line));
+  }
+}
+
+@media (min-width: 1200px) {
+  .hero-grid {
+    grid-template-columns: minmax(0, 5.4fr) minmax(0, 6.6fr);
+  }
+  .hero-figure {
+    max-height: 68cqw;
+  }
+}
+
+@media (min-width: 1024px) and (max-height: 700px) {
+  .hero[data-layout='stage'] .hero-hint {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-loader {
+    display: none;
+  }
+  /* architecture.css resets every .bp-dim__label transform under reduced motion, which also drops the centring
+     translate (and the vertical label's rotation). Restore both for the two dimensions in the hero. */
+  .hero .bp-dim--x .bp-dim__label {
+    transform: translate(-50%, -50%) !important;
+  }
+  .hero .bp-dim--y .bp-dim__label {
+    transform: translate(-50%, -50%) rotate(-90deg) !important;
+  }
+}
