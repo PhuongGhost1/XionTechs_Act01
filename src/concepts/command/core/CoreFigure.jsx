@@ -1,5 +1,6 @@
 import { useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { content } from '../content/index.js'
+import { applyFlow } from '../runtime/flow.js'
 import { useInView } from '../runtime/hooks.js'
 import { cx } from '../ui/cx.js'
 import { setArm } from './armState.js'
@@ -191,6 +192,7 @@ function Packet({ d, delay = 0, dur }) {
       y={-PACKET_H / 2}
       width={PACKET_LEN}
       height={PACKET_H}
+      ref={applyFlow}
       className="anim-packet fill-signal"
       style={{ '--path': `path('${d}')`, animationDelay: `${delay}ms`, ...(dur ? { animationDuration: `calc(${dur}ms / var(--flow, 1))` } : null) }}
     />

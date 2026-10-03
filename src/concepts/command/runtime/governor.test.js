@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { STRIKES, THRESHOLD_MS, WINDOW, createGovernor, median, startGovernor } from './governor.js'
+import { CAP_30HZ_MS, STALL_MS, STRIKES, THRESHOLD_MS, WINDOW, createGovernor, looksCapped, median, startGovernor } from './governor.js'
 
 // Feed one full window of identical frames; returns the last push result.
 const feed = (gov, ms) => {
@@ -82,16 +82,51 @@ describe('governor hysteresis (doc 6.2)', () => {
   })
 })
 
-describe('startGovernor: the thin rAF timer around the core', () => {
-  // A hand driven frame clock and a fake <html>, so the loop runs in Node.
+describe('a refresh cap is not the fault of WebGL', () => {
+  it('knows a steady 30 Hz when it sees one', () => {
+    expect([CAP_30HZ_MS.min, CAP_30HZ_MS.max]).toEqual([32, 35])
+    expect(looksCapped(new Array(WINDOW).fill(33.3))).toBe(true)
+    // Timer jitter around 33.3 ms is still a cap.
+    expect(looksCapped(Array.from({ length: WINDOW }, (_, i) => 32.6 + (i % 4) * 0.6))).toBe(true)
+    expect(looksCapped(new Array(WINDOW).fill(16.7))).toBe(false)
+    expect(looksCapped(new Array(WINDOW).fill(45))).toBe(false)
+    expect(looksCapped([])).toBe(false)
+  })
+
+  it('never drops the tier on a 30 Hz window, however many come in a row', () => {
+    const gov = createGovernor({ tier: 'high' })
+    for (let i = 0; i < 10; i += 1) expect(feed(gov, 33.3)).toBeNull()
+    expect(gov.tier()).toBe('high')
+    const low = createGovernor({ tier: 'low' })
+    for (let i = 0; i < 10; i += 1) expect(feed(low, 33.3)).toBeNull()
+    expect(low.tier()).toBe('low')
+  })
+
+  it('a capped window neither counts as a strike nor resets one', () => {
+    const gov = createGovernor({ tier: 'high' })
+    feed(gov, 40) // strike one
+    expect(feed(gov, 33.3)).toBeNull() // ignored
+    expect(feed(gov, 40)).toMatchObject({ from: 'high', to: 'low' }) // strike two, still counted
+  })
+
+  it('still drops on real load: slower than the cap, or irregular', () => {
+    const slow = createGovernor({ tier: 'high' })
+    feed(slow, 50)
+    expect(feed(slow, 50)).toMatchObject({ to: 'low' })
+    const ragged = createGovernor({ tier: 'high' })
+    const window = () => {
+      let out = null
+      for (let i = 0; i < WINDOW; i += 1) out = ragged.push(i % 2 ? 22 : 38) ?? out // median 30, not clustered
+      return out
+    }
+    window()
+    expect(window()).toMatchObject({ to: 'low' })
+  })
+})
+
+describe('startGovernor: fed by the frames the core drew', () => {
   const setup = () => {
-    let callback = null
     const attrs = {}
-    vi.stubGlobal('requestAnimationFrame', (fn) => {
-      callback = fn
-      return 1
-    })
-    vi.stubGlobal('cancelAnimationFrame', vi.fn())
     const doc = {
       hidden: false,
       documentElement: {
@@ -103,46 +138,53 @@ describe('startGovernor: the thin rAF timer around the core', () => {
       },
     }
     vi.stubGlobal('document', doc)
-    let now = 1000
-    const frame = (dt) => {
-      now += dt
-      const fn = callback
-      callback = null
-      fn(now)
-    }
-    return { attrs, doc, frame }
+    return { attrs, doc }
   }
 
   afterEach(() => vi.unstubAllGlobals())
 
-  it('is a harmless no-op without requestAnimationFrame', () => {
+  it('has no timer of its own: no requestAnimationFrame is needed or used', () => {
+    const raf = vi.fn()
+    vi.stubGlobal('requestAnimationFrame', raf)
     const g = startGovernor({ tier: 'high' })
     expect(() => {
+      g.frame(16)
       g.stop()
       g.lost()
     }).not.toThrow()
+    expect(raf).not.toHaveBeenCalled()
   })
 
   it('writes data-tier and calls onDrop after two bad windows, then goes quiet', () => {
-    const { attrs, frame } = setup()
+    const { attrs } = setup()
     const onDrop = vi.fn()
-    startGovernor({ tier: 'high', onDrop })
-    frame(16) // the first frame only sets the baseline
-    for (let i = 0; i < WINDOW * 2; i += 1) frame(40)
+    const g = startGovernor({ tier: 'high', onDrop })
+    for (let i = 0; i < WINDOW * 2; i += 1) g.frame(40)
     expect(onDrop).toHaveBeenCalledTimes(1)
     expect(onDrop.mock.calls[0][0]).toMatchObject({ from: 'high', to: 'low' })
     expect(attrs['data-tier']).toBe('low')
   })
 
-  it('does not count a hidden tab or a long stall as slow frames', () => {
-    const { attrs, doc, frame } = setup()
+  it('does not count a hidden tab, a long stall, a missing interval or a 30 Hz cap', () => {
+    const { attrs, doc } = setup()
     const onDrop = vi.fn()
-    startGovernor({ tier: 'high', onDrop })
-    frame(16)
-    for (let i = 0; i < WINDOW * 3; i += 1) frame(400) // stalls over 250 ms are skipped
+    const g = startGovernor({ tier: 'high', onDrop })
+    for (let i = 0; i < WINDOW * 3; i += 1) g.frame(STALL_MS + 150) // stalls are skipped
+    for (let i = 0; i < WINDOW * 3; i += 1) g.frame(0) // the first frame after a stop has no interval
+    for (let i = 0; i < WINDOW * 3; i += 1) g.frame(undefined)
     doc.hidden = true
-    for (let i = 0; i < WINDOW * 3; i += 1) frame(40) // hidden frames are skipped
+    for (let i = 0; i < WINDOW * 3; i += 1) g.frame(40) // hidden frames are skipped
+    doc.hidden = false
+    for (let i = 0; i < WINDOW * 3; i += 1) g.frame(33.3) // a capped display
     expect(onDrop).not.toHaveBeenCalled()
+    expect(attrs['data-tier']).toBeUndefined()
+  })
+
+  it('ignores frames after stop()', () => {
+    const { attrs } = setup()
+    const g = startGovernor({ tier: 'high' })
+    g.stop()
+    for (let i = 0; i < WINDOW * 3; i += 1) g.frame(40)
     expect(attrs['data-tier']).toBeUndefined()
   })
 

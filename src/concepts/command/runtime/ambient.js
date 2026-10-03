@@ -1,3 +1,5 @@
+import { setTabHidden } from '../contract/attributes.js'
+
 // Ambient loops stop off screen and while the tab is hidden (doc 7.1, 7.2). CSS animations that
 // never end (the hero caret, the SVG-tier packets) cost compositor time even when nobody can see
 // them, so this watcher marks them:
@@ -15,7 +17,6 @@ let stopFn = null
 /** Starts watching. Idempotent. Returns stop(). */
 export function startAmbient() {
   if (stopFn || typeof document === 'undefined') return stopAmbient
-  const html = document.documentElement
   const seen = new WeakSet()
 
   const io =
@@ -45,7 +46,7 @@ export function startAmbient() {
   })
   mo.observe(document.body, { childList: true, subtree: true })
 
-  const onVisibility = () => html.toggleAttribute('data-tab-hidden', document.hidden)
+  const onVisibility = () => setTabHidden(document.hidden)
   document.addEventListener('visibilitychange', onVisibility)
   onVisibility()
 
@@ -53,7 +54,7 @@ export function startAmbient() {
     io?.disconnect()
     mo.disconnect()
     document.removeEventListener('visibilitychange', onVisibility)
-    html.removeAttribute('data-tab-hidden')
+    setTabHidden(false)
     stopFn = null
   }
   return stopAmbient

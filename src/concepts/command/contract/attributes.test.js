@@ -8,6 +8,7 @@ import {
   setBrief,
   setMotion,
   setStation,
+  setTabHidden,
   setTier,
   setView,
   setWebgl,
@@ -28,7 +29,7 @@ function fakeDocument() {
 afterEach(() => vi.unstubAllGlobals())
 
 describe('attribute names', () => {
-  it('are the seven of the contract', () => {
+  it('are the eight of the contract', () => {
     expect(ATTR).toEqual({
       tier: 'data-tier',
       motion: 'data-motion',
@@ -37,6 +38,7 @@ describe('attribute names', () => {
       active: 'data-active',
       webgl: 'data-webgl',
       brief: 'data-brief',
+      tabHidden: 'data-tab-hidden',
     })
     expect(STORAGE_KEYS).toEqual({ view: 'xt-view', motion: 'xt-motion' })
   })
@@ -59,6 +61,8 @@ describe('normalise', () => {
     expect(normalise(ATTR.webgl, 'yes')).toBeNull()
     expect(normalise(ATTR.brief, 5)).toBe('5')
     expect(normalise(ATTR.brief, -1)).toBeNull()
+    expect(normalise(ATTR.tabHidden, 'true')).toBe('true')
+    expect(normalise(ATTR.tabHidden, 'yes')).toBeNull()
     expect(normalise('data-other', 'x')).toBeNull()
   })
 })
@@ -72,6 +76,7 @@ describe('setters without a document', () => {
     expect(setActive('line')).toBe(false)
     expect(setWebgl(true)).toBe(false)
     expect(setBrief(2)).toBe(false)
+    expect(setTabHidden(true)).toBe(false)
     expect(readAttr(ATTR.tier)).toBeNull()
   })
 })
@@ -108,6 +113,14 @@ describe('setters with a document', () => {
     expect(attrs.get('data-webgl')).toBe('drawn')
     setWebgl(false)
     expect(attrs.has('data-webgl')).toBe(false)
+  })
+
+  it('set and clear data-tab-hidden (the only writer of it)', () => {
+    const { attrs } = fakeDocument()
+    setTabHidden(true)
+    expect(attrs.get('data-tab-hidden')).toBe('true')
+    setTabHidden(false)
+    expect(attrs.has('data-tab-hidden')).toBe(false)
   })
 
   it('persist motion and view when asked, and survive blocked storage', () => {

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { content } from '../../content/index.js'
 import { buildGraph } from '../graph.js'
-import { TIER_SPEC, buildSceneData } from './buffers.js'
+import { TIER_SPEC, buildSceneData, pixelRatioFor } from './buffers.js'
 import { createCore } from './createCore.js'
 
 // Smoke tests against a fake renderer, the way a careful engineer tests code that needs a GPU:
@@ -112,10 +112,59 @@ describe('createCore', () => {
     expect(core.camera.position.z).toBeCloseTo(d, 6)
     expect(core.camera.aspect).toBeCloseTo(1440 / 900, 6)
     expect(renderer.dpr).toBeLessThanOrEqual(1.5)
-    core.resize(3840, 2160, 2)
-    expect(3840 * 2160 * renderer.dpr * renderer.dpr).toBeLessThanOrEqual(2.4e6 + 1)
+    core.resize(1920, 1080, 2)
+    expect(1920 * 1080 * renderer.dpr * renderer.dpr).toBeLessThanOrEqual(2.4e6 + 1)
+    expect(renderer.dpr).toBeGreaterThanOrEqual(1)
     const low = make({ tier: 'low' })
     expect(low.renderer.dpr).toBe(1)
+  })
+
+  it('never renders a DPR 1 or higher screen below ratio 1 (a big window at DPR 1 stays sharp)', () => {
+    const { core, renderer } = make()
+    core.resize(2560, 1440, 1) // 3.7 MP of buffer, over the 2.4 MP budget: still ratio 1
+    expect(renderer.dpr).toBe(1)
+    core.resize(3840, 2160, 2)
+    expect(renderer.dpr).toBe(1)
+    core.resize(1440, 900, 2) // above ratio 1 the budget still shrinks it (1.5 -> 1.36)
+    expect(renderer.dpr).toBeGreaterThan(1)
+    expect(renderer.dpr).toBeLessThan(1.5)
+    core.resize(1280, 800, 0.75) // a zoomed out browser keeps the device's own ratio
+    expect(renderer.dpr).toBe(0.75)
+  })
+
+  it('pixelRatioFor: the cap, the floor and the tier ratios', () => {
+    expect(pixelRatioFor(390, 844, 3, TIER_SPEC.high)).toBe(1.5)
+    expect(pixelRatioFor(390, 844, 3, TIER_SPEC.low)).toBe(1)
+    expect(pixelRatioFor(2560, 1440, 1, TIER_SPEC.high)).toBe(1)
+    expect(pixelRatioFor(2560, 1440, 1, TIER_SPEC.low)).toBe(1)
+    expect(pixelRatioFor(1440, 900, 2, TIER_SPEC.high)).toBeCloseTo(Math.sqrt(2.4e6 / (1440 * 900)), 6)
+    expect(pixelRatioFor(1440, 900, 2, TIER_SPEC.high) ** 2 * 1440 * 900).toBeLessThanOrEqual(2.4e6 + 1)
+  })
+
+  it('emits "frame" with the interval between frames the loop drew, and none for the first after a start or wake', () => {
+    let idleNow = false
+    const { core, r } = make({
+      sample: (s) => Object.assign(s, { k: 0, alpha: 1, w: 300, h: 300, hasRect: true }),
+      idle: () => idleNow,
+    })
+    const seen = []
+    const off = core.on('frame', (ms) => seen.push(ms))
+    core.start()
+    r.step(100) // first frame: no predecessor
+    r.step(133)
+    r.step(150)
+    expect(seen).toEqual([33, 17])
+    idleNow = true
+    r.step(167) // drawn, then the loop stops
+    expect(seen).toEqual([33, 17, 17])
+    idleNow = false
+    core.wake()
+    r.step(5000) // the first frame after the wake: the gap is not a frame
+    r.step(5016)
+    expect(seen).toEqual([33, 17, 17, 16])
+    off()
+    r.step(5033)
+    expect(seen).toHaveLength(4)
   })
 
   it('places the group from the anchor rect and the layout fit, and sets the uniforms', () => {

@@ -11,6 +11,7 @@
 //   data-active   section id            scroll controller
 //   data-webgl    drawn (else absent)   CoreCanvas
 //   data-brief    count                 brief store
+//   data-tab-hidden  true (else absent) runtime/ambient.js: the tab is hidden, loops pause
 //
 // Every setter is a no-op without a document (tests, SSR).
 
@@ -22,7 +23,11 @@ export const ATTR = Object.freeze({
   active: 'data-active',
   webgl: 'data-webgl',
   brief: 'data-brief',
+  tabHidden: 'data-tab-hidden',
 })
+
+/** Attributes that exist only while a flag is on: writing null removes them. */
+const FLAGS = new Set([ATTR.webgl, ATTR.tabHidden])
 
 export const TIERS = Object.freeze(['off', 'low', 'high'])
 export const MOTIONS = Object.freeze(['on', 'off'])
@@ -57,6 +62,8 @@ export function normalise(name, value) {
       const n = Number(value)
       return Number.isInteger(n) && n >= 0 ? String(n) : null
     }
+    case ATTR.tabHidden:
+      return value === 'true' ? 'true' : null
     default:
       return null
   }
@@ -67,8 +74,9 @@ function write(name, value) {
   if (!el) return false
   const next = normalise(name, value)
   if (next === null) {
-    // Only data-webgl may be cleared; an invalid value for any other attribute is ignored.
-    if (name === ATTR.webgl) el.removeAttribute(name)
+    // Only the flag attributes (data-webgl, data-tab-hidden) may be cleared; an invalid value for
+    // any other attribute is ignored.
+    if (FLAGS.has(name)) el.removeAttribute(name)
     return false
   }
   if (el.getAttribute(name) !== next) el.setAttribute(name, next)
@@ -81,6 +89,8 @@ export const setActive = (id) => write(ATTR.active, id)
 export const setBrief = (count) => write(ATTR.brief, count)
 /** `true` writes data-webgl="drawn"; `false` removes it (context lost, canvas torn down). */
 export const setWebgl = (drawn) => write(ATTR.webgl, drawn ? 'drawn' : null)
+/** `true` writes data-tab-hidden="true" (the tab is hidden); `false` removes it. */
+export const setTabHidden = (hidden) => write(ATTR.tabHidden, hidden ? 'true' : null)
 
 /**
  * Sets data-motion. With `persist`, also remembers the choice (try/catch: storage can be

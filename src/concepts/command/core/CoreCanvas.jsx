@@ -1,9 +1,9 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { content } from '../content/index.js'
 import { ATTR, readAttr, setTier as writeTier, setWebgl } from '../contract/attributes.js'
 import { getFlow } from '../runtime/flow.js'
 import { startGovernor } from '../runtime/governor.js'
-import { getState } from '../runtime/scroll.js'
+import { syncScroll } from '../runtime/scroll.js'
 import { getArm } from './armState.js'
 import { buildGraph } from './graph.js'
 import { isFar, placeCore } from './placement.js'
@@ -22,12 +22,16 @@ import { readTokens } from './three/tokens.js'
 //     anchor registry (where the core is), the flow watcher (CTA hover), the lit arm and the pointer.
 //   - After its first painted frame it writes <html data-webgl="drawn"> (through attributes.js),
 //     which fades the SVG figures out (core.css); on teardown it removes it and they fade back.
-//   - It starts the FPS governor, hands it webglcontextlost, and falls back to the SVG on a drop to
-//     "off".
+//   - It starts the FPS governor, feeds it the frame intervals of the frames THIS canvas drew (the
+//     core's 'frame' event), hands it webglcontextlost, switches the scene to the cheaper tier IN
+//     PLACE on a drop high -> low (same canvas, same renderer, same context: only the buffers are
+//     rebuilt), and falls back to the SVG on a drop to "off".
 //   - The loop stops while the tab is hidden, while alpha is 0, while the core is more than a
 //     viewport off screen and under data-motion=off, and wakes on scroll, resize and visibility.
 //
-//   tier   'low' | 'high'   (never 'off': App does not mount it then). In dev, ?tier=low|high wins.
+//   tier   'low' | 'high'   (never 'off': App does not mount it then, and unmounting it is the only
+//          teardown). A later change between low and high (the governor writes data-tier, which
+//          re-renders App) is applied in place by the second effect. In dev, ?tier=low|high wins.
 
 const graph = buildGraph(content)
 const MAX_YAW = (4 * Math.PI) / 180 // pointer follow, doc 6.5
@@ -41,8 +45,14 @@ function devTier() {
 }
 
 export default function CoreCanvas({ tier }) {
+  // The tier the page had when the canvas mounted, and the live hook for later changes. The mount
+  // effect below does not depend on `tier`: a change of tier must not rebuild the canvas, the
+  // WebGL context and the renderer (only the off <-> on transition does, and that unmounts us).
+  const initialTier = useRef(tier)
+  const live = useRef(null)
+
   useEffect(() => {
-    const mode = devTier() ?? tier
+    let mode = devTier() ?? initialTier.current
     if (!TIER_SPEC[mode]) return undefined
 
     const canvas = document.createElement('canvas')
@@ -78,10 +88,12 @@ export default function CoreCanvas({ tier }) {
 
     const place = { from: 'hero', to: 'premise', t: 0, x: 0, y: 0, width: 0, height: 0 }
     const pointer = { tx: 0, ty: 0, x: 0, y: 0, enabled: false, last: 0 }
+    const finePointer = typeof matchMedia === 'function' && matchMedia('(pointer: fine)').matches
 
     function teardown() {
       if (dead) return
       dead = true
+      live.current = null
       cleanups.forEach((fn) => fn())
       governor?.stop()
       core?.dispose()
@@ -99,7 +111,8 @@ export default function CoreCanvas({ tier }) {
         tokens,
         // Filled in place every frame: nothing here allocates.
         sample(state) {
-          const s = getState()
+          // Up to date for THIS frame: the loop was queued before the scroll controller's own rAF.
+          const s = syncScroll()
           const placed = placeCore(s.raw, rectOf, place)
           state.k = s.k
           state.hasRect = placed
@@ -143,11 +156,25 @@ export default function CoreCanvas({ tier }) {
         governor = startGovernor({
           tier: mode,
           onDrop: ({ to }) => {
-            if (to === 'low') core?.setTier('low')
+            if (to === 'low') applyTier('low')
             else teardown()
           },
         })
       })
+      // Only frames this canvas drew are evidence about WebGL (not DOM jank, idle gaps, a hidden tab).
+      core.on('frame', (ms) => governor?.frame(ms))
+
+      // A cheaper (or, after a capability re-read, richer) tier: the same renderer and context, new
+      // buffers. The pointer follow belongs to the high tier only.
+      const applyTier = (next) => {
+        if (dead || !core || next === mode || !TIER_SPEC[next]) return
+        mode = next
+        core.setTier(next)
+        pointer.enabled = Boolean(TIER_SPEC[next].pointer) && finePointer
+        if (!pointer.enabled) pointer.x = pointer.y = pointer.tx = pointer.ty = 0
+        wake()
+      }
+      live.current = { setTier: (next) => applyTier(devTier() ?? next) }
 
       // Context loss: stop, tell the governor (it writes data-tier=off), fall back to the SVG.
       const onLost = (e) => {
@@ -189,10 +216,12 @@ export default function CoreCanvas({ tier }) {
         document.removeEventListener('visibilitychange', onVisibility)
       })
 
-      // Pointer follow: fine pointers on the high tier only (doc 6.2).
-      if (TIER_SPEC[mode].pointer && typeof matchMedia === 'function' && matchMedia('(pointer: fine)').matches) {
-        pointer.enabled = true
+      // Pointer follow: fine pointers on the high tier only (doc 6.2). The listener exists on any fine
+      // pointer and is gated by pointer.enabled, which applyTier flips when the tier changes.
+      pointer.enabled = Boolean(TIER_SPEC[mode].pointer) && finePointer
+      if (finePointer) {
         const onMove = (e) => {
+          if (!pointer.enabled) return
           pointer.tx = Math.max(-1, Math.min(1, (e.clientX / window.innerWidth - 0.5) * 2)) * MAX_YAW
           pointer.ty = Math.max(-1, Math.min(1, (e.clientY / window.innerHeight - 0.5) * 2)) * -MAX_YAW
           wake()
@@ -210,6 +239,12 @@ export default function CoreCanvas({ tier }) {
     }
 
     return teardown
+  }, [])
+
+  // A tier change while mounted (the governor's high -> low writes data-tier, which re-renders
+  // App): switch in place, never rebuild the canvas.
+  useEffect(() => {
+    live.current?.setTier(tier)
   }, [tier])
 
   return null

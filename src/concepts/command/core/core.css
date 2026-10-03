@@ -17,3 +17,12 @@ html[data-webgl='drawn'] .core-figure {
 
 /* While the figure is off screen it carries data-paused, and motion.css (!important) pauses the
    packets under it; no rule is needed here. */
+
+/* While WebGL draws the core the figure is invisible, so its endless packet animations (offset-path
+   animation runs on the main thread: style and paint work every frame) are held where they are.
+   Paused, not removed: when the canvas goes away (a tier drop to off, a lost context) the attribute
+   disappears, the packets resume from the same place and the figure fades back in with its motion,
+   nothing restarts or jumps. The selector outranks any later `animation` shorthand on a packet. */
+html[data-webgl='drawn'] .core-figure .anim-packet {
+  animation-play-state: paused;
+}

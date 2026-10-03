@@ -10,7 +10,7 @@ import { Mesh } from 'three/src/objects/Mesh.js'
 import { Points } from 'three/src/objects/Points.js'
 import { WebGLRenderer } from 'three/src/renderers/WebGLRenderer.js'
 import { Scene } from 'three/src/scenes/Scene.js'
-import { QUAD, buildSceneData } from './buffers.js'
+import { QUAD, buildSceneData, pixelRatioFor } from './buffers.js'
 import {
   HALO_FRAG,
   HALO_VERT,
@@ -37,7 +37,8 @@ import {
 //     viewport  () => { width, height, dpr }
 //     renderer  inject a renderer (tests); otherwise a WebGLRenderer on `canvas`
 //   returns { start, stop, wake, frame, resize, setTier, setUniforms, setAnchorRect, on, dispose, scene, group, state }
-//   events: 'painted' (first frame on screen), 'lost' (context lost), 'error'
+//   events: 'painted' (first frame on screen), 'frame' (one per frame the loop drew, with the ms since
+//   the previous one it drew: the FPS governor's only input), 'lost' (context lost), 'error'
 
 const FOV = 20
 const PACKET_PERIOD = 2.4 // seconds per edge at flow 1 (doc 6.1)
@@ -87,7 +88,7 @@ export function createCore({
   caf = (id) => cancelAnimationFrame(id),
   now = () => performance.now(),
 }) {
-  const listeners = { painted: [], lost: [], error: [] }
+  const listeners = { painted: [], frame: [], lost: [], error: [] }
   const emit = (name, arg) => listeners[name].forEach((fn) => fn(arg))
 
   const renderer = injected ?? new WebGLRenderer({ canvas, alpha: true, antialias: false, stencil: false, depth: false, powerPreference: 'high-performance' })
@@ -124,6 +125,7 @@ export function createCore({
   let running = false
   let rafId = 0
   let last = 0
+  let lastLoop = 0 // timestamp of the previous frame the loop drew; 0 after any stop
   let time = 0
   let painted = false
   let frames = 0
@@ -254,10 +256,9 @@ export function createCore({
   function resize(width, height, dpr = 1) {
     vw = Math.max(1, width)
     vh = Math.max(1, height)
-    const spec = data.spec
-    dprEff = Math.min(dpr, spec.dpr)
-    // Render pixel cap (doc 6.2): shrink the pixel ratio, never the CSS size.
-    if (vw * vh * dprEff * dprEff > spec.mp) dprEff = Math.sqrt(spec.mp / (vw * vh))
+    // Render pixel cap (doc 6.2): shrink the pixel ratio, never the CSS size, and never below a
+    // ratio of 1 (see pixelRatioFor: the canvas is full viewport but only the core is drawn).
+    dprEff = pixelRatioFor(vw, vh, dpr, data.spec)
     renderer.setPixelRatio(dprEff)
     renderer.setSize(vw, vh, false)
     // z = 0 maps to CSS px: distance so that the plane at z = 0 is exactly vh tall.
@@ -331,9 +332,14 @@ export function createCore({
     rafId = 0
     if (!running) return
     frame(t)
+    // The interval between two frames this loop drew back to back (not the first one after a
+    // start or a wake, whose predecessor is long gone).
+    if (lastLoop && t > lastLoop) emit('frame', t - lastLoop)
+    lastLoop = t
     if (idle && idle(state)) {
       running = false
       last = 0
+      lastLoop = 0
       return
     }
     rafId = raf(loop)
@@ -361,6 +367,7 @@ export function createCore({
       if (running || disposed) return
       running = true
       last = 0
+      lastLoop = 0
       rafId = raf(loop)
     },
     stop() {
@@ -368,6 +375,7 @@ export function createCore({
       if (rafId) caf(rafId)
       rafId = 0
       last = 0
+      lastLoop = 0
     },
     /** Re-reads the sources and says whether the loop has nothing to draw (the idle test). */
     probe() {
@@ -426,6 +434,7 @@ export function createCore({
       unbuild()
       renderer.dispose?.()
       listeners.painted.length = 0
+      listeners.frame.length = 0
       listeners.lost.length = 0
       listeners.error.length = 0
     },

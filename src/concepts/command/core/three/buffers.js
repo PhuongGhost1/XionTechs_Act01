@@ -18,6 +18,21 @@ export const TIER_SPEC = Object.freeze({
 /** Edge kind codes for the line shader (aKindE). */
 export const EDGE_CODE = Object.freeze({ hub: 0, member: 1, record: 2, pending: 3, method: 4 })
 
+/**
+ * The pixel ratio of the canvas for a viewport. The canvas is one full-viewport buffer, but only
+ * the core is ever drawn into it (at most about 320 x 320 CSS px, or the 1700 x 96 line): the
+ * budget `spec.mp` limits the buffer (memory, clear, compositing), not shader work, which is
+ * bounded by the core's own size. So the cap shrinks the ratio only down to 1 (or to the device's
+ * own ratio when that is below 1): a 2560 x 1440 window at DPR 1 renders at 1 and stays sharp
+ * instead of being resampled to 0.8 to fit 2.4 MP. Above DPR 1 the budget still applies.
+ */
+export function pixelRatioFor(width, height, dpr, spec) {
+  let ratio = Math.min(dpr, spec.dpr)
+  const area = width * height
+  if (area * ratio * ratio > spec.mp) ratio = Math.max(Math.sqrt(spec.mp / area), Math.min(ratio, 1))
+  return ratio
+}
+
 const toLocal = (out, o, p) => {
   out[o] = p[0] - 0.5
   out[o + 1] = 0.5 - p[1]

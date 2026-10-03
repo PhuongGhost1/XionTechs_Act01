@@ -4,7 +4,7 @@ import { FRAME, PHONE_MAX_WIDTH, STATIONS, stationById } from '../contract/stati
 
 // The scroll scalar of the page (doc 6.2, 7.3, 10.4). Native scroll, no hijack: one passive
 // scroll listener marks the frame dirty, one rAF turns scrollY into progress, and the results go
-// out as CSS variables (--p on each track element), data-station / data-active on <html> (through
+// out as a CSS variable (--p, only on the tracks whose CSS reads it: CSS_VAR_TRACKS), data-station / data-active on <html> (through
 // contract/attributes.js) and a plain object read by the dock and by the WebGL render loop.
 // Nothing here sets React state per frame.
 //
@@ -235,7 +235,16 @@ const state = {
 
 const INDEX_OF = new Map(STATIONS.map((s) => [s.id, s.index]))
 
-const tracks = new Map() // id -> { el, plateaus, mode, top, height }
+/**
+ * Tracks whose CSS reads --p (the plateau-shaped progress). A custom property is inherited, so
+ * every write restyles the whole subtree below the element: it is written ONLY where a rule
+ * needs it. Today that is The Line (line.css: the progress fill and the packet). Any other track
+ * opts in with registerTrack(id, el, { cssVar: true }). --p-raw is not written at all: nothing
+ * reads it, and state.raw carries the same number for JS.
+ */
+export const CSS_VAR_TRACKS = Object.freeze(['line'])
+
+const tracks = new Map() // id -> { el, plateaus, mode, cssVar, top, height }
 const stationListeners = new Set()
 const frameListeners = new Set()
 const layoutListeners = new Set()
@@ -293,6 +302,15 @@ function measureAll() {
     if (index !== undefined && t.height > 0) state.tops[index] = t.top
   }
   layoutListeners.forEach((fn) => fn())
+  invalidate()
+}
+
+// Something other than the scroll position changed (layout, a track came or went): the next
+// update() must recompute even if scrollY is the same.
+let dirty = true
+
+function invalidate() {
+  dirty = true
   schedule()
 }
 
@@ -313,6 +331,9 @@ function setVar(el, name, value) {
 // (tops, heights, viewport, document height) was cached by measureAll.
 function update() {
   const scrollY = window.scrollY
+  // Already computed for this scroll position (syncScroll ran earlier in this frame): nothing to do.
+  if (!dirty && scrollY === state.scrollY) return
+  dirty = false
   const { vh } = state
   state.scrollY = scrollY
 
@@ -322,8 +343,7 @@ function update() {
     const shaped = plateau(raw, t.plateaus)
     state.raw[id] = raw
     state.progress[id] = shaped
-    setVar(t.el, '--p-raw', raw)
-    setVar(t.el, '--p', shaped)
+    if (t.cssVar) setVar(t.el, '--p', shaped)
   }
 
   const { k, alpha } = kAlphaFor(state.raw)
@@ -346,11 +366,32 @@ function update() {
 }
 
 /**
- * Registers a station's track element. `plateaus` are dwell intervals (see plateau()); `mode`
- * overrides the station's default progress mode. Returns the unsubscribe function.
+ * Brings the state up to date with the scroll position as of right now, and returns it. For a
+ * caller that runs in the same rAF phase as the controller but BEFORE it (the WebGL render loop
+ * was queued in the previous frame, the controller's rAF is queued by this frame's scroll event,
+ * so it runs after): without this the loop would draw the previous frame's progress during a
+ * sustained scroll. The controller's own rAF then finds nothing left to do. One scrollY read; no
+ * layout read.
  */
-export function registerTrack(id, element, { plateaus = [], mode } = {}) {
-  const t = { el: element, plateaus, mode: mode ?? stationById(id)?.mode ?? 'pin', top: 0, height: 0 }
+export function syncScroll() {
+  if (running && typeof window !== 'undefined' && (dirty || window.scrollY !== state.scrollY)) update()
+  return state
+}
+
+/**
+ * Registers a station's track element. `plateaus` are dwell intervals (see plateau()); `mode`
+ * overrides the station's default progress mode; `cssVar` writes --p on the element each frame
+ * (default: only for CSS_VAR_TRACKS). Returns the unsubscribe function.
+ */
+export function registerTrack(id, element, { plateaus = [], mode, cssVar } = {}) {
+  const t = {
+    el: element,
+    plateaus,
+    mode: mode ?? stationById(id)?.mode ?? 'pin',
+    cssVar: cssVar ?? CSS_VAR_TRACKS.includes(id),
+    top: 0,
+    height: 0,
+  }
   tracks.set(id, t)
   if (typeof window !== 'undefined') {
     // Mount time, not scroll time: a layout read here is fine.
@@ -358,7 +399,7 @@ export function registerTrack(id, element, { plateaus = [], mode } = {}) {
     const index = INDEX_OF.get(id)
     if (index !== undefined && t.height > 0) state.tops[index] = t.top
     observer?.observe(element)
-    schedule()
+    invalidate()
   }
   return () => {
     if (tracks.get(id) === t) tracks.delete(id)
@@ -367,7 +408,7 @@ export function registerTrack(id, element, { plateaus = [], mode } = {}) {
     delete state.progress[id]
     const index = INDEX_OF.get(id)
     if (index !== undefined && !tracks.has(id)) delete state.tops[index]
-    schedule()
+    invalidate()
   }
 }
 
@@ -473,7 +514,7 @@ function land() {
       // scroll-margin-top (the header) makes the target land just under the fixed header.
       document.getElementById(id)?.scrollIntoView({ block: 'start', behavior: 'instant' })
     }
-    schedule()
+    invalidate()
   }
   // Fonts change line breaks and so heights: wait for them, then for one painted layout.
   const fonts = document.fonts?.ready ?? Promise.resolve()
@@ -487,6 +528,7 @@ function land() {
 export function startScroll() {
   if (running || typeof window === 'undefined') return stop
   running = true
+  dirty = true
   const onScroll = () => schedule()
   const onLayout = () => measureAll()
   const onResize = () => {
@@ -494,7 +536,7 @@ export function startScroll() {
     else {
       state.vh = window.innerHeight
       state.docHeight = document.documentElement.scrollHeight
-      schedule()
+      invalidate()
     }
   }
   const onShow = (e) => e.persisted && measureAll()

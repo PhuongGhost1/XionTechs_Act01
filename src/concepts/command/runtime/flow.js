@@ -2,12 +2,18 @@
 // packets of the core up by 2.5 times. The Button component adds the attribute (`flow` prop);
 // this file watches the document for it, so no CTA needs a handler of its own.
 //
-// The scene reads getFlow() each frame (uniform uFlow); the SVG tier reads the CSS variable
-// --flow on <html>, which anim-packet uses to shorten its duration. The value ramps over 160 ms.
+// The scene reads getFlow() each frame (uniform uFlow). The SVG tier reads the CSS variable --flow
+// on each .anim-packet element, which anim-packet uses to shorten its duration. The variable is
+// NOT written on <html>: a custom property is inherited, so a write on the root restyles the whole
+// document (about 50 ms of UpdateLayoutTree on a CTA hover), for a handful of packets. It is set
+// only while boosted (idle packets fall back to var(--flow, 1)), on the packets that exist, and a
+// packet that mounts during a boost takes it from applyFlow(). The value ramps over 160 ms in the
+// scene; the SVG packets switch at once.
 
 export const FLOW_IDLE = 1
 export const FLOW_BOOST = 2.5
 const RAMP_MS = 160
+const PACKETS = '.anim-packet'
 
 let target = FLOW_IDLE
 let value = FLOW_IDLE
@@ -23,12 +29,22 @@ export function getFlow(now = typeof performance !== 'undefined' ? performance.n
   return value
 }
 
+/**
+ * Gives one packet element the current --flow (or clears it at idle). A ref callback on the
+ * packet calls this at mount, so a packet created while a CTA is hovered is not left slow.
+ */
+export function applyFlow(el) {
+  if (!el?.style) return
+  if (target === FLOW_IDLE) el.style.removeProperty('--flow')
+  else el.style.setProperty('--flow', String(target))
+}
+
 function setTarget(next) {
   if (next === target) return
   from = value
   target = next
   startedAt = typeof performance !== 'undefined' ? performance.now() : 0
-  if (typeof document !== 'undefined') document.documentElement.style.setProperty('--flow', String(next))
+  if (typeof document !== 'undefined') document.querySelectorAll(PACKETS).forEach(applyFlow)
 }
 
 const hasFlow = (node) => node instanceof Element && node.closest('[data-flow]') !== null
