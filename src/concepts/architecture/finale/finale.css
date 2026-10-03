@@ -1,0 +1,182 @@
+/* Sheet 07: the converge stage, the statement and the title block. Plain CSS, tokens only (no hex). */
+
+/* ------------------------------------------------------------------ converge stage
+   On a wide screen with motion allowed the stage is a tall container with a sticky child; below 1024 px or
+   under reduced motion it is an ordinary block that shows the finished mark. */
+.fn-stage {
+  position: relative;
+}
+.fn-stage[data-mode='sticky'] {
+  height: 240vh;
+}
+.fn-pin {
+  display: flex;
+  align-items: center;
+}
+.fn-stage[data-mode='sticky'] .fn-pin {
+  position: sticky;
+  top: 3.5rem;
+  height: calc(100vh - 3.5rem);
+  height: calc(100svh - 3.5rem);
+}
+.fn-stage[data-mode='static'] .fn-pin {
+  padding-block: 3rem 2rem;
+}
+.fn-grid {
+  display: grid;
+  width: 100%;
+  gap: 2.5rem;
+  align-items: center;
+}
+@media (min-width: 1024px) {
+  .fn-grid {
+    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+    gap: 4rem;
+  }
+}
+
+.fn-figure {
+  margin: 0;
+  width: 100%;
+  max-width: 30rem; /* stacked: small enough that the chain below is on screen while the drawing converges */
+  justify-self: center;
+}
+.fn-draw {
+  width: 100%;
+  height: auto; /* the viewBox sets the ratio: 720 x 600 with labels, 600 x 600 without */
+  overflow: visible;
+}
+/* Side by side: the drawing may use its whole column, but never be taller than the pinned viewport (leave room
+   for the caption). */
+@media (min-width: 1024px) {
+  .fn-figure {
+    max-width: 44rem;
+  }
+  .fn-stage[data-mode='sticky'] .fn-figure {
+    max-width: none;
+    width: min(100%, calc((100vh - 3.5rem - 6rem) * 1.2));
+    width: min(100%, calc((100svh - 3.5rem - 6rem) * 1.2));
+  }
+}
+
+/* Layer labels belong to the exploded model: they fade as soon as the collapse begins. */
+.fn-label {
+  font-family: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.fn-labels {
+  opacity: clamp(0, calc(1 - (var(--q, 0) - 0.04) * 9), 1);
+}
+
+/* Caption under the drawing: the model's caption gives way to the mark's. */
+.fn-caption {
+  position: relative;
+  display: grid;
+}
+.fn-caption > span {
+  grid-area: 1 / 1;
+  transition: opacity 400ms var(--bp-ease);
+}
+.fn-caption[data-step='3'] > span:first-child,
+.fn-caption:not([data-step='3']) > span:last-child {
+  opacity: 0;
+}
+
+/* ------------------------------------------------------------------ the chain
+   Unlit captions are muted paper, lit ones full paper; the arrow below a lit caption turns from rule to line
+   colour. Everything is set by the discrete step, never per frame. */
+.fn-step {
+  display: grid;
+  grid-template-columns: 2.5rem minmax(0, 1fr);
+  color: rgb(var(--bp-mute) / 0.7);
+  transition: color 450ms var(--bp-ease);
+}
+.fn-step[data-lit='true'] {
+  color: rgb(var(--bp-text));
+}
+.fn-step__no {
+  grid-column: 1;
+  grid-row: 1;
+  align-self: center;
+}
+.fn-step__word {
+  grid-column: 2;
+  grid-row: 1;
+  display: block;
+  min-height: 3.5rem;
+  line-height: 3.5rem;
+  transition: opacity 400ms var(--bp-ease);
+}
+.fn-step__logo {
+  grid-column: 2;
+  grid-row: 1;
+  align-self: center;
+  max-width: 100%;
+  height: auto;
+  opacity: 0;
+  transition: opacity 600ms var(--bp-ease) 120ms;
+}
+/* The word stays in the page (it is the item's text); the logo takes its place once the mark has formed. */
+.fn-step[data-logo='true'] .fn-step__word {
+  opacity: 0;
+}
+.fn-step[data-logo='true'] .fn-step__logo {
+  opacity: 1;
+}
+.fn-arrow {
+  grid-column: 2;
+  grid-row: 2;
+  margin-left: 0.25rem;
+}
+.fn-arrow path {
+  fill: none;
+  stroke: rgb(var(--bp-rule));
+  stroke-width: 1.5;
+  transition: stroke 450ms var(--bp-ease);
+}
+.fn-arrow[data-lit='true'] path {
+  stroke: rgb(var(--bp-line));
+}
+
+/* ------------------------------------------------------------------ statement and call to action */
+/* The two statement lines are set to fit one line each at every width (the longer one is 11.1 em), so the
+   headline stays two lines on a phone too. */
+.fn-statement {
+  font-size: clamp(1.5rem, min(8vw, calc((100vw - 2.5rem) / 11.5)), 7rem);
+}
+/* On the navy sheet the primary button is paper with a navy label (the tokens invert). It needs its own
+   hover, because the default one darkens to the text colour, which is the same paper here. */
+.fn-cta.bp-btn--primary:hover {
+  background: rgb(var(--bp-mute));
+}
+
+/* ------------------------------------------------------------------ title block */
+.fn-anchor {
+  scroll-margin-top: 4.5rem;
+}
+.fn-tb a {
+  text-decoration: underline;
+  text-decoration-color: rgb(var(--bp-rule));
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.3em;
+  transition: text-decoration-color var(--bp-dur) var(--bp-ease);
+}
+.fn-tb a:hover,
+.fn-tb a:focus-visible {
+  text-decoration-color: rgb(var(--bp-signal));
+  text-decoration-thickness: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fn-step,
+  .fn-step__word,
+  .fn-step__logo,
+  .fn-arrow path,
+  .fn-caption > span,
+  .fn-tb a {
+    transition: none !important;
+  }
+}
