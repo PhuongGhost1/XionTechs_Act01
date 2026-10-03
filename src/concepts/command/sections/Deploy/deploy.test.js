@@ -1,7 +1,7 @@
 import { createElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
-import { modules, services } from '../../content/index.js'
+import { deploy, ledger, modules, services } from '../../content/index.js'
 import { CONFIRMED_SERVICES } from '../../content/validate.js'
 import Deploy from './index.jsx'
 import { ServicesPanel } from './ServicesPanel.jsx'
@@ -52,16 +52,31 @@ describe('DEPLOY markup', () => {
     }
   })
 
-  it('announces the brief count politely', () => {
-    expect(out).toContain('aria-live="polite"')
+  it('shows the brief count but leaves announcing it to the dock (one live region, not two)', () => {
     expect(out).toContain('BRIEF ( 0 )')
+    expect(out).not.toContain('aria-live')
+  })
+})
+
+describe('module grouping and ledger wording', () => {
+  it('no longer flags the confirmed grouping as awaiting sign-off (the definitions stay draft)', () => {
+    expect(modules.some((m) => 'groupingDraft' in m)).toBe(false)
+    expect(deploy.definitionsNote.text).not.toMatch(/group/i)
+    expect(deploy.definitionsNote.src).toBe('DRAFT')
+    expect(modules.every((m) => m.definition.src === 'DRAFT')).toBe(true)
+  })
+
+  it('names no station in WHERE IT APPEARS that carries no chip of the kind (contact has none)', () => {
+    for (const row of ledger.rows) expect(row.where.text, row.kind).not.toMatch(/contact|the X/i)
   })
 })
 
 describe('ServicesPanel', () => {
-  it('keeps a hidden panel in the DOM but out of view', () => {
-    const panel = html(createElement(ServicesPanel, { module: modules[1], hidden: true, brief }))
-    expect(panel).toContain('hidden')
+  it('keeps a collapsed panel in the DOM and the accessibility tree, only drawn as nothing', () => {
+    const panel = html(createElement(ServicesPanel, { module: modules[1], collapsed: true, brief }))
+    expect(panel).toContain('data-collapsed')
+    expect(panel.match(/^<div[^>]*>/)[0]).not.toMatch(/hidden/) // neither [hidden] nor aria-hidden on the panel itself
+    expect(panel).toContain('type="checkbox"')
     expect(panel).toContain('AI-Powered Solutions')
     expect(panel).toContain('AI-Driven Analytics')
   })

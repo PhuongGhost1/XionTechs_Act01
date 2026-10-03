@@ -5,6 +5,9 @@ import { draft } from './wrap.js'
 // (M18), so `kind` must match a chip kind in legend.js and the data-chip attribute on <Chip>.
 //
 // The sentences name no product, so they stay true when NAME_PRODUCTS is false.
+// "Where it appears" names the stations that carry a chip of that kind in the page as rendered (the
+// contact endpoints carry none, and the X is artwork, not a chip), so the words match the outline
+// that selecting the row draws.
 // The DRAFT row only shows in dev or with ?review (devOnly), because a visitor must not read
 // "this wording awaits sign-off" in production (plan: no development labels in production).
 
@@ -38,7 +41,7 @@ export const ledger = {
     rowOf(
       'live',
       'The eight services, the contact details and the 25+ years sentence come from xiontechs.com, captured 2026-09-22.',
-      'Services, premise, contact',
+      'Services, premise',
     ),
     rowOf(
       'real',
@@ -49,18 +52,18 @@ export const ledger = {
     rowOf(
       'illustrative',
       'The agent workflow demo, the failure beat in the line and the layout of the X are artwork, not client work.',
-      'The X, the line, selected deployments',
+      'The line, selected deployments',
     ),
     rowOf(
       'draft',
       'Module and process wording is written for this page and awaits sign-off.',
-      'Services, the line',
+      'Services',
       { devOnly: true },
     ),
     rowOf(
       'pending',
       'Stack, status, client and results for each product; offices; legal name. Not published until the team confirms them.',
-      'Selected deployments, contact',
+      'Selected deployments',
     ),
   ],
   // Two sourced lines under the table. The BUILD values are injected at build (runtime/build.js).

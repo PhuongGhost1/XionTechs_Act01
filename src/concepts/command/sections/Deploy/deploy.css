@@ -34,15 +34,28 @@
   }
 }
 
-/* Spans the full width, so rows slide under it. */
+/* Spans the full width, so rows slide under it. Pinned only where a pinned bar leaves room: a short
+   landscape window (a phone on its side) lets it flow with the rows, so the modules and their
+   checkboxes stay reachable (the same cut as the pinned stages in base.css). */
+@media (min-height: 500px), (orientation: portrait) {
+  .deploy-sticky {
+    position: sticky;
+    top: var(--header-h);
+    z-index: 20;
+  }
+}
+
 .deploy-sticky {
-  position: sticky;
-  top: var(--header-h);
-  z-index: 20;
   margin-inline: calc(var(--margin-x) * -1);
   padding: 8px var(--margin-x);
   background: rgb(var(--ground));
   border-bottom: 1px solid var(--c-hair);
+}
+
+/* The panel sits under the row's definition, set off by a dashed rule (wide screens redraw it below). */
+.deploy__item > .svc-panel {
+  padding-top: 16px;
+  border-top: 1px dashed var(--c-hair-strong);
 }
 
 .deploy-instrument {
@@ -121,13 +134,18 @@
 /* Wide: rows left, instrument and services sticky on the right        */
 /* ------------------------------------------------------------------ */
 
-@media (min-width: 1024px) {
+/* "Wide" is 1024 px and up AND 500 px or more of height (Deploy/index.jsx WIDE_QUERY mirrors it): a
+   shorter window cannot hold the pinned instrument and a panel, so it keeps the stacked layout. */
+@media (min-width: 1024px) and (min-height: 500px) {
   .deploy__grid {
     display: grid;
-    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+    /* The services column is never under 448 px and the figure never over 21vw: at 1024 px the
+       readout beside the figure keeps 200 px or more (7 : 5 and a 260 px figure left it 53 to 92 px,
+       and a word such as ENGINEERING broke in the middle; 200% text needs about 175 px). */
+    grid-template-columns: minmax(0, 7fr) minmax(448px, 5fr);
     column-gap: calc(var(--gutter) * 2);
     align-items: start;
-    --deploy-core: max(200px, min(300px, 34svh));
+    --deploy-core: max(200px, min(300px, 34svh, 21vw));
     /* Room kept under the figure for the tallest panel (see .deploy-sticky). */
     --deploy-tail: 270px;
   }
@@ -135,9 +153,12 @@
   /* Sticky boxes in one grid are all held inside the grid container, so when the rows end the
      figure and the panel are pushed up against the same bottom edge. The figure's box therefore
      includes the room the panel needs under it: the figure leaves first, the panel sits in the
-     reserved space, and they never overlap. The reserved part is empty and lets pointers through
-     to the panel, which comes later in the DOM and so paints above it. */
+     reserved space, and they never overlap. The reserved part is empty, so the box takes no
+     pointer and drops the narrow z-index (20 painted it above the panel and a click on a checkbox
+     landed here): the panel, later in the DOM, paints above it. */
   .deploy-sticky {
+    z-index: auto;
+    pointer-events: none;
     height: calc(var(--deploy-core) + 32px + var(--deploy-tail) + 8px);
     grid-column: 2;
     grid-row: 1 / span 4;
@@ -186,7 +207,8 @@
     background: rgb(var(--panel));
   }
 
-  /* All four panels share one cell under the instrument; only the active one is shown (hidden). */
+  /* All four panels share one cell under the instrument; only the active one is drawn (the rest
+     are data-collapsed, see below). */
   .deploy__item > .svc-panel {
     grid-column: 2;
     grid-row: 1 / span 4;
@@ -207,6 +229,14 @@
     padding: 4px;
     margin: -4px;
   }
+}
+
+/* An inactive module on a wide screen (Deploy/index.jsx sets data-collapsed, never in RAW, which draws
+   every panel): invisible, takes no pointer, but not display: none, so its checkboxes stay in the
+   accessibility tree and the tab order (Tab onto one makes its module active). */
+.svc-panel[data-collapsed] {
+  opacity: 0;
+  pointer-events: none;
 }
 
 /* The 12 px mono caps (text-label) of the type scale; .svc__group is mono at 13 px (text-data). */
@@ -299,14 +329,6 @@
   margin: 0;
   padding: 0;
   border: 0;
-}
-
-/* Narrow: the panel sits under the definition, set off by a dashed rule. */
-@media (max-width: 1023px) {
-  .deploy__item > .svc-panel {
-    padding-top: 16px;
-    border-top: 1px dashed var(--c-hair-strong);
-  }
 }
 
 .svc-panel__legend {
@@ -451,11 +473,10 @@ html[data-view='raw'] .deploy__grid {
   display: block;
 }
 
+/* The instrument is a picture of the active row plus its count: RAW lists every row and panel in
+   full and the dock carries the count, so it would only add a tall empty box. */
 html[data-view='raw'] .deploy-sticky {
-  position: static;
-  margin-inline: 0;
-  padding: 0;
-  border-bottom: 0;
+  display: none;
 }
 
 html[data-view='raw'] .deploy__item,
@@ -490,10 +511,6 @@ html[data-view='raw'] .deploy__item > .svc-panel {
 html[data-view='raw'] .deploy__item > .svc-panel .svc-list {
   max-height: none;
   overflow: visible;
-}
-
-html[data-view='raw'] .svc-panel[hidden] {
-  display: block;
 }
 
 /* RAW shows which module each legend belongs to (it is screen-reader text everywhere else). */

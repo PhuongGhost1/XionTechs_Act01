@@ -117,12 +117,11 @@ html[data-view='raw'] [class*='text-step'] {
   font-size: 22px;
 }
 
-/* Display type that a section sizes itself (a clamp() or a vw size in a class, or its own CSS
-   class) is held to the same scale. Add a line here when a section ships a new display size;
-   the audit is: no text above 28 px in RAW. */
-html[data-view='raw'] [class*='text-[clamp'],
-html[data-view='raw'] [class*='text-['][class*='vw]'],
-html[data-view='raw'] .deploy-row__title {
+/* Display type that a section sizes itself (its own CSS class, or a clamp() or vw size in a utility
+   such as text-[clamp(...)]) is held to the same scale. Add a selector here when a section ships a
+   new display size; the audit is: no text above 28 px in RAW. No section uses a utility size today. */
+html[data-view='raw'] .deploy-row__title,
+html[data-view='raw'] .contact-lead-value {
   font-size: 22px;
   line-height: 1.2;
   letter-spacing: -0.02em;

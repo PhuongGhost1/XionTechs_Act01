@@ -22,7 +22,7 @@ const STACKED = new Set(['CAPTURE SHOWS', 'DETAILS'])
 
 const hotspotsOf = (record) => content.hotspots[record.hotspots]
 
-function RegionRow({ box, active, pinned, descId, onHover, onFocus, onBlur, onTap }) {
+function RegionRow({ box, active, pinned, descId, onHover, onFocus, onBlur, onPick }) {
   return (
     <li>
       <button
@@ -35,7 +35,7 @@ function RegionRow({ box, active, pinned, descId, onHover, onFocus, onBlur, onTa
         onPointerLeave={() => onHover(null)}
         onFocus={(e) => isFocusVisible(e.currentTarget) && onFocus(box.id)}
         onBlur={() => onBlur(box.id)}
-        onClick={() => onTap(box.id)}
+        onClick={(e) => onPick(box.id, e.currentTarget)}
       >
         <span className="of-row__code">{box.code}</span>
         <span className="of-row__leader" data-leader="" aria-hidden="true" />
@@ -76,8 +76,9 @@ export default function Plate({ record, index, mirrored = false, nameProducts = 
   const descId = useId()
 
   // A tap pins a region (and zooms to it) only where the viewer zooms: fingers or a narrow window.
-  // With a mouse and room, hover and keyboard focus already highlight, and a pinned region would
-  // leave the capture dimmed with no visible way to undo it.
+  // With a mouse and room a pinned region would leave the capture dimmed with no visible way to
+  // undo it, so a click or Enter on a row selects it the way focus does: the region stays marked
+  // while the row has focus and goes when focus moves on (the same state keyboard focus uses).
   const pinnedId = zoomEnabled ? pinned : null
   const activeId = activeRegion({ hover, focus, pinned: pinnedId })
   const handlers = {
@@ -85,6 +86,13 @@ export default function Plate({ record, index, mirrored = false, nameProducts = 
     onFocus: setFocus,
     onBlur: (id) => setFocus((f) => (f === id ? null : f)),
     onTap: (id) => zoomEnabled && setPinned((p) => (p === id ? null : id)),
+    onPick: (id, button) => {
+      if (zoomEnabled) return handlers.onTap(id)
+      // A click does not focus a button in every browser: take focus so the selection can end on blur.
+      button.focus({ preventScroll: true })
+      setFocus(id)
+      return undefined
+    },
   }
 
   return (

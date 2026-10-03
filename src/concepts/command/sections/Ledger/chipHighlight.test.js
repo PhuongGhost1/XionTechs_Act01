@@ -1,13 +1,16 @@
 import { afterEach, describe, expect, it } from 'vitest'
-import { HIGHLIGHT_MS, chipsOfKind, clearHighlight, highlightKind, isInView, scrollTarget } from './chipHighlight.js'
+import { HIGHLIGHT_MS, chipsOfKind, clearHighlight, highlightKind, isDrawn, isInView, scrollTarget } from './chipHighlight.js'
 
 // A chip stand-in: just what the module touches. `top` and `height` place it in an 800 px viewport.
-function chip(kind, top, height = 20) {
+// `collapsed` puts the chip inside a [data-collapsed] panel with that computed opacity ('0' = invisible).
+function chip(kind, top, height = 20, collapsed = null) {
   const attrs = new Map()
   return {
     kind,
     attrs,
     scrolled: null,
+    closest: (sel) =>
+      sel === '[data-collapsed]' && collapsed !== null ? { opacity: collapsed } : null,
     getBoundingClientRect: () => ({ top, bottom: top + height, height }),
     setAttribute: (k, v) => attrs.set(k, v),
     removeAttribute: (k) => attrs.delete(k),
@@ -101,16 +104,43 @@ describe('chip highlight (M18)', () => {
     expect(only.scrolled).toEqual({ block: 'center', behavior: 'auto' })
   })
 
-  it('ignores chips inside the ledger panel when deciding to scroll', () => {
+  it('ignores chips inside the ledger panel when deciding where to scroll', () => {
     const own = chip('live', 300) // in the table the visitor just clicked
     const elsewhere = chip('live', 2500)
     const skip = (el) => el === own
     expect(scrollTarget([own, elsewhere], { viewportHeight: 800, ...band }, skip)).toBe(elsewhere)
     // and when the only chip is the panel's own, there is nowhere to go
     expect(scrollTarget([own], { viewportHeight: 800, ...band }, skip)).toBeNull()
-    const r = highlightKind('live', { root: rootOf([own]), win, band, skip, schedule: clock().schedule })
+  })
+
+  it("neither outlines nor counts the ledger's own chips (skip)", () => {
+    const own = chip('live', 300) // the row the visitor just clicked
+    const page = chip('live', 350)
+    const skip = (el) => el === own
+    const r = highlightKind('live', { root: rootOf([own, page]), win, band, skip, schedule: clock().schedule })
     expect(r).toEqual({ count: 1, scrolled: false })
-    expect(own.attrs.has('data-highlight')).toBe(true)
+    expect(own.attrs.has('data-highlight')).toBe(false)
+    expect(page.attrs.has('data-highlight')).toBe(true)
+  })
+
+  it("reports zero, not one, when the only chip of the kind is the ledger's own", () => {
+    const own = chip('live', 300)
+    const r = highlightKind('live', { root: rootOf([own]), win, band, skip: (el) => el === own, schedule: clock().schedule })
+    expect(r).toEqual({ count: 0, scrolled: false })
+  })
+
+  it('does not count chips that are not drawn: no box, or inside a collapsed panel', () => {
+    const drawn = chip('live', 300)
+    const noBox = chip('live', 300, 0) // display: none
+    const clipped = chip('live', 300, 20, '0') // an inactive Deploy module on a wide screen
+    const shownPanel = chip('live', 350, 20, '1') // data-collapsed but drawn in full (RAW)
+    const style = (panel) => panel
+    expect([drawn, noBox, clipped, shownPanel].map((c) => isDrawn(c, style))).toEqual([true, false, false, true])
+    const winStyle = { ...win, getComputedStyle: style }
+    const r = highlightKind('live', { root: rootOf([drawn, noBox, clipped, shownPanel]), win: winStyle, band, schedule: clock().schedule })
+    expect(r.count).toBe(2)
+    expect(noBox.attrs.has('data-highlight')).toBe(false)
+    expect(clipped.attrs.has('data-highlight')).toBe(false)
   })
 
   it('a second selection replaces the first', () => {

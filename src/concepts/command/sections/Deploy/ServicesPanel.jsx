@@ -71,11 +71,13 @@ function Service({ service, checked, onToggle, flash }) {
 }
 
 /**
- * @param {{ module: object, hidden?: boolean, brief: { has: (id: string) => boolean, toggleService: (id: string) => boolean } }} props
- * `hidden` keeps the panel in the DOM but out of view (the other three modules in the sticky
- * column). RAW shows every panel (deploy.css), so no service is ever missing.
+ * @param {{ module: object, collapsed?: boolean, onFocus?: () => void, brief: { has: (id: string) => boolean, toggleService: (id: string) => boolean } }} props
+ * `collapsed` (data-collapsed) draws the panel as nothing (the other three modules in the sticky
+ * column) but keeps it in the DOM, the accessibility tree and the tab order: a screen reader still
+ * reads all eight services, and `onFocus` lets the owner make a focused panel's module the active
+ * one, which shows it. RAW shows every panel (deploy.css), so no service is ever missing.
  */
-export function ServicesPanel({ module: mod, hidden = false, brief }) {
+export function ServicesPanel({ module: mod, collapsed = false, onFocus, brief }) {
   const [flashId, setFlashId] = useState(null)
   const timer = useRef(0)
   useEffect(() => () => clearTimeout(timer.current), [])
@@ -88,7 +90,13 @@ export function ServicesPanel({ module: mod, hidden = false, brief }) {
   }
 
   return (
-    <div id={`${mod.id}-services`} hidden={hidden} className="svc-panel" data-module={mod.id}>
+    <div
+      id={`${mod.id}-services`}
+      className="svc-panel"
+      data-module={mod.id}
+      data-collapsed={collapsed ? '' : undefined}
+      onFocus={onFocus}
+    >
       <fieldset className="svc-fieldset">
         <legend className="svc-panel__legend">
           <span className="sr-only">{mod.label}: </span>

@@ -9,6 +9,19 @@ export const HIGHLIGHT_MS = 3000
 export const chipsOfKind = (root, kind) => Array.from(root.querySelectorAll(`[data-chip="${kind}"]`))
 
 /**
+ * True when the chip is drawn: it has a box, and it is not inside a panel that is made invisible
+ * (an inactive Deploy module on wide screens: data-collapsed, opacity 0; RAW draws it in full).
+ * Chips that are not drawn are not outlined and not counted, so the count is what the visitor can
+ * find. (A chip waiting for its reveal fade still counts: it is on the page.) `style` is
+ * getComputedStyle, a parameter so the logic runs under test.
+ */
+export function isDrawn(el, style = (e) => getComputedStyle(e)) {
+  if (el.getBoundingClientRect().height <= 0) return false
+  const collapsed = el.closest?.('[data-collapsed]')
+  return !collapsed || style(collapsed).opacity !== '0'
+}
+
+/**
  * True when any part of the element is inside the visible band of the viewport, the band
  * between the fixed header and the fixed dock.
  */
@@ -41,8 +54,10 @@ export function clearHighlight({ clear = clearTimeout } = {}) {
 }
 
 /**
- * Outlines every chip of `kind` for HIGHLIGHT_MS and scrolls to the first when none is visible.
- * A second call replaces the first. Returns { count, scrolled }.
+ * Outlines every drawn chip of `kind` for HIGHLIGHT_MS and scrolls to the first when none is
+ * visible. A second call replaces the first. Returns { count, scrolled }. A chip that `skip` names
+ * (the ledger's own row chips: the visitor just clicked there) or that is not drawn (isDrawn) is
+ * neither outlined nor counted.
  *
  * @param {string} kind
  * @param {{
@@ -65,12 +80,12 @@ export function highlightKind(kind, options = {}) {
   } = options
   clearHighlight({ clear })
 
-  const chips = chipsOfKind(root, kind)
+  const chips = chipsOfKind(root, kind).filter((c) => isDrawn(c, win.getComputedStyle?.bind(win)) && !(skip && skip(c)))
   for (const chip of chips) chip.setAttribute('data-highlight', '')
   lit = chips
   timer = schedule(() => clearHighlight({ clear }), HIGHLIGHT_MS)
 
-  const target = scrollTarget(chips, { viewportHeight: win.innerHeight, top: band.top ?? 0, bottom: band.bottom ?? 0 }, skip)
+  const target = scrollTarget(chips, { viewportHeight: win.innerHeight, top: band.top ?? 0, bottom: band.bottom ?? 0 })
   if (target) target.scrollIntoView({ block: 'center', behavior: smooth ? 'smooth' : 'auto' })
   return { count: chips.length, scrolled: Boolean(target) }
 }

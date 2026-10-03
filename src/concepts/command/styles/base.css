@@ -85,6 +85,11 @@
     text-size-adjust: 100%;
     scrollbar-width: thin;
     scrollbar-color: var(--c-hair-strong) rgb(var(--void));
+    /* The fixed header, the dock and (phones) the CTA bar never cover a focused control (WCAG
+       2.4.11). The top is exactly the header, so anchored sections land just under it (doc 5.3,
+       10.4); the bottom keeps 8 px of air for the focus ring. */
+    scroll-padding-top: var(--header-h);
+    scroll-padding-bottom: calc(var(--dock-h) + var(--bar-h) + 8px);
   }
 
   body {
@@ -99,11 +104,6 @@
     overflow-x: clip;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
-  }
-
-  /* Anchored sections land below the fixed header (doc 5.3, 10.4). */
-  [id] {
-    scroll-margin-top: var(--header-h);
   }
 
   h1,

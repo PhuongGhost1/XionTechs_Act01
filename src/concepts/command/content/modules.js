@@ -7,8 +7,8 @@ import { LIVE_SITE, brief, draft, live } from './wrap.js'
 //
 // FACT: the eight service names, and the platform and capability names under them (live site).
 // BRIEF: the four module names (docs/idea/v2/01-X-Command.md, section 7).
-// DRAFT (open question 4): which service sits under which module, and the one-line definitions.
-// The grouping is flagged on every module with groupingDraft, so the page can mark it in review.
+// CONFIRMED by the team on 2026-10-03 (HANDOFF section 5, content/TODO.md): which service sits under
+// which module. It is no longer flagged. DRAFT: the one-line module definitions and the row words.
 
 const leaf = (id, label, parent, group) => ({
   id,
@@ -47,7 +47,6 @@ const mod = (id, index, label, short, title, definition, services) => ({
   // The row word of station 02 is sentence case (doc 5.2); `label` stays the uppercase module name.
   title: draft(`${id}.title`, title),
   definition: draft(`${id}.definition`, definition),
-  groupingDraft: true,
   services,
 })
 
@@ -137,8 +136,8 @@ export const deploy = {
   headingMuted: draft('deploy.heading.muted', 'We wire the rest.'),
   add: draft('deploy.add', 'ADD TO BRIEF'),
   added: draft('deploy.added', 'IN BRIEF'),
-  // The three markers that make the draft grouping visible in review (open question 4).
-  groupingNote: draft('deploy.grouping', 'Grouping of services into modules awaits sign-off.'),
+  // Shown only in review: the module wording is still draft (the grouping itself is confirmed).
+  definitionsNote: draft('deploy.definitions', 'Module definitions and row words await sign-off.'),
   // Words of the module rows and the service panel (station 02). All DRAFT, none is a fact.
   modulesLabel: draft('deploy.modules', 'Modules'),
   platformsLabel: draft('deploy.platforms', 'PLATFORMS'),

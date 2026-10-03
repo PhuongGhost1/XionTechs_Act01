@@ -3,7 +3,7 @@ import { deploy, modules, showDraftMarks } from '../../content/index.js'
 import { CoreAnchor } from '../../contract/anchors.js'
 import { STATIONS } from '../../contract/stations.js'
 import { CoreFigure } from '../../core/CoreFigure.jsx'
-import { useBrief, useTrack } from '../../runtime/hooks.js'
+import { useBrief, useHtmlAttribute, useTrack } from '../../runtime/hooks.js'
 import { Chip } from '../../ui/Chip.jsx'
 import { Frame } from '../../ui/Frame.jsx'
 import { EvidenceDot } from '../../ui/Evidence.jsx'
@@ -20,26 +20,39 @@ import './deploy.css'
 //
 // Which row is active (one at a time), by whichever happened last:
 //   scroll   the row nearest the middle of the viewport (IntersectionObserver, a thin band)
-//   focus    Tab onto a row
+//   focus    Tab onto a row, or into a panel (that panel's module becomes active)
 //   click    a row, or a hero tag (arm.js requestArm); the page then scrolls to this section and
 //            the observer is held back until that scroll has settled, so the asked-for arm sticks
 //   hover    a mouse over a row (ignored right after a scroll, which moves rows under a still mouse)
+//   While the keyboard is inside a services panel (wide screens), scroll and hover do not change the
+//   module: the panel with the focused checkbox must stay drawn.
 // The arm change is 160 ms and nothing else moves (M07): only stroke and text colour change.
 //
 // DOM order is the focus order: each module's row button is followed by its own services panel,
 // so Tab goes row, then that row's checkboxes. On wide screens the panels are lifted into the
 // sticky column with CSS grid (deploy.css, .deploy__item is display: contents there) and only the
-// active one is shown; on narrow screens every panel sits under its row. Each of the eight
+// active one is drawn (the rest are clipped, still in the accessibility tree); on narrow screens
+// every panel sits under its row. Each of the eight
 // services is in the DOM exactly once either way.
 
 const SETTLE_MS = 250 // after the page has arrived, before the observer takes over again (a smooth scroll has a long tail)
 const NEAR_PX = 2 // "arrived": within this many px of where the request is scrolling to
 const GIVE_UP_MS = 4000 // a request never holds the observer longer than this
 const HOVER_AFTER_SCROLL_MS = 150
+// 1024 px and up AND 500 px or more high: the pinned instrument and a panel fit (mirrors deploy.css).
+const WIDE_QUERY = '(min-width: 1024px) and (min-height: 500px)'
+
+// True while the keyboard is inside a services panel. Changing the module then (scroll or hover)
+// would clip the panel that holds the focused checkbox, and its ring would vanish.
+const keyboardInPanel = () => {
+  const el = typeof document === 'undefined' ? null : document.activeElement
+  return Boolean(el?.closest?.('.svc-panel') && el.matches(':focus-visible'))
+}
 
 export default function Deploy() {
   const ref = useTrack('deploy')
-  const wide = useMediaQuery('(min-width: 1024px)')
+  const wide = useMediaQuery(WIDE_QUERY)
+  const raw = useHtmlAttribute('data-view') === 'raw' // RAW lists every panel in full: none is collapsed
   const brief = useBrief()
   const [active, setActive] = useState(0)
 
@@ -80,7 +93,7 @@ export default function Deploy() {
     const io = new IntersectionObserver(
       (entries) => {
         for (const e of entries) ratios[Number(e.target.dataset.index)] = e.isIntersecting ? e.intersectionRatio : 0
-        if (hold.current.on) return
+        if (hold.current.on || (wide && keyboardInPanel())) return
         const next = pickActive(ratios, activeRef.current)
         if (next !== activeRef.current) setArm(next)
       },
@@ -133,6 +146,14 @@ export default function Deploy() {
     [setArm],
   )
 
+  // A panel that is clipped away must not keep focus after a mouse click (Space would tick a box
+  // nobody can see). A keyboard focus never gets here: it holds the module (keyboardInPanel).
+  useEffect(() => {
+    const el = document.activeElement
+    const panel = el?.closest?.('.svc-panel')
+    if (wide && panel && panel.dataset.module !== modules[active]?.id) el.blur()
+  }, [wide, active])
+
   const current = modules[active] ?? modules[0]
 
   return (
@@ -164,7 +185,7 @@ export default function Deploy() {
                   <EvidenceDot kind="confirmed" size={8} />
                   {current.state.text}
                 </p>
-                <p aria-live="polite" aria-atomic="true" className="deploy-readout__count font-mono text-counter uppercase text-ink">
+                <p className="deploy-readout__count font-mono text-counter uppercase text-ink">
                   {deploy.countLabel.text} ( {brief.count} )
                 </p>
               </div>
@@ -198,7 +219,7 @@ export default function Deploy() {
                   onClick={() => choose(i)}
                   onFocus={() => choose(i)}
                   onPointerEnter={(e) => {
-                    if (e.pointerType === 'mouse' && performance.now() - lastScroll.current > HOVER_AFTER_SCROLL_MS) choose(i)
+                    if (e.pointerType === 'mouse' && performance.now() - lastScroll.current > HOVER_AFTER_SCROLL_MS && !(wide && keyboardInPanel())) choose(i)
                   }}
                 >
                   <span className="deploy-row__meta">
@@ -212,7 +233,7 @@ export default function Deploy() {
                   <span className="deploy-row__def">{m.definition.text}</span>
                 </button>
               </div>
-              <ServicesPanel module={m} hidden={wide && active !== i} brief={brief} />
+              <ServicesPanel module={m} collapsed={wide && !raw && active !== i} onFocus={() => choose(i)} brief={brief} />
             </div>
           ))}
         </div>
@@ -220,7 +241,7 @@ export default function Deploy() {
         {showDraftMarks() && (
           <p className="mt-10 flex flex-wrap items-center gap-3 font-mono text-label uppercase text-ink3">
             <Chip kind="draft" />
-            {deploy.groupingNote.text}
+            {deploy.definitionsNote.text}
           </p>
         )}
       </div>
