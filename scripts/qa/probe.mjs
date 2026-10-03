@@ -14,7 +14,7 @@ if (process.env.REDUCED) await page.emulateMediaFeatures([{ name: 'prefers-reduc
 const logs = []
 page.on('console', (m) => logs.push(`[${m.type()}] ${m.text().slice(0, 200)}`))
 page.on('pageerror', (e) => logs.push(`[pageerror] ${String(e).slice(0, 300)}`))
-await page.goto('http://localhost:5173/concepts/command/', { waitUntil: 'networkidle2', timeout: 60000 })
+await page.goto((process.env.QA_ORIGIN || 'http://localhost:5173') + '/concepts/command/', { waitUntil: 'networkidle2', timeout: 60000 })
 await new Promise((r) => setTimeout(r, 3000))
 if (sel !== '0') {
   await page.evaluate((s) => document.querySelector(s)?.scrollIntoView({ block: 'start', behavior: 'instant' }), sel)

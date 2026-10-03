@@ -18,7 +18,7 @@ page.on('console', (m) => { if (['error', 'warning'].includes(m.type())) logs.pu
 page.on('pageerror', (e) => logs.push('pageerror ' + String(e).slice(0, 220)))
 const wait = (ms) => new Promise((r) => setTimeout(r, ms))
 const res = {}
-await page.goto('http://localhost:5173/concepts/command/', { waitUntil: 'networkidle2', timeout: 60000 })
+await page.goto((process.env.QA_ORIGIN || 'http://localhost:5173') + '/concepts/command/', { waitUntil: 'networkidle2', timeout: 60000 })
 await wait(3000)
 
 // 1. Pause motion

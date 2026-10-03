@@ -17,7 +17,7 @@ if (mode.includes('reduced')) await page.emulateMediaFeatures([{ name: 'prefers-
 const logs = []
 page.on('console', (m) => { if (['error', 'warning'].includes(m.type())) logs.push(m.text().slice(0, 200)) })
 page.on('pageerror', (e) => logs.push('pageerror ' + String(e).slice(0, 200)))
-await page.goto('http://localhost:5173/concepts/command/', { waitUntil: 'networkidle2', timeout: 60000 })
+await page.goto((process.env.QA_ORIGIN || 'http://localhost:5173') + '/concepts/command/', { waitUntil: 'networkidle2', timeout: 60000 })
 await new Promise((r) => setTimeout(r, 4000))
 let i = 0
 for (const y of ys.split(',')) {

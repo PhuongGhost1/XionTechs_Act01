@@ -3,7 +3,7 @@
 import puppeteer from 'puppeteer-core'
 import { mkdirSync, writeFileSync } from 'node:fs'
 
-const [w = '1280', h = '800', tag = 'd', url = 'http://localhost:5173/concepts/command/', mode = ''] = process.argv.slice(2)
+const [w = '1280', h = '800', tag = 'd', url = (process.env.QA_ORIGIN || 'http://localhost:5173') + '/concepts/command/', mode = ''] = process.argv.slice(2)
 const width = Number(w)
 const height = Number(h)
 const out = new URL('./out/', import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, '$1')
