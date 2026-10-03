@@ -1,0 +1,254 @@
+/* Concept 01 · Modules (section 02). Two parts:
+     .cmdm-*  the row's local hover / focus layer (M6): status chip, title tick, drifting particles
+     .mv-*    the four module diagrams (ModuleVisual.jsx) and their looping micro-motion
+   Colours come from the --c-* tokens in command.css. Only transform and opacity animate. */
+
+/* ---- Diagram drawing: hairlines, one yellow accent --------------------------------------------- */
+
+.mv line,
+.mv path,
+.mv rect,
+.mv polyline {
+  vector-effect: non-scaling-stroke; /* the box scales the viewBox; hairlines stay 1 px */
+}
+.mv-l {
+  fill: none;
+  stroke: rgb(var(--c-faint));
+  stroke-width: 1;
+}
+.mv-d {
+  fill: none;
+  stroke: rgb(var(--c-faint) / 0.4);
+  stroke-width: 1;
+}
+.mv-y {
+  fill: none;
+  stroke: rgb(var(--c-signal));
+  stroke-width: 1.25;
+}
+.mv-fy {
+  fill: rgb(var(--c-signal));
+  stroke: none;
+}
+.mv-ff,
+.mv-port {
+  fill: rgb(var(--c-faint));
+  stroke: none;
+}
+/* Fills a shape with the page colour so the layer in front of it hides what is behind. After the
+   stroke classes on purpose: it only overrides their `fill: none`. */
+.mv-bg {
+  fill: rgb(var(--c-bg));
+}
+.mv-ghost {
+  fill: none;
+  stroke: rgb(var(--c-faint) / 0.45);
+  stroke-dasharray: 3 3;
+}
+
+/* Code: each line is a run of tokens, so the dashes differ from line to line. */
+.mv-tokens line:nth-child(1) { stroke-dasharray: 11 3 5 3 16 3; }
+.mv-tokens line:nth-child(2) { stroke-dasharray: 6 3 14 3 4 3 18 3; }
+.mv-tokens line:nth-child(3) { stroke-dasharray: 9 3 12 3; }
+.mv-tokens line:nth-child(4) { stroke-dasharray: 4 3 8 3 16 3; }
+.mv-tokens line:nth-child(5) { stroke-dasharray: 13 3 6 3 10 3; }
+.mv-tokens line:nth-child(6) { stroke-dasharray: 7 3 12 3; }
+
+/* ---- Diagram motion ---------------------------------------------------------------------------
+   Without these (reduced motion) the base state is the finished diagram: blocks snapped, block face
+   lit, packets and sweeps hidden. */
+
+.mv-cursor {
+  animation: cmd-blink 1.1s steps(1) infinite;
+}
+
+/* Code: a scan crosses the lines, a packet runs down the funnel, the block's top face lights. */
+.mv-scan {
+  opacity: 0;
+  animation: mv-scan 5s linear infinite;
+}
+@keyframes mv-scan {
+  0% { transform: translateY(20px); opacity: 0; }
+  6% { opacity: 1; }
+  52% { transform: translateY(98px); opacity: 1; }
+  58%, 100% { transform: translateY(98px); opacity: 0; }
+}
+.mv-packet-x {
+  opacity: 0;
+  animation: mv-packet-x 5s linear infinite;
+}
+@keyframes mv-packet-x {
+  0%, 55% { transform: translateX(0); opacity: 0; }
+  58% { opacity: 1; }
+  68% { transform: translateX(36px); opacity: 1; }
+  70%, 100% { transform: translateX(36px); opacity: 0; }
+}
+.mv-face {
+  opacity: 0.14;
+  animation: mv-face 5s linear infinite;
+}
+@keyframes mv-face {
+  0%, 62% { opacity: 0; }
+  70%, 92% { opacity: 0.24; }
+  100% { opacity: 0; }
+}
+
+/* AI: a packet takes the highlighted path from request to outcome; the outcome pings on arrival. */
+.mv-packet-ai {
+  opacity: 0;
+  animation: mv-packet-ai 3.6s linear infinite;
+}
+@keyframes mv-packet-ai {
+  0% { transform: translate(0, 0); opacity: 0; }
+  4% { transform: translate(0, 0); opacity: 1; }
+  29% { transform: translate(44px, 0); }
+  61% { transform: translate(96px, -22px); }
+  96% { transform: translate(154px, 0); opacity: 1; }
+  100% { transform: translate(154px, 0); opacity: 0; }
+}
+.mv-ring {
+  fill: none;
+  stroke: rgb(var(--c-signal));
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: mv-ring 3.6s ease-out infinite;
+}
+@keyframes mv-ring {
+  0%, 94% { transform: scale(1); opacity: 0; }
+  96% { opacity: 0.9; }
+  100% { transform: scale(2.4); opacity: 0; }
+}
+
+/* Cloud: a packet climbs the axis, pausing at each layer; the top layer lights on arrival. */
+.mv-packet-cloud {
+  opacity: 0;
+  animation: mv-packet-cloud 4.4s linear infinite;
+}
+@keyframes mv-packet-cloud {
+  0% { transform: translateY(0); opacity: 0; }
+  6%, 10% { transform: translateY(0); opacity: 1; }
+  34%, 40% { transform: translateY(-32px); opacity: 1; }
+  64%, 90% { transform: translateY(-64px); opacity: 1; }
+  96%, 100% { transform: translateY(-64px); opacity: 0; }
+}
+.mv-face-cloud {
+  animation-name: mv-face-cloud;
+  animation-duration: 4.4s;
+}
+@keyframes mv-face-cloud {
+  0%, 60% { opacity: 0; }
+  66%, 90% { opacity: 0.22; }
+  100% { opacity: 0; }
+}
+
+/* Product: each block starts a little apart and closes onto its slot, one after another. The
+   offsets and delay come from the block's inline custom properties. */
+.mv-block {
+  animation: mv-snap 5s var(--cmd-ease) var(--sd, 0s) infinite both;
+}
+@keyframes mv-snap {
+  0%, 8% { transform: translate(var(--sx), var(--sy)); }
+  24%, 66% { transform: translate(0, 0); }
+  86%, 100% { transform: translate(var(--sx), var(--sy)); }
+}
+.mv-joint {
+  opacity: 0;
+  animation: mv-joint 5s linear 0.45s infinite both;
+}
+@keyframes mv-joint {
+  0%, 22% { opacity: 0; }
+  26% { opacity: 1; }
+  44%, 100% { opacity: 0; }
+}
+
+/* Loops run only while the diagram is on screen (data-live) and while the visitor has not paused motion. */
+.mv[data-live='false'] *,
+[data-motion='paused'] .mv * {
+  animation-play-state: paused;
+}
+
+/* With the WebGL core running, the diagram stays as a faint blueprint under the arm that has travelled to its
+   module, so each row keeps its own drawing (the arm alone looks the same in all four rows). */
+[data-xcore='on'] .mv.xcore-fallback {
+  opacity: 0.4;
+}
+
+/* ---- Row hover / focus (M6) -------------------------------------------------------------------
+   Touch and keyboard-only setups never hover, so the chip is simply always visible there. */
+
+.cmdm-fx {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.cmdm-p {
+  position: absolute;
+  left: var(--x);
+  top: var(--y);
+  width: 3px;
+  height: 3px;
+  background: rgb(var(--c-signal));
+  opacity: 0;
+}
+.cmdm-tick {
+  position: absolute;
+  left: 0;
+  top: -1rem;
+  width: 28px;
+  height: 2px;
+  background: rgb(var(--c-signal));
+  transform: scaleX(0);
+  transform-origin: left center;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .cmdm-chip {
+    opacity: 0;
+    transform: translate3d(0, 4px, 0);
+    transition:
+      opacity var(--dur-micro) var(--cmd-ease),
+      transform var(--dur-micro) var(--cmd-ease);
+  }
+  .cmdm-tick {
+    transition: transform var(--dur-base) var(--cmd-ease);
+  }
+  .cmdm:hover .cmdm-chip,
+  .cmdm:focus-within .cmdm-chip {
+    opacity: 1;
+    transform: none;
+  }
+  .cmdm:hover .cmdm-tick,
+  .cmdm:focus-within .cmdm-tick {
+    transform: scaleX(1);
+  }
+  /* A handful of particles drift toward the diagram, as the data core's arm does. */
+  .cmdm:hover .cmdm-p,
+  .cmdm:focus-within .cmdm-p {
+    animation: cmdm-drift 2.8s linear var(--d, 0s) infinite;
+  }
+}
+@keyframes cmdm-drift {
+  0% { transform: translate3d(0, 0, 0); opacity: 0; }
+  20% { opacity: 0.9; }
+  100% { transform: translate3d(var(--dx, 88px), -12px, 0); opacity: 0; }
+}
+
+/* As specific as the hover rule that starts the drift, so pausing wins. */
+[data-motion='paused'] .cmdm .cmdm-p {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mv * {
+    animation: none;
+  }
+  .cmdm-fx {
+    display: none;
+  }
+  .cmdm-chip,
+  .cmdm-tick {
+    transition: none;
+  }
+}

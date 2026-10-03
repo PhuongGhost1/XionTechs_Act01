@@ -1,0 +1,306 @@
+/* Concept 01 · Process (section 03, M9). One pipeline: a vertical timeline below lg, a horizontal
+   track from lg up. Process.jsx writes --p (0..1) on .cmdp as the page scrolls and marks each step
+   idle, reached or current.
+
+   Geometry contract: the list has --n equal rows (vertical) or --n equal columns (horizontal), and
+   each step's node sits at the start of its row or column. Node centres are therefore evenly spaced,
+   the track runs from the first node centre to the last ((n - 1) / n of the list), and step i is
+   reached when the fill is i / (n - 1) of the way along it. Only transform and opacity animate.
+   With --p left at 1 and every step reached (reduced motion) this is the finished pipeline. */
+
+.cmdp {
+  --node: 44px; /* the anchor box that holds each step's node */
+  --p: 1;
+}
+@media (min-width: 1024px) {
+  .cmdp {
+    --node: 56px;
+  }
+}
+
+/* The node is drawn 28 px wide, centred in its anchor box. Pull the body left by the difference so the
+   node's edge, not the box's, lines up with the section heading. */
+.cmdp-body {
+  position: relative;
+  margin-left: calc((28px - var(--node)) / 2);
+}
+.cmdp-list {
+  display: grid;
+  grid-auto-rows: 1fr; /* equal rows, so the nodes are evenly spaced whatever the copy length */
+}
+@media (min-width: 1024px) {
+  .cmdp-list {
+    grid-template-columns: repeat(var(--n), minmax(0, 1fr));
+    grid-auto-rows: auto;
+  }
+}
+
+/* ---- Track ------------------------------------------------------------------------------------ */
+
+.cmdp-track {
+  position: absolute;
+  top: calc(var(--node) / 2);
+  left: calc(var(--node) / 2 - 1px);
+  width: 2px;
+  height: calc(100% * (var(--n) - 1) / var(--n));
+  pointer-events: none;
+}
+.cmdp-base {
+  position: absolute;
+  inset: 0 0.5px;
+  background: rgb(var(--c-line));
+}
+.cmdp-fill {
+  position: absolute;
+  inset: 0;
+  background: rgb(var(--c-signal));
+  transform: scaleY(var(--p));
+  transform-origin: 50% 0;
+  will-change: transform;
+}
+
+/* The packet. .cmdp-clip is the track scaled by --p, so it only ever covers the filled part; .cmdp-run
+   slides a track-length box through it; the packet rides the box's leading edge and is counter-scaled
+   so --p does not stretch it. */
+.cmdp-clip {
+  position: absolute;
+  inset: 0 -4px;
+  overflow: hidden;
+  transform: scaleY(var(--p));
+  transform-origin: 50% 0;
+  will-change: transform;
+}
+.cmdp-run {
+  position: absolute;
+  inset: 0;
+  animation: cmdp-run-y 3.6s linear infinite;
+}
+.cmdp-packet {
+  position: absolute;
+  left: 2px;
+  right: 2px;
+  bottom: 0;
+  height: 16px;
+  background: rgb(var(--c-signal));
+  transform: scaleY(calc(1 / max(var(--p), 0.02)));
+  transform-origin: 50% 100%;
+}
+@keyframes cmdp-run-y {
+  from { transform: translateY(-100%); }
+  to { transform: translateY(0); }
+}
+@keyframes cmdp-run-x {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(0); }
+}
+
+@media (min-width: 1024px) {
+  .cmdp-track {
+    top: calc(var(--node) / 2 - 1px);
+    left: calc(var(--node) / 2);
+    width: calc(100% * (var(--n) - 1) / var(--n));
+    height: 2px;
+  }
+  .cmdp-base {
+    inset: 0.5px 0;
+  }
+  .cmdp-fill {
+    transform: scaleX(var(--p));
+    transform-origin: 0 50%;
+  }
+  .cmdp-clip {
+    inset: -4px 0;
+    transform: scaleX(var(--p));
+    transform-origin: 0 50%;
+  }
+  .cmdp-run {
+    animation-name: cmdp-run-x;
+  }
+  .cmdp-packet {
+    top: 2px;
+    bottom: 2px;
+    left: auto;
+    right: 0;
+    width: 16px;
+    height: auto;
+    transform: scaleX(calc(1 / max(var(--p), 0.02)));
+    transform-origin: 100% 50%;
+  }
+}
+
+/* ---- Steps ------------------------------------------------------------------------------------ */
+
+.cmdp-step {
+  position: relative;
+  min-width: 0;
+  padding: 0 0 2.5rem calc(var(--node) + 1.25rem);
+}
+.cmdp-anchor {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: grid;
+  width: var(--node);
+  height: var(--node);
+  place-items: center;
+}
+/* Below lg the index line is centred on the node; from lg the text sits under it. */
+.cmdp-text {
+  padding-top: calc(var(--node) / 2 - 8px);
+}
+/* An idle step is dimmed, but its index label is not: dimming it with opacity took it to 3.5:1. */
+.cmdp-text > h3,
+.cmdp-text > p:last-child {
+  opacity: 0.72;
+  transition: opacity var(--dur-base) var(--cmd-ease);
+}
+.cmdp-step:not([data-state='idle']) .cmdp-text > h3,
+.cmdp-step:not([data-state='idle']) .cmdp-text > p:last-child {
+  opacity: 1;
+}
+@media (min-width: 1024px) {
+  .cmdp-step {
+    padding: 0 1.5rem 0 0;
+  }
+  .cmdp-anchor {
+    position: relative;
+  }
+  .cmdp-text {
+    margin-top: 1.25rem;
+    padding: 0 0 0 calc((var(--node) - 28px) / 2); /* under the node's edge, not its box's */
+  }
+}
+
+/* The node: a hairline square holding a small X, faint until the fill reaches it, then yellow. The
+   current step also gets a centre pip and a ping. */
+.cmdp-node {
+  position: relative;
+  display: block;
+  width: 28px;
+  height: 28px;
+}
+.cmdp-node svg {
+  display: block;
+  width: 28px;
+  height: 28px;
+}
+.cmdp-n-bg {
+  fill: rgb(var(--c-bg)); /* hides the track behind the node */
+  stroke: none;
+}
+.cmdp-n-base {
+  stroke: rgb(var(--c-faint));
+  stroke-width: 1;
+}
+.cmdp-n-on {
+  stroke: rgb(var(--c-signal));
+  stroke-width: 1.25;
+  opacity: 0;
+  transition: opacity var(--dur-base) var(--cmd-ease);
+}
+.cmdp-core {
+  fill: rgb(var(--c-signal));
+  opacity: 0;
+  transition: opacity var(--dur-base) var(--cmd-ease);
+}
+.cmdp-ping {
+  position: absolute;
+  inset: 0;
+  border: 1px solid rgb(var(--c-signal));
+  opacity: 0;
+}
+.cmdp-step:not([data-state='idle']) .cmdp-n-on {
+  opacity: 1;
+}
+.cmdp-step[data-state='current'] .cmdp-core {
+  opacity: 1;
+}
+.cmdp-step[data-state='current'] .cmdp-ping {
+  animation: cmdp-ping 2.4s var(--cmd-ease) infinite;
+}
+@keyframes cmdp-ping {
+  0% { transform: scale(1); opacity: 0.7; }
+  100% { transform: scale(1.9); opacity: 0; }
+}
+
+/* The index: a dash and the number, both lighting yellow by crossfading a yellow copy over the faint one. */
+.cmdp-dash {
+  position: relative;
+  width: 20px;
+  height: 1px;
+  background: rgb(var(--c-line));
+}
+.cmdp-dash::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: -0.5px;
+  width: 100%;
+  height: 2px;
+  background: rgb(var(--c-signal));
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+  transition: transform var(--dur-base) var(--cmd-ease);
+}
+.cmdp-idx-on {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity var(--dur-base) var(--cmd-ease);
+}
+.cmdp-step:not([data-state='idle']) .cmdp-dash::after {
+  transform: scaleX(1);
+}
+.cmdp-step:not([data-state='idle']) .cmdp-idx-on {
+  opacity: 1;
+}
+
+/* ---- Readout ---------------------------------------------------------------------------------- */
+
+.cmdp-seg {
+  position: relative;
+  width: 14px;
+  height: 2px;
+  background: rgb(var(--c-line));
+}
+.cmdp-seg::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgb(var(--c-signal));
+  opacity: 0;
+  transition: opacity var(--dur-micro) linear;
+}
+.cmdp-seg[data-on='true']::after {
+  opacity: 1;
+}
+
+/* ---- Pausing and reduced motion --------------------------------------------------------------- */
+
+/* Loops run only while the pipeline is on screen and the visitor has not paused motion. */
+.cmdp:not([data-live='true']) .cmdp-run,
+.cmdp:not([data-live='true']) .cmdp-ping,
+[data-motion='paused'] .cmdp-run,
+[data-motion='paused'] .cmdp-ping,
+/* The current step's ping is declared with a more specific selector, so the pause rule needs to match it. */
+[data-motion='paused'] .cmdp-step[data-state] .cmdp-ping {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cmdp-clip {
+    display: none;
+  }
+  .cmdp-ping {
+    animation: none;
+  }
+  .cmdp-text > h3,
+  .cmdp-text > p:last-child,
+  .cmdp-n-on,
+  .cmdp-core,
+  .cmdp-dash::after,
+  .cmdp-idx-on,
+  .cmdp-seg::after {
+    transition: none;
+  }
+}
