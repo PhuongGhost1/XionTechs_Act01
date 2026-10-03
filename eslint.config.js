@@ -52,7 +52,7 @@ const conceptGuards = Array.from({ length: MAX_DEPTH }, (_, depth) => {
 })
 
 export default [
-  { ignores: ['dist', '.claude', '.agents'] },
+  { ignores: ['dist', '.claude', '.agents', 'scripts/qa'] },
   {
     files: ['**/*.{js,jsx}'],
     languageOptions: {
