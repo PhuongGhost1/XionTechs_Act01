@@ -13,6 +13,7 @@ import { startScroll } from './runtime/scroll.js'
 import { markChunkFailed, startTier } from './runtime/tier.js'
 import Deploy from './sections/Deploy/index.jsx'
 import Done from './sections/Done/index.jsx'
+import { Footer } from './sections/Done/Footer.jsx'
 import Ledger from './sections/Ledger/index.jsx'
 import Line from './sections/Line/index.jsx'
 import OnFile from './sections/OnFile/index.jsx'
@@ -87,7 +88,7 @@ function Page() {
       {/* The one background: a static dot grid, full bleed (doc 5.4), and the constant hairline pair. */}
       <div aria-hidden="true" data-decor="" className="bg-dots pointer-events-none fixed inset-0" />
       <Hairlines />
-      <main id="main" tabIndex={-1} className="relative pb-[calc(var(--dock-h)+var(--bar-h))] pt-header outline-none">
+      <main id="main" tabIndex={-1} className="relative pt-header outline-none">
         <Standby />
         <Premise />
         <Deploy />
@@ -96,6 +97,10 @@ function Page() {
         <Ledger />
         <Done />
       </main>
+      {/* Outside <main> so it is the page's contentinfo landmark. It carries the end-of-page room
+          for the fixed dock itself (and the phone bar hides while it is on screen), so nothing is
+          reserved after it. */}
+      <Footer />
       <MobileBar />
       <Dock />
       {showCanvas && (

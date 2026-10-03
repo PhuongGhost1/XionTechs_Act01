@@ -202,6 +202,19 @@
   overflow: clip;
 }
 
+/* A pin whose stage does not hold its content (enlarged text, a tiny window; see runtime/fit.js
+   watchPinFit) is released: the stage flows at its natural height and nothing is clipped. */
+.track--pin[data-unpinned] {
+  height: auto;
+}
+
+.track--pin[data-unpinned] > .stage {
+  position: static;
+  height: auto;
+  overflow: visible;
+  padding-block: calc(var(--station-gap) / 2);
+}
+
 /* No pins on landscape phones (doc 5.3): show the final states in normal flow. */
 @media (max-height: 499px) and (orientation: landscape) {
   .track--pin {

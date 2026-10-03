@@ -93,6 +93,20 @@ h2.finale-type {
   }
 }
 
+/* A released pin (data-unpinned, base.css) shows the finished frame: the scroll thresholds above
+   cannot be reached by the reader the way they are on a pinned stage. */
+.done-finale[data-unpinned] .finale-line {
+  clip-path: none !important;
+}
+
+.done-finale[data-unpinned] .finale-sweep {
+  transform: none !important;
+}
+
+.done-finale[data-unpinned] .finale-logo {
+  opacity: 1 !important;
+}
+
 /* RAW is a plain sheet: nothing decorative, nothing waiting. */
 html[data-view='raw'] .finale-line {
   padding-left: 0;

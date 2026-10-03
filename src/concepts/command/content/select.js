@@ -1,6 +1,7 @@
 import { NAME_PRODUCTS, showDraftMarks } from './flags.js'
 import { ledger } from './ledger.js'
 import { modules } from './modules.js'
+import { processContent } from './process.js'
 import { records } from './records.js'
 
 // Read helpers over the content. Components use these instead of re-deriving shapes, so the
@@ -46,6 +47,13 @@ export function specRows(record, flag = NAME_PRODUCTS) {
     ...record.rows,
   ]
 }
+
+/**
+ * The wrappers of the legend line under THE LINE, in reading order: the DRAFT part only in dev
+ * or with ?review, the illustrative-beat label always (it is an honesty label).
+ */
+export const legendLineParts = (review = showDraftMarks()) =>
+  review ? [processContent.legendSteps, processContent.legendBeat] : [processContent.legendBeat]
 
 /** Ledger rows for this visitor: the DRAFT row only in dev or with ?review. */
 export const visibleLedgerRows = (review = showDraftMarks()) => ledger.rows.filter((r) => review || !r.devOnly)

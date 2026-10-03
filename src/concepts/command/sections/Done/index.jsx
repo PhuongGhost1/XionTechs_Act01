@@ -3,9 +3,8 @@ import { Reveal } from '../../ui/Reveal.jsx'
 import { Composer } from './Composer.jsx'
 import { Endpoints } from './Endpoints.jsx'
 import { Finale } from './Finale.jsx'
-import { Footer } from './Footer.jsx'
 
-// Station 06 DONE (doc 4.8). Two sections of one station, then the footer:
+// Station 06 DONE (doc 4.8). Two sections of one station (the footer follows <main>, App.jsx):
 //   #done     the pinned finale: the X mark, the real logo, GET / IT / DONE. (Finale.jsx)
 //   #contact  normal flow, below the pin: the composer and the endpoints. The finale and the core
 //             never block it: this section sits above the canvas and starts after the pin ends.
@@ -23,7 +22,6 @@ export default function Done() {
           <Endpoints />
         </div>
       </section>
-      <Footer />
     </>
   )
 }

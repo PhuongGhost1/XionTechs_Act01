@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Button } from '../ui/Button.jsx'
+import { watchLayout } from '../runtime/fit.js'
 import { useActiveStation, useBrief } from '../runtime/hooks.js'
 import CtaLabel from './CtaLabel.jsx'
 import { ctaVariant } from './logic.js'
@@ -10,13 +11,15 @@ import './frame.css'
 // per viewport" rule of the CTA ladder, so it is hidden while another start-a-project control is
 // already on screen:
 //   - the hero's own primary button (the first yellow button of #standby), and
-//   - the composer (#contact), where SEND EMAIL is the action.
+//   - the composer (#contact), where SEND EMAIL is the action, and
+//   - the footer, so the end of the page needs no strip reserved for the bar: it is never over it.
+// With enlarged text its label no longer fits one line of the fixed 56 px bar: the bar then drops out
+// (data-crowded, frame.css); the MENU panel carries the same CTA.
 // While hidden it is inert, so it can not be tabbed to or read. Layout never changes with it:
-// base.css reserves its height (--bar-h) for the end of the page and the pinned stages, so it
-// never covers text at rest. It follows the header's CTA states (outlined until the WORK station,
+// base.css reserves its height (--bar-h) under the pinned stages, so it never covers text at rest. It follows the header's CTA states (outlined until the WORK station,
 // then filled). data-fixed-cta lets RAW take it out.
 
-const WATCH = ['#standby [data-fill="signal"]', '#contact']
+const WATCH = ['#standby [data-fill="signal"]', '#contact', '[data-site-footer]']
 // Header 48 and dock 56 are on screen on a phone: an element behind them is not "in view".
 const MARGIN = '-48px 0px -56px 0px'
 
@@ -70,14 +73,35 @@ export default function MobileBar() {
   const { count } = useBrief()
   const station = useActiveStation()
   const hidden = useAnyInView(WATCH)
+  const barRef = useRef(null)
+
+  useEffect(() => {
+    const bar = barRef.current
+    const cta = bar?.querySelector('a')
+    if (!bar || !cta) return undefined
+    // Measured while the bar is displayed (data-crowded is cleared first); display: none on a
+    // phone-only bar makes the numbers 0, which reads as fitting.
+    return watchLayout(() => {
+      bar.removeAttribute('data-crowded')
+      if (cta.scrollHeight > cta.clientHeight + 1 || cta.scrollWidth > cta.clientWidth + 1) bar.setAttribute('data-crowded', '')
+    })
+  }, [])
+
   return (
     <div
+      ref={barRef}
       data-fixed-cta=""
       data-hidden={hidden ? 'true' : 'false'}
       inert={hidden ? '' : undefined}
-      className="mobile-bar fixed inset-x-0 bottom-dock z-30 flex h-14 items-center border-t border-hair bg-ground px-[var(--margin-x)] md:hidden"
+      className="mobile-bar fixed inset-x-0 bottom-dock z-30 flex h-[56px] items-center border-t border-hair bg-ground px-[var(--margin-x)] md:hidden"
     >
-      <Button href="#contact" variant={ctaVariant(station.index)} flow arrow="right" className="w-full justify-between">
+      <Button
+        href="#contact"
+        variant={ctaVariant(station.index)}
+        flow
+        arrow="right"
+        className="!h-[48px] w-full justify-between"
+      >
         <CtaLabel count={count} />
       </Button>
     </div>

@@ -97,7 +97,7 @@ export default function Premise() {
       ref={ref}
       data-track="premise"
       aria-labelledby="premise-title"
-      className="track premise flex items-center"
+      className="track premise flex items-center lg:items-stretch"
     >
       <div className="column w-full py-24">
         <div className="premise__grid">
@@ -106,7 +106,7 @@ export default function Premise() {
             <h2
               id="premise-title"
               ref={statementRef}
-              className="mt-6 max-w-[17ch] font-display text-statement font-[450] text-ink"
+              className="mt-6 max-w-[17ch] font-display text-statement font-[450] text-ink [overflow-wrap:anywhere]"
             >
               {WORDS.map((word, i) => (
                 <span key={`${word}-${i}`}>
@@ -123,7 +123,7 @@ export default function Premise() {
               <span className="sr-only">.</span>
             </h2>
 
-            <Reveal className="mt-12 grid max-w-[60rem] gap-8 md:grid-cols-2 md:gap-12">
+            <Reveal className="mt-12 grid max-w-[60rem] grid-cols-[minmax(0,1fr)] gap-8 md:grid-cols-2 md:gap-12">
               <p className="max-w-measure text-body text-ink2">{premise.paragraph.text}</p>
               <div className="flex flex-col items-start gap-3">
                 <p className="max-w-measure text-[1.375rem] leading-snug text-ink">{premise.claim.text}</p>
@@ -132,7 +132,7 @@ export default function Premise() {
                     {CHIP_PARTS.map((part, i) => (
                       <Fragment key={part}>
                         {i > 0 ? ' · ' : null}
-                        <span className="whitespace-nowrap">{part}</span>
+                        <span className="inline-block max-w-full break-all">{part}</span>
                       </Fragment>
                     ))}
                   </span>

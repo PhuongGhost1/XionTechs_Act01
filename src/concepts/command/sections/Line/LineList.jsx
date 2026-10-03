@@ -3,6 +3,7 @@ import { STATIONS } from '../../contract/stations.js'
 import { Chip } from '../../ui/Chip.jsx'
 import { Label } from '../../ui/Label.jsx'
 import { BriefLine } from './BriefLine.jsx'
+import { LegendLine } from './LegendLine.jsx'
 import { BUILD_STEP } from './lineModel.js'
 
 // THE LINE without the pin (doc 4.5 fallback): reduced motion, RAW, landscape phones, and any
@@ -17,8 +18,8 @@ export function LineList() {
       </Label>
       <ol role="list" aria-label={line.a11y.stops.text} className="mt-8 border-b border-hair">
         {line.steps.map((s, i) => (
-          <li key={s.id} className="grid gap-3 border-t border-hair py-6 md:grid-cols-2 md:gap-8 md:py-8">
-            <p className="font-display text-row font-medium uppercase text-ink">{s.label}</p>
+          <li key={s.id} className="grid grid-cols-[minmax(0,1fr)] gap-3 border-t border-hair py-6 md:grid-cols-2 md:gap-8 md:py-8">
+            <p className="font-display text-row font-medium uppercase text-ink [overflow-wrap:anywhere]">{s.label}</p>
             <div className="flex flex-col gap-4">
               <p className="max-w-measure text-body text-ink2">{s.sentence.text}</p>
               {i === 0 && <BriefLine />}
@@ -32,7 +33,7 @@ export function LineList() {
           </li>
         ))}
       </ol>
-      <p className="mt-6 font-mono text-label uppercase text-ink3">{line.legendLine.text}</p>
+      <LegendLine className="mt-6" />
     </div>
   )
 }

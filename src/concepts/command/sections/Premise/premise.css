@@ -18,47 +18,57 @@
 }
 
 .premise__anchor {
-  width: 140px;
-  height: 140px;
+  --premise-core: 140px;
+  width: var(--premise-core);
+  height: var(--premise-core);
 }
 
 @media (min-width: 360px) {
   .premise__anchor {
-    width: 160px;
-    height: 160px;
+    --premise-core: 160px;
   }
 }
 
 @media (min-width: 768px) {
   .premise__anchor {
-    width: 200px;
-    height: 200px;
+    --premise-core: 200px;
   }
 }
 
+/* Wide: the grid fills the whole track (the column and the section stretch), the statement is
+   centred in it and the core cell is as tall as the track, so the anchor can be STICKY in it: the
+   dimmed core stays on screen, mid-window, for as long as the track is, instead of scrolling away
+   with the statement while the scene is still flying the core in from the hero. It is released
+   when the track ends (the scene has moved on to DEPLOY by then). On phones the core stays in
+   flow above the text: pinned there it would sit on top of the words. */
 @media (min-width: 1024px) {
   .premise__grid {
     display: grid;
     grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
     align-items: center;
     gap: var(--gutter);
+    height: 100%;
   }
 
   .premise__core {
     order: 0;
+    align-self: stretch;
     justify-content: center;
   }
 
   .premise__anchor {
-    width: 240px;
-    height: 240px;
+    --premise-core: 240px;
+    position: sticky;
+    align-self: flex-start;
+    /* Centred between the header and the dock. */
+    top: max(calc(var(--header-h) + 16px), calc(50vh - var(--premise-core) / 2));
+    top: max(calc(var(--header-h) + 16px), calc(50svh - var(--premise-core) / 2));
   }
 }
 
 @media (min-width: 1280px) {
   .premise__anchor {
-    width: 280px;
-    height: 280px;
+    --premise-core: 280px;
   }
 }
 

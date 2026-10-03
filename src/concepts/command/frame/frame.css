@@ -28,6 +28,39 @@
   transform: scaleX(1);
 }
 
+/* ---- Crowded phone bar (enlarged text): the label no longer fits, so the bar drops out ------- */
+
+[data-fixed-cta][data-crowded] {
+  display: none;
+}
+
+/* ---- Crowded dock (enlarged text): the word BUILD goes, the counter stays ----------------------- */
+
+[data-frame='dock'][data-crowded] .dock-build {
+  display: none;
+}
+
+/* ---- Crowded bar (enlarged text): READ | RAW moves from the bar into the MENU panel ---------- */
+
+[data-frame='header'] .menu-view {
+  display: none;
+}
+
+/* Crowded: the bar keeps the logo and the MENU button (also from 1024, where MENU is normally
+   absent); the words, READ | RAW, MOTION, the clock and the CTA are all in the MENU panel. */
+[data-frame='header'][data-crowded] .header-view,
+[data-frame='header'][data-crowded] .header-nav,
+[data-frame='header'][data-crowded] .header-motion,
+[data-frame='header'][data-crowded] .header-cta,
+[data-frame='header'][data-crowded] .header-sys {
+  display: none;
+}
+
+[data-frame='header'][data-crowded] .menu-view,
+[data-frame='header'][data-crowded] .header-menu {
+  display: inline-flex;
+}
+
 /* ---- Focus rings in the frame sit INSIDE the control. A 44 px control in the 48 px phone header
    has 2 px to spare, so the usual 3 px offset ring (base.css) would run off the top of the screen. */
 

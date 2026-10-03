@@ -124,7 +124,7 @@ export function Composer() {
           </p>
         </div>
         <div className="flex flex-col gap-2">
-          <Button variant="ghost" flow onClick={onCopy} className="min-w-[11rem] self-start justify-center max-sm:w-full">
+          <Button variant="ghost" flow onClick={onCopy} className="min-w-[min(11rem,100%)] self-start justify-center max-sm:w-full">
             {copied ? composer.copied.text : composer.copy.text}
           </Button>
           <p className="composer-hint text-data text-ink2">{composer.copyHint.text}</p>

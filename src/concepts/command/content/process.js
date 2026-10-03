@@ -50,8 +50,12 @@ export const processContent = {
     pauseHint: draft('process.a11y.pause', 'Pause the failure beat'),
     replayHint: draft('process.a11y.replay', 'Replay the failure beat'),
   },
-  // Printed under the stage so a visitor knows what kind of content each part is.
-  legendLine: draft('process.legend', 'STEPS: DRAFT · FAILURE BEAT: ILLUSTRATIVE'),
+  // Printed under the stage so a visitor knows what kind of content each part is. Two parts:
+  // the beat label is an honesty label and shows to everyone; the STEPS: DRAFT part says the
+  // step wording awaits sign-off, so it follows the DRAFT rule (dev or ?review only).
+  // select.js legendLineParts() picks which to show.
+  legendBeat: draft('process.legend.beat', 'FAILURE BEAT: ILLUSTRATIVE'),
+  legendSteps: draft('process.legend.steps', 'STEPS: DRAFT'),
   // The single labelled failure (M09): a check fails once, is retried, passes. Not a client run.
   beat: {
     id: 'process.beat',

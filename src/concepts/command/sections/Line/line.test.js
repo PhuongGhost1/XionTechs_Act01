@@ -1,9 +1,10 @@
 import { createElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
-import { process as line } from '../../content/index.js'
+import { legendLineParts, process as line } from '../../content/index.js'
 import { Beat } from './Beat.jsx'
 import { BriefLine } from './BriefLine.jsx'
+import { LegendLine } from './LegendLine.jsx'
 import { LineList } from './LineList.jsx'
 import { LineStage } from './LineStage.jsx'
 
@@ -42,7 +43,7 @@ describe('LineStage', () => {
     expect(html).toContain('line-word')
     expect(html).toContain(line.steps[4].sentence.text)
     for (let i = 0; i < 6; i += 1) expect(html).toContain(`id="line-desc-${i}"`)
-    expect(html).toContain(line.legendLine.text)
+    expect(html).toContain(line.legendBeat.text)
   })
 
   it('has the PAUSE and REPLAY controls with aria-pressed only on PAUSE', () => {
@@ -122,6 +123,23 @@ describe('LineList (the no-pin fallback)', () => {
   })
 
   it('keeps the legend line', () => {
-    expect(html).toContain(line.legendLine.text)
+    expect(html).toContain(line.legendBeat.text)
+  })
+})
+
+describe('legend line', () => {
+  const show = (review) => renderToStaticMarkup(createElement(LegendLine, { review }))
+
+  it('shows the illustrative-beat label to every visitor', () => {
+    expect(show(false)).toContain('FAILURE BEAT: ILLUSTRATIVE')
+    expect(show(true)).toContain('FAILURE BEAT: ILLUSTRATIVE')
+    expect(legendLineParts(false).map((p) => p.id)).toEqual(['process.legend.beat'])
+  })
+
+  it('shows the STEPS: DRAFT part only in dev or with ?review, before the beat label', () => {
+    expect(show(false)).not.toContain('DRAFT')
+    const review = show(true)
+    expect(review).toContain('STEPS: DRAFT')
+    expect(review.indexOf('STEPS: DRAFT')).toBeLessThan(review.indexOf('FAILURE BEAT'))
   })
 })

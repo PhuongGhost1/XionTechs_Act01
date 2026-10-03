@@ -18,7 +18,7 @@ export default function MotionToggle({ className }) {
       aria-label={frame.motion.label.text}
       onClick={() => setMotion(off ? 'on' : 'off', { persist: true })}
       className={cx(
-        'inline-flex h-11 min-w-11 items-center gap-2 px-3 font-mono text-label uppercase text-ink2 transition-colors duration-ui ease-ui hover:text-ink motion-off:transition-none',
+        'inline-flex h-[44px] min-w-[44px] items-center gap-2 px-3 font-mono text-label uppercase text-ink2 transition-colors duration-ui ease-ui hover:text-ink motion-off:transition-none',
         className,
       )}
     >

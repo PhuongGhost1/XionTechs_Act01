@@ -6,6 +6,7 @@ import { LineStage } from './LineStage.jsx'
 import { BUILD_STEP, PLATEAUS, stepTarget } from './lineModel.js'
 import { useLineStep } from './useLineStep.js'
 import { useListMode } from './useListMode.js'
+import { useStageCramped } from './useStageCramped.js'
 import './line.css'
 
 // Station 03 THE LINE, "from request to production" (doc 4.5). A pinned track of 220 svh (200 on
@@ -20,9 +21,12 @@ import './line.css'
 
 export default function Line() {
   const ref = useTrack('line', { plateaus: PLATEAUS })
-  const list = useListMode()
+  const listMode = useListMode()
   const motionOff = useReducedMotion()
-  const step = useLineStep(ref, !list)
+  const step = useLineStep(ref, !listMode)
+  // Enlarged text can make the stage clip its content: then the section is the list too.
+  const cramped = useStageCramped(ref, !listMode, step)
+  const list = listMode || cramped
 
   // Failure-beat controls. runId names a run of the beat; the first entry to BUILD plays run 1.
   // `played` is the last run the stage has shown, so re-entering BUILD later shows the final

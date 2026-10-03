@@ -9,6 +9,14 @@ import { createElement, useEffect, useRef } from 'react'
 // ResizeObserver and document.fonts.ready, and cached DOCUMENT-relative. getAnchorRect() then
 // subtracts scrollY, so the scroll handler and the render loop never read layout.
 //
+// The exception is an anchor that is, or sits inside, a position: sticky box (the premise
+// core, the DEPLOY instrument, the pinned LINE and DONE stages). Its document position is not
+// fixed: it moves as the box sticks, so a cached document rect drifts by up to a whole track.
+// measure() detects that case (hasStickyAncestor) and marks the entry live: getAnchorRect() then
+// reads its viewport rect from the DOM on each call. That is one layout read per sticky anchor
+// per call, so callers on a hot path (the canvas loop) keep their own rect reader, as
+// core/placement.js does; every other caller can use getAnchorRect() for any anchor.
+//
 // This file has no JSX on purpose (.js), so its pure helpers stay testable in Node.
 
 export const ANCHOR_NAMES = Object.freeze(['hero', 'premise', 'deploy', 'line', 'done'])
@@ -18,6 +26,18 @@ export const ANCHOR_NAMES = Object.freeze(['hero', 'premise', 'deploy', 'line', 
 // ---------------------------------------------------------------------------------------------
 // Pure helpers (tested in anchors.test.js)
 // ---------------------------------------------------------------------------------------------
+
+/**
+ * True when `el` or one of its ancestors is position: sticky. `getPosition(node)` returns the
+ * computed position of a node (the DOM passes getComputedStyle; the tests pass a stub). Nodes
+ * need a `parentElement`.
+ */
+export function hasStickyAncestor(el, getPosition) {
+  for (let node = el; node; node = node.parentElement) {
+    if (getPosition(node) === 'sticky') return true
+  }
+  return false
+}
 
 /** Document-relative rect to viewport rect. */
 export const toViewportRect = (docRect, scrollX, scrollY) => ({
@@ -68,7 +88,7 @@ export function coreAnchorSegment(progress = {}) {
 // Registry
 // ---------------------------------------------------------------------------------------------
 
-const anchors = new Map() // name -> { el, rect: Rect | null } (document relative)
+const anchors = new Map() // name -> { el, rect: Rect | null (document relative), live: boolean }
 const subscribers = new Set()
 let observer = null
 let teardown = null
@@ -78,6 +98,8 @@ function measure(name) {
   if (!entry || typeof window === 'undefined') return
   const r = entry.el.getBoundingClientRect()
   entry.rect = { x: r.left + window.scrollX, y: r.top + window.scrollY, width: r.width, height: r.height }
+  // Re-decided on every measure: a breakpoint can turn a sticky box static and back.
+  entry.live = hasStickyAncestor(entry.el, (node) => getComputedStyle(node).position)
 }
 
 /** Re-measure every anchor. Called on resize-like events, never from a scroll handler. */
@@ -111,7 +133,7 @@ function startObserving() {
 
 /** Registers an element as the anchor `name`. Returns the unregister function. */
 export function registerAnchor(name, el) {
-  anchors.set(name, { el, rect: null })
+  anchors.set(name, { el, rect: null, live: false })
   observer?.observe(el)
   startObserving()
   measure(name)
@@ -132,14 +154,22 @@ export function subscribeAnchors(fn) {
 /** The cached document-relative rect of an anchor, or null if it is not mounted. */
 export const getDocRect = (name) => anchors.get(name)?.rect ?? null
 
+/** True when the anchor is measured live because it is, or sits in, a sticky box. */
+export const isLiveAnchor = (name) => anchors.get(name)?.live === true
+
 /**
- * The anchor's rect in viewport coordinates right now (no layout read: cached rect minus scroll).
- * Null if the anchor is not mounted.
+ * The anchor's rect in viewport coordinates right now. A static anchor costs no layout read
+ * (cached rect minus scroll); a sticky one (see the header) is read from the DOM, so it is right
+ * while the box sticks. Null if the anchor is not mounted.
  */
 export function getAnchorRect(name) {
-  const rect = getDocRect(name)
-  if (!rect || typeof window === 'undefined') return null
-  return toViewportRect(rect, window.scrollX, window.scrollY)
+  const entry = anchors.get(name)
+  if (!entry?.rect || typeof window === 'undefined') return null
+  if (entry.live) {
+    const r = entry.el.getBoundingClientRect()
+    return { x: r.left, y: r.top, width: r.width, height: r.height }
+  }
+  return toViewportRect(entry.rect, window.scrollX, window.scrollY)
 }
 
 /**

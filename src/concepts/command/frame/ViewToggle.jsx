@@ -28,7 +28,7 @@ export default function ViewToggle({ className }) {
           aria-pressed={view === o.id}
           onClick={() => setView(o.id, { persist: true })}
           className={cx(
-            'seg inline-flex h-11 min-w-11 items-center justify-center px-2 transition-colors duration-ui ease-ui motion-off:transition-none sm:px-3',
+            'seg inline-flex h-[44px] min-w-[44px] items-center justify-center px-2 transition-colors duration-ui ease-ui motion-off:transition-none sm:px-3',
             view === o.id ? 'bg-panel text-ink' : 'text-ink3 hover:text-ink',
           )}
         >

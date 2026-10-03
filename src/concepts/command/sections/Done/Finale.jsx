@@ -3,6 +3,7 @@ import { brand, contact } from '../../content/index.js'
 import { CoreAnchor } from '../../contract/anchors.js'
 import { STATIONS } from '../../contract/stations.js'
 import { CoreFigure } from '../../core/CoreFigure.jsx'
+import { watchPinFit } from '../../runtime/fit.js'
 import { useInView, useTrack } from '../../runtime/hooks.js'
 import { getState } from '../../runtime/scroll.js'
 import { cx } from '../../ui/cx.js'
@@ -70,6 +71,14 @@ export function Finale() {
   const { logoOn, swept } = useFinaleThresholds()
   const { finale } = contact
 
+  // Enlarged text (or a very small window) can make the lockup taller than the pinned stage, which
+  // would clip it: then the pin is released and the finale is laid out in normal flow.
+  useEffect(() => {
+    const stage = stageRef.current
+    const track = trackRef.current
+    return stage && track ? watchPinFit(track, stage, 'h2, p, img, .finale-anchor') : undefined
+  }, [trackRef, stageRef])
+
   return (
     <section
       id="done"
@@ -81,7 +90,7 @@ export function Finale() {
       className="track track--pin done-finale"
     >
       <div ref={stageRef} className="stage">
-        <div className="column relative z-10 flex h-full flex-col justify-center gap-5 max-md:pb-16 lg:grid lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center lg:gap-12">
+        <div className="column relative z-10 flex h-full flex-col justify-center gap-5 lg:grid lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center lg:gap-12">
           <div className="min-w-0">
             <Label>{STATIONS[6].label}</Label>
             <p className="mt-1 font-mono text-label uppercase text-ink2">{finale.kicker.text}</p>

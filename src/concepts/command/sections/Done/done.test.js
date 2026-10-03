@@ -5,6 +5,7 @@ import { clear, toggleRecord, toggleService } from '../../contract/brief.js'
 import { COPIED_MS, copyText, selectionCopy } from './copy.js'
 import { Composer } from './Composer.jsx'
 import { Endpoints } from './Endpoints.jsx'
+import Done from './index.jsx'
 import { Finale } from './Finale.jsx'
 import { Footer } from './Footer.jsx'
 import {
@@ -165,6 +166,11 @@ describe('finale and footer markup', () => {
     expect(markup).toContain('id="done-title"')
     expect(markup).toContain('data-core-anchor="done"')
     expect(markup).toContain('HAVE A SYSTEM TO BUILD?')
+  })
+
+  it('keeps the footer out of the station: App.jsx renders it after <main> as the contentinfo landmark', () => {
+    expect(html(createElement(Done))).not.toContain('<footer')
+    expect(html(createElement(Footer))).toMatch(/^<footer[^>]*data-site-footer/)
   })
 
   it('draws no offices, addresses or legal name in production markup', () => {

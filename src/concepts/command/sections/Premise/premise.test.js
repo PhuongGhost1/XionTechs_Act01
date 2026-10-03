@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs'
 import { createElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
@@ -24,13 +25,21 @@ describe('PREMISE markup', () => {
     expect(premise.claim.chip.text).toContain('xiontechs.com')
   })
 
-  it('wraps the LIVE chip so a date never breaks at its hyphens', () => {
+  it('wraps each part of the LIVE chip in an inline-block: the date never breaks at its hyphens unless it is wider than the screen', () => {
     expect(out).toContain('data-chip="live"')
-    expect(out).toContain('whitespace-nowrap">captured 2026-09-22<')
+    expect(out).toContain('inline-block max-w-full break-all">captured 2026-09-22<')
   })
 
   it('parks the core at the premise anchor, dimmed on the figure and not on the anchor', () => {
     expect(out).toContain('data-core-anchor="premise"')
     expect(out).toContain('opacity-[0.35]')
+  })
+
+  it('makes the anchor sticky from 1024 px, so the dimmed core stays on screen at the premise stop', () => {
+    const css = readFileSync(new URL('./premise.css', import.meta.url), 'utf8')
+    const wide = css.slice(css.indexOf('@media (min-width: 1024px)'))
+    expect(wide).toMatch(/.premise__anchor {[^}]*position: sticky/)
+    // The section stretches its content so the core cell is as tall as the track (room to stick in).
+    expect(out).toContain('lg:items-stretch')
   })
 })

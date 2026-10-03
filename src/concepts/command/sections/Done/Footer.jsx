@@ -26,8 +26,10 @@ function ReviewOnly() {
 
 export function Footer() {
   return (
-    // The bottom padding clears the fixed phone CTA bar and the dock (main only reserves the dock).
-    <footer className="relative z-10 border-t border-hair bg-void pb-16 md:pb-0">
+    // The page's contentinfo landmark: it follows <main>. The bottom padding is the fixed dock's
+    // height, the only thing that covers the end of the page: the phone CTA bar hides itself while
+    // [data-site-footer] is on screen (frame/MobileBar.jsx), so it needs no room of its own.
+    <footer data-site-footer="" className="relative z-10 border-t border-hair bg-void pb-dock">
       <div className="column flex flex-col gap-8 py-10 md:py-12">
         <div className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between md:gap-12">
           <div className="flex min-w-0 flex-col gap-4">

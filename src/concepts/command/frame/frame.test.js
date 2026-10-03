@@ -78,10 +78,13 @@ describe('Header', () => {
     expect(out).toContain('aria-expanded="false"')
     expect(out).toContain('>MENU<')
     expect(out).toContain('START A PROJECT')
-    // Every control class that sets a height sets at least h-11.
+    // Every control class that sets a height sets at least 44 px. Heights are px, not rem, so the
+    // fixed bar keeps its 44 px targets when the reader enlarges text (rem ones would double in a 48 px bar).
     for (const m of out.matchAll(/<(?:button|a)[^>]*class="([^"]*)"/g)) {
-      const h = m[1].match(/\bh-(\d+)\b/)
-      if (h) expect(Number(h[1])).toBeGreaterThanOrEqual(11)
+      const h = m[1].match(/\bh-\[(\d+)px\]/)
+      // The shared Button carries a rem h-11 of its own; a px override (!h-[44px]) must win over it.
+      if (!h) expect(m[1]).not.toMatch(/\bh-\d+\b/)
+      if (h) expect(Number(h[1])).toBeGreaterThanOrEqual(44)
     }
   })
 
@@ -122,7 +125,7 @@ describe('MobileBar', () => {
   const out = html(createElement(MobileBar))
 
   it('is a 56 px bar above the dock, phones only, and starts hidden and inert', () => {
-    expect(out).toContain('h-14')
+    expect(out).toContain('h-[56px]')
     expect(out).toContain('bottom-dock')
     expect(out).toContain('md:hidden')
     expect(out).toContain('data-fixed-cta')

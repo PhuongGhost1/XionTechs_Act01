@@ -158,10 +158,6 @@ html[data-view='raw'] main > section > .column {
   padding-block: var(--station-gap);
 }
 
-html[data-view='raw'] main {
-  padding-bottom: var(--dock-h);
-}
-
 /* ------------------------------------------------------------------ */
 /* Lists and facts                                                     */
 /* ------------------------------------------------------------------ */

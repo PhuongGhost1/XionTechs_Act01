@@ -105,7 +105,7 @@ export default function Scrubber({ className }) {
   }
 
   return (
-    <div className={cx('flex h-11 items-stretch', className)}>
+    <div className={cx('flex h-[44px] items-stretch', className)}>
       <div
         ref={rootRef}
         role="slider"

@@ -8,6 +8,7 @@ import { Label } from '../../ui/Label.jsx'
 import { cx } from '../../ui/cx.js'
 import { Beat } from './Beat.jsx'
 import { BriefLine } from './BriefLine.jsx'
+import { LegendLine } from './LegendLine.jsx'
 import { BUILD_STEP, isLowerRow, rollDirection, stopPercent } from './lineModel.js'
 
 // The pinned stage of THE LINE (doc 4.5): section header with PAUSE | REPLAY, ONE giant step word
@@ -144,6 +145,7 @@ function Rail({ step, onStop }) {
                       )}
                     />
                     <span
+                      data-stop-label=""
                       className={cx(
                         'pointer-events-none absolute left-1/2 top-full mt-[6px] -translate-x-1/2 whitespace-nowrap font-mono text-label uppercase transition-colors duration-ui',
                         isLowerRow(i) && 'max-sm:mt-[24px]',
@@ -190,7 +192,7 @@ export function LineStage({ step, paused, runId, played, onStop, onPause, onRepl
 
         <div>
           <Rail step={step} onStop={onStop} />
-          <p className="column pb-2 font-mono text-label uppercase text-ink3">{line.legendLine.text}</p>
+          <LegendLine className="column pb-2" />
         </div>
       </div>
 

@@ -2,6 +2,7 @@ import { frame } from '../content/index.js'
 import { Button } from '../ui/Button.jsx'
 import CtaLabel from './CtaLabel.jsx'
 import MotionToggle from './MotionToggle.jsx'
+import ViewToggle from './ViewToggle.jsx'
 import Readout from './Readout.jsx'
 import './frame.css'
 
@@ -46,6 +47,8 @@ export default function MenuPanel({ id, close, count, activeId, clock, sectionAc
 
         <div className="mt-auto flex flex-col gap-4 border-t border-hair pt-6">
           <MotionToggle className="-ml-3 self-start" />
+          {/* Only shown while the bar is too crowded to hold it (frame.css, header[data-crowded]). */}
+          <ViewToggle className="menu-view self-start" />
           <Readout stacked />
           <p title={frame.sysTitle.text} className="font-mono text-label uppercase text-ink3">
             {frame.sys.text} / {clock.year} · {frame.doy.text} {clock.doy}
