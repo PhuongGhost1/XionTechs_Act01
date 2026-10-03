@@ -55,29 +55,24 @@ see unmarked (open any build with `?review` to see the Draft markers). Resolve e
 - [ ] Workflow capability labels in the demo ("AI model", "Integration", …) stay generic
       until the team confirms the real services per step.
 
-## Concept 01: X / Command (`/concepts/command/`)
+## Concept 01 v2: X / COMMAND (`/concepts/command/`, branch `feat/concept-01-command-v2`)
 
-A design exploration from `docs/idea/01-X-Command.md`, built as a separate page. Spec:
-`docs/concepts/01-command-implementation.md`. Open items before it could replace the main page:
+A zero-state redesign built from `docs/idea/v2/`, as a separate page. Design and contract:
+`docs/concepts/command-v2/` (state and history: `HANDOFF.md`). Decisions below were confirmed by the team on 2026-10-03.
 
-- [ ] **Official logo**: only a 250 × 46 px navy PNG exists so far; a larger one is coming from the team. The
-      concept uses a generated white-wordmark copy (`public/concepts/command/logo-reversed.png`, set in
-      `content.js` `brand.logo`) at natural size. When the large logo arrives: regenerate the reversed copy
-      and update the size.
-- [x] ~~Brand yellow~~: team said to pick whatever looks good. The concept uses the brief's `#F5C400`
-      (`--c-signal` in `command.css`).
-- [x] ~~Stack decision~~: the `CLAUDE.md` rules on `feat/motion-3d` belong to the earlier concept, not this one.
-      This concept follows the docs: `three` for the data core (lazy chunk; off for reduced motion, no WebGL,
-      data saver).
-- [ ] **StaffXP status and stack**: the brief's example says "Production" and ".NET / React / AI / Cloud".
-      Neither is confirmed. The concept reuses the real screenshots already in `public/work/` (team said to
-      use them for now) and shows stack and status as "Pending confirmation".
-- [ ] **Engineering signals**: only `25+` years of leadership and `3` offices (see the offices item above)
-      are stated on the live site. Real counts for projects delivered and engineers are placeholders.
-- [ ] **Status panel**: the hero panel (98 %, build `#4821`, Online) is an illustrative interface and is labelled.
-- [x] ~~Lab page~~: skipped for now (no such page exists); the link is left out of the navigation.
-- [ ] **Module names**: the brief mixes `AI / Code / Data / Cloud` (scroll sequence) with Software engineering /
-      AI systems / Cloud & platform / Product development (modules). The concept uses the second set.
+- [ ] **Official logo**: only the 250 x 46 px PNG exists (no larger or vector version). The page uses it at native
+      size (`public/concepts/command/logo-reversed.png`) plus a hand-traced X mark in `core/mark.js` for the
+      converge ending. Replace with a vector if one ever arrives.
+- [x] ~~Fonts, `--void`, yellow `#F5C400`, module grouping of the eight services, DEP-003 link to `/#ai-agents`,
+      `mailto:` as the only conversion, StaffXP and ESS shown by name, LinkedIn/Facebook as FACT, no purple
+      sign-in capture~~: confirmed (HANDOFF section 5).
+- [ ] **Production status, stack and results** of StaffXP and ESS: shown as PENDING until the team confirms them.
+- [ ] **Legal name and which offices are real**: omitted from the page, shown only under `?review`.
+- [ ] **AI assistant "Felix"** visible in the StaffXP capture: confirm it may be named.
+- [ ] **"25+ years of leadership"** wording: kept from the live site, confirm.
+- [ ] **`/#ai-agents` on the deployed main page**: DEP-003 links there; confirm it stays live.
+- [ ] **`og-image.png` and favicon**: regenerate from this design.
+- [ ] **Case study metrics and client details**: none are invented; rows stay PENDING.
 
 ## Not on the page (kept out on purpose)
 
