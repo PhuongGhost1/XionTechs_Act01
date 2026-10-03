@@ -1,0 +1,389 @@
+@config "../../../tailwind.architecture.config.js";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ------------------------------------------------------------------ tokens
+   RGB channels so Tailwind can apply alpha. `data-band` re-scopes the same names for the dark and the
+   alternate sheets; components never change colour for it. Every text pair is checked by
+   `model/tokens.test.js`, which parses this file. Yellow is a fill, a line and a signal: on paper it is
+   1.5:1, so it is never text there. */
+:root {
+  --bp-bg: 247 246 241; /* #F7F6F1 warm architectural white */
+  --bp-bg2: 239 238 230; /* #EFEEE6 */
+  --bp-rule: 217 222 229; /* #D9DEE5 hairlines and grid, decoration only */
+  --bp-text: 16 24 32; /* #101820 */
+  --bp-mute: 71 84 103; /* #475467 */
+  --bp-line: 8 35 74; /* #08234A deep navy, linework */
+  --bp-signal: 244 196 0; /* #F4C400 XionTechs yellow */
+  --bp-on-signal: 8 35 74; /* text on a yellow fill */
+  --bp-ease: cubic-bezier(0.22, 0.7, 0.12, 1);
+  --bp-dur: 240ms;
+  --bp-draw: 1400ms;
+  color-scheme: light;
+}
+
+[data-band='alt'] {
+  --bp-bg: 239 238 230;
+  --bp-bg2: 231 229 219;
+}
+
+[data-band='navy'] {
+  --bp-bg: 8 35 74; /* #08234A */
+  --bp-bg2: 12 45 92; /* #0C2D5C */
+  --bp-rule: 44 74 117; /* #2C4A75 */
+  --bp-text: 247 246 241;
+  --bp-mute: 182 194 212; /* #B6C2D4 */
+  --bp-line: 247 246 241;
+  --bp-signal: 244 196 0;
+  --bp-on-signal: 8 35 74;
+  color-scheme: dark;
+}
+
+[data-band] {
+  background-color: rgb(var(--bp-bg));
+  color: rgb(var(--bp-text));
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+body {
+  @apply bg-bp-bg font-sans text-bp-text antialiased;
+  margin: 0;
+  font-stretch: 100%;
+  line-height: 1.6;
+  overflow-x: clip;
+}
+::selection {
+  background: rgb(var(--bp-signal));
+  color: rgb(var(--bp-on-signal));
+}
+:focus-visible {
+  outline: 2px solid rgb(var(--bp-line));
+  outline-offset: 3px;
+}
+svg {
+  display: block;
+}
+
+/* A little paper grain: one static layer, no blend mode, so it costs nothing while scrolling. */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  pointer-events: none;
+  opacity: 0.05;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .9 0'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 180px 180px;
+}
+
+/* ------------------------------------------------------------------ type */
+.bp-display,
+.bp-h2,
+.bp-h3 {
+  font-family: Archivo, 'Arial Narrow', 'Roboto Condensed', system-ui, sans-serif;
+  text-transform: uppercase;
+  text-wrap: balance;
+}
+.bp-display {
+  font-stretch: 72%;
+  font-weight: 800;
+  letter-spacing: -0.012em;
+  line-height: 0.9;
+}
+.bp-h2 {
+  font-stretch: 76%;
+  font-weight: 780;
+  letter-spacing: -0.008em;
+  line-height: 0.94;
+}
+.bp-h3 {
+  font-stretch: 84%;
+  font-weight: 700;
+  letter-spacing: 0;
+  line-height: 1;
+}
+.bp-mono {
+  font-family: theme('fontFamily.mono');
+  font-size: 0.6875rem; /* 11px */
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  line-height: 1.35;
+  font-variant-numeric: tabular-nums;
+}
+.bp-lede {
+  font-size: clamp(1.0625rem, 0.95rem + 0.45vw, 1.3125rem);
+  line-height: 1.5;
+}
+
+/* ------------------------------------------------------------------ layout */
+.bp-wrap {
+  margin-inline: auto;
+  width: 100%;
+  max-width: 1400px;
+  padding-inline: clamp(20px, 4vw, 56px);
+}
+.bp-sheet {
+  position: relative;
+  scroll-margin-top: 3.5rem;
+}
+/* Blueprint grid: a fine and a major rule, hairline weight. */
+.bp-grid {
+  --g: 96px;
+  background-image:
+    linear-gradient(to right, rgb(var(--bp-rule) / 0.7) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(var(--bp-rule) / 0.7) 1px, transparent 1px),
+    linear-gradient(to right, rgb(var(--bp-rule) / 0.32) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(var(--bp-rule) / 0.32) 1px, transparent 1px);
+  background-size: var(--g) var(--g), var(--g) var(--g), calc(var(--g) / 4) calc(var(--g) / 4),
+    calc(var(--g) / 4) calc(var(--g) / 4);
+  background-position: -1px -1px;
+}
+.bp-rulebox {
+  border: 1px solid rgb(var(--bp-rule));
+}
+
+/* ------------------------------------------------------------------ drawing on
+   The page-wide signature: a sheet's drawing plots itself once when it enters the viewport. A container
+   (`Sheet`, `Plot`) carries data-in="true|false", which sets the inherited number --in (1 or 0). Because a
+   custom property inherits from the NEAREST ancestor that sets it, a `Plot` inside a `Sheet` plots when the
+   Plot enters the viewport, not when its sheet does. SVG shapes need pathLength="1". Dashed shapes cannot
+   use the dash trick, so they fade (.bp-fade). */
+[data-in='true'] {
+  --in: 1;
+}
+[data-in='false'] {
+  --in: 0;
+}
+.bp-draw {
+  stroke-dasharray: 1;
+  stroke-dashoffset: calc((1 - var(--in, 0)) * 1px);
+  transition: stroke-dashoffset var(--bp-draw) var(--bp-ease) var(--d, 0ms);
+}
+.bp-fade {
+  opacity: var(--in, 0);
+  transition: opacity 700ms var(--bp-ease) var(--d, 0ms);
+}
+.bp-rise {
+  opacity: var(--in, 0);
+  transform: translateY(calc((1 - var(--in, 0)) * 14px));
+  transition:
+    opacity 700ms var(--bp-ease) var(--d, 0ms),
+    transform 700ms var(--bp-ease) var(--d, 0ms);
+}
+/* Line types (the legend on the page): solid = confirmed or structural, dashed = illustrative or pending. */
+.bp-dashed {
+  stroke-dasharray: 5 4;
+}
+@keyframes bp-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+.bp-loop {
+  animation: bp-pulse 2.4s ease-in-out infinite;
+}
+[data-motion='paused'] .bp-loop {
+  animation-play-state: paused;
+}
+
+/* ------------------------------------------------------------------ dimension line (signature effect) */
+.bp-dim {
+  position: relative;
+  display: block;
+  color: rgb(var(--bp-text));
+}
+.bp-dim--x {
+  width: 100%;
+  height: 22px;
+}
+.bp-dim--y {
+  width: 22px;
+  height: 100%;
+}
+.bp-dim__line {
+  position: absolute;
+  background: rgb(var(--bp-signal));
+  transition: transform var(--bp-draw) var(--bp-ease) var(--d, 0ms);
+}
+.bp-dim--x .bp-dim__line {
+  left: 0;
+  right: 0;
+  top: calc(50% - 1px);
+  height: 2px;
+  transform: scaleX(var(--in, 0));
+  transform-origin: left center;
+}
+.bp-dim--y .bp-dim__line {
+  top: 0;
+  bottom: 0;
+  left: calc(50% - 1px);
+  width: 2px;
+  transform: scaleY(var(--in, 0));
+  transform-origin: center top;
+}
+.bp-dim__tick {
+  position: absolute;
+  background: rgb(var(--bp-signal));
+  opacity: var(--in, 0);
+  transition: opacity 400ms var(--bp-ease) calc(var(--d, 0ms) + 500ms);
+}
+.bp-dim--x .bp-dim__tick {
+  top: 3px;
+  width: 2px;
+  height: 16px;
+}
+.bp-dim--y .bp-dim__tick {
+  left: 3px;
+  height: 2px;
+  width: 16px;
+}
+.bp-dim--x .bp-dim__tick--a {
+  left: 0;
+}
+.bp-dim--x .bp-dim__tick--b {
+  right: 0;
+}
+.bp-dim--y .bp-dim__tick--a {
+  top: 0;
+}
+.bp-dim--y .bp-dim__tick--b {
+  bottom: 0;
+}
+.bp-dim__label {
+  position: absolute;
+  padding: 0 0.5rem;
+  background: rgb(var(--bp-bg));
+  white-space: nowrap;
+  opacity: var(--in, 0);
+  transition: opacity 500ms var(--bp-ease) calc(var(--d, 0ms) + 600ms);
+}
+.bp-dim--x .bp-dim__label {
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+.bp-dim--y .bp-dim__label {
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%) rotate(-90deg);
+}
+
+/* ------------------------------------------------------------------ buttons: hover extends a dimension line */
+.bp-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-height: 3rem;
+  padding: 0 1.25rem;
+  font-family: theme('fontFamily.mono');
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition:
+    background-color var(--bp-dur) var(--bp-ease),
+    color var(--bp-dur) var(--bp-ease);
+}
+.bp-btn--primary {
+  background: rgb(var(--bp-line));
+  color: rgb(var(--bp-bg));
+}
+.bp-btn--primary:hover {
+  background: rgb(var(--bp-text));
+}
+.bp-btn--ghost {
+  box-shadow: inset 0 0 0 1px rgb(var(--bp-line));
+  color: rgb(var(--bp-text));
+}
+.bp-btn--ghost:hover {
+  background: rgb(var(--bp-bg2));
+}
+.bp-btn::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -14px;
+  height: 9px;
+  border-inline: 2px solid rgb(var(--bp-signal));
+  background: linear-gradient(rgb(var(--bp-signal)), rgb(var(--bp-signal))) center / 100% 2px no-repeat;
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 360ms var(--bp-ease);
+  pointer-events: none;
+}
+.bp-btn:hover::after,
+.bp-btn:focus-visible::after {
+  transform: scaleX(1);
+}
+.bp-btn__mark {
+  display: inline-block;
+  width: 0.5rem;
+  height: 0.5rem;
+  background: rgb(var(--bp-signal));
+  transition: transform var(--bp-dur) var(--bp-ease);
+}
+.bp-btn:hover .bp-btn__mark {
+  transform: translateX(4px);
+}
+
+/* ------------------------------------------------------------------ chips: dashed = not confirmed */
+.bp-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.25rem 0.5rem;
+  border: 1px dashed currentColor;
+  color: rgb(var(--bp-text));
+}
+.bp-chip::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border: 1px solid currentColor;
+}
+.bp-chip--confirmed {
+  border-style: solid;
+}
+.bp-chip--confirmed::before {
+  background: rgb(var(--bp-signal));
+  border-color: rgb(var(--bp-line));
+}
+
+/* ------------------------------------------------------------------ motion switches */
+[data-motion='paused'] .bp-pausable {
+  animation-play-state: paused !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  /* Every plotting effect reads --in, so forcing it to 1 shows the final state everywhere (and leaves
+     the label centring transforms alone). */
+  :root,
+  [data-in] {
+    --in: 1 !important;
+  }
+  .bp-draw,
+  .bp-fade,
+  .bp-rise,
+  .bp-dim__line,
+  .bp-dim__tick,
+  .bp-dim__label {
+    transition: none !important;
+  }
+  .bp-loop {
+    animation: none !important;
+  }
+}
