@@ -22,9 +22,15 @@ export const contact = {
     briefLabel: draft('contact.brief.label', 'YOUR BRIEF'),
     briefEmpty: draft('contact.brief.empty', '( nothing selected yet )'),
     noteLabel: draft('contact.note.label', 'TELL US ABOUT THE SYSTEM'),
+    noteOptional: draft('contact.note.optional', '( optional )'),
+    // Shown only when the note is long enough that the email link has to cut it (brief.js cap).
+    noteLong: draft('contact.note.long', 'Long note. The email keeps the start of it and marks the cut.'),
     send: draft('contact.send', 'SEND EMAIL'),
     copy: draft('contact.copy', 'COPY TEXT'),
     copied: draft('contact.copied', 'COPIED'),
+    // Neither the clipboard API nor the selection fallback worked: the text is shown selected instead.
+    copyFailed: draft('contact.copy.failed', 'Copy was blocked. The text is selected below: copy it by hand.'),
+    clear: draft('contact.clear', 'CLEAR'),
     sendHint: draft('contact.send.hint', 'Opens your mail app. Nothing is stored.'),
     copyHint: draft('contact.copy.hint', 'Mail app did not open? Copy the text instead.'),
   },
@@ -39,6 +45,9 @@ export const contact = {
     noteHeading: draft('mail.note', 'About the system:'),
     truncated: draft('mail.truncated', '[ shortened ]'),
   },
+
+  // Read out by screen readers after an endpoint that leaves the page (LinkedIn, Facebook).
+  newTab: draft('contact.newtab', '( opens in a new tab )'),
 
   endpoints: [
     endpoint('contact.email', 'email', 'EMAIL', 'contact@xiontechs.com', 'mailto:contact@xiontechs.com'),

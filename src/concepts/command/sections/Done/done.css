@@ -1,0 +1,153 @@
+/*
+ * Station 06 DONE: the finale type, the lockup and the two scroll thresholds (doc 4.8, 6.6, M14).
+ * Colours come from tokens (Tailwind keys or the variables of styles/tokens.css); no hex.
+ *
+ * Final state first. The element's own style is the finished look: lines set, logo visible, the
+ * underline drawn. The hidden "way in" states below apply only while motion is on and the page is
+ * pinned, so reduced motion, data-motion=off, RAW, landscape phones and a failed script all show
+ * the finished frame with nothing lost.
+ */
+
+/* The finale size of doc 5.2, capped so three lines always fit the stage on a short window.
+   h2.finale-type outranks the .text-finale utility without !important; RAW's own selector
+   (html[data-view='raw'] [class*='text-finale']) outranks both and caps it at 28 px. */
+h2.finale-type {
+  /* Room the lockup takes beside the type (none while the page is one column). */
+  --finale-reserve: 0px;
+  /* Two caps. Height: three lines must fit the stage. Width: "DONE." with its 1.2em indent is
+     about 4.2em wide, so the size never exceeds the column / 4.6 (this also holds when the
+     reader enlarges text, where a rem floor alone would clip the word). */
+  font-size: min(
+    max(2.5rem, min(var(--fs-finale), calc((100svh - var(--header-h) - var(--dock-h) - 8rem) / 2.8))),
+    calc((min(100vw, var(--content-max)) - 2 * var(--margin-x) - var(--finale-reserve)) / 4.6)
+  );
+  /* Doc 5.2 says -0.06em; at this size Geist capitals (E against T) fuse, so it is eased to -0.045em. */
+  letter-spacing: -0.045em;
+}
+
+@media (min-width: 1024px) {
+  h2.finale-type {
+    --finale-reserve: calc(min(24vw, 34svh, 20rem) + 3rem);
+  }
+}
+
+/* Stair steps (doc 4.8): indent 0, 0.6em, 1.2em. --i is the line index, shared with the
+   clip-rise stagger (motion.css). */
+.finale-line {
+  display: block;
+  padding-left: calc(var(--i, 0) * 0.6em);
+  white-space: nowrap;
+}
+
+/* The word DONE is what the underline sweeps under. */
+.finale-done {
+  position: relative;
+  display: inline-block;
+}
+
+.finale-sweep {
+  position: absolute;
+  /* Starts at the D's stem, not at the glyph's side bearing. */
+  left: 0.06em;
+  right: 0;
+  bottom: -0.05em;
+  height: 0.06em;
+  background: rgb(var(--signal));
+  transform-origin: left center;
+  transition: transform var(--dur-signal) var(--ease-brand);
+}
+
+/* The anchor holds the mark (WP2 draws it). It is a square sized from the viewport so the whole
+   lockup fits the stage on a 320 x 568 phone and on a short laptop. */
+.finale-anchor {
+  width: min(36vw, 22svh, 20rem);
+  aspect-ratio: 1 / 1;
+}
+
+@media (min-width: 1024px) {
+  .finale-anchor {
+    width: min(24vw, 34svh, 20rem);
+  }
+}
+
+.finale-logo {
+  transition: opacity 300ms var(--ease-out);
+}
+
+/* ---- the way in: only while motion is on, the view is READ and the stage is pinned ---- */
+@media not all and (max-height: 499px) and (orientation: landscape) {
+  /* M14: the lines wait below their clip until the stage is entered, then clip-rise runs. */
+  html[data-motion='on']:not([data-view='raw']) .finale-line[data-rise='out'] {
+    clip-path: inset(0 0 100% 0);
+  }
+
+  /* The underline waits at zero length until the track passes 0.9, then sweeps once. */
+  html[data-motion='on']:not([data-view='raw']) .done-finale[data-sweep='off'] .finale-sweep {
+    transform: scaleX(0);
+  }
+
+  /* M13: the real logo appears at 70 percent of the convergence, and goes again if the reader
+     scrolls back (the convergence is reversible). */
+  html[data-motion='on']:not([data-view='raw']) .done-finale[data-lockup='off'] .finale-logo {
+    opacity: 0;
+  }
+}
+
+/* RAW is a plain sheet: nothing decorative, nothing waiting. */
+html[data-view='raw'] .finale-line {
+  padding-left: 0;
+  white-space: normal;
+}
+
+html[data-view='raw'] .finale-sweep {
+  display: none;
+}
+
+/* A visitor who turned motion on over an OS "reduce" setting still gets a calm page: these
+   states are the same ones as above, resolved at once (data-motion='off' removes the transitions
+   in motion.css). */
+html[data-motion='off'] .finale-logo,
+html[data-motion='off'] .finale-sweep {
+  transition: none;
+}
+
+/* ---- shared by the finale, the composer, the endpoints and the footer ---- */
+
+/* The logo is drawn at its file size, never scaled (doc 6.6). */
+.native-logo {
+  display: block;
+  width: 250px;
+  height: 46px;
+  max-width: none;
+}
+
+.finale-tagline {
+  font-size: clamp(1.125rem, 2vw, 1.75rem);
+  letter-spacing: -0.02em;
+}
+
+/* The contact row: the largest tap target on the page (doc 4.9 step 4). The email at display
+   size; 18 px at 320 keeps 21 characters inside the 288 px column. */
+.contact-lead {
+  min-height: clamp(8rem, 16vw, 13rem);
+}
+
+.contact-lead-value {
+  font-size: clamp(1.125rem, 5.4vw, 4.5rem);
+  letter-spacing: -0.03em;
+  line-height: 1;
+}
+
+/* The brief preview and the note box are the same height, so the two halves line up. */
+.composer-pane {
+  min-height: 8.5rem;
+}
+
+.composer-hint {
+  max-width: 34ch;
+}
+
+/* A blocked copy selects the text below the buttons: keep it clear of the fixed dock. */
+textarea[readonly] {
+  scroll-margin-bottom: calc(var(--dock-h) + 4rem);
+}
