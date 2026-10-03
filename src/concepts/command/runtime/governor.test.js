@@ -1,5 +1,5 @@
-import { describe, expect, it } from 'vitest'
-import { STRIKES, THRESHOLD_MS, WINDOW, createGovernor, median } from './governor.js'
+import { afterEach, describe, expect, it, vi } from 'vitest'
+import { STRIKES, THRESHOLD_MS, WINDOW, createGovernor, median, startGovernor } from './governor.js'
 
 // Feed one full window of identical frames; returns the last push result.
 const feed = (gov, ms) => {
@@ -79,5 +79,81 @@ describe('governor hysteresis (doc 6.2)', () => {
     expect(gov.lost()).toMatchObject({ from: 'high', to: 'off' })
     expect(gov.tier()).toBe('off')
     expect(gov.lost()).toBeNull()
+  })
+})
+
+describe('startGovernor: the thin rAF timer around the core', () => {
+  // A hand driven frame clock and a fake <html>, so the loop runs in Node.
+  const setup = () => {
+    let callback = null
+    const attrs = {}
+    vi.stubGlobal('requestAnimationFrame', (fn) => {
+      callback = fn
+      return 1
+    })
+    vi.stubGlobal('cancelAnimationFrame', vi.fn())
+    const doc = {
+      hidden: false,
+      documentElement: {
+        getAttribute: (k) => attrs[k] ?? null,
+        setAttribute: (k, v) => {
+          attrs[k] = v
+        },
+        removeAttribute: (k) => delete attrs[k],
+      },
+    }
+    vi.stubGlobal('document', doc)
+    let now = 1000
+    const frame = (dt) => {
+      now += dt
+      const fn = callback
+      callback = null
+      fn(now)
+    }
+    return { attrs, doc, frame }
+  }
+
+  afterEach(() => vi.unstubAllGlobals())
+
+  it('is a harmless no-op without requestAnimationFrame', () => {
+    const g = startGovernor({ tier: 'high' })
+    expect(() => {
+      g.stop()
+      g.lost()
+    }).not.toThrow()
+  })
+
+  it('writes data-tier and calls onDrop after two bad windows, then goes quiet', () => {
+    const { attrs, frame } = setup()
+    const onDrop = vi.fn()
+    startGovernor({ tier: 'high', onDrop })
+    frame(16) // the first frame only sets the baseline
+    for (let i = 0; i < WINDOW * 2; i += 1) frame(40)
+    expect(onDrop).toHaveBeenCalledTimes(1)
+    expect(onDrop.mock.calls[0][0]).toMatchObject({ from: 'high', to: 'low' })
+    expect(attrs['data-tier']).toBe('low')
+  })
+
+  it('does not count a hidden tab or a long stall as slow frames', () => {
+    const { attrs, doc, frame } = setup()
+    const onDrop = vi.fn()
+    startGovernor({ tier: 'high', onDrop })
+    frame(16)
+    for (let i = 0; i < WINDOW * 3; i += 1) frame(400) // stalls over 250 ms are skipped
+    doc.hidden = true
+    for (let i = 0; i < WINDOW * 3; i += 1) frame(40) // hidden frames are skipped
+    expect(onDrop).not.toHaveBeenCalled()
+    expect(attrs['data-tier']).toBeUndefined()
+  })
+
+  it('lost() drops straight to off and writes it', () => {
+    const { attrs } = setup()
+    const onDrop = vi.fn()
+    const g = startGovernor({ tier: 'high', onDrop })
+    g.lost()
+    expect(attrs['data-tier']).toBe('off')
+    expect(onDrop).toHaveBeenCalledWith(expect.objectContaining({ from: 'high', to: 'off' }))
+    g.lost()
+    expect(onDrop).toHaveBeenCalledTimes(1)
   })
 })

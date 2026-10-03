@@ -71,19 +71,46 @@ export function describeTier(env) {
   return reasons.length ? `${tier.toUpperCase()} ( ${reasons.join(', ')} )` : tier.toUpperCase()
 }
 
+// The GPU does not change during a session, and creating a WebGL context is the most expensive
+// thing this file does (browsers cap live contexts), so probe once and remember the answer.
+let probe = null
+
 /**
- * Reads the real environment. Probes WebGL2 on a throwaway canvas and releases the context so
- * the page's own canvas is not the second one. Returns a TierEnv; with no window it describes a
- * device without WebGL, which selects 'off'.
+ * Probes WebGL2 on a throwaway canvas and releases the context straight away, so the page's own
+ * canvas is never the second one. Cached for the session. { webgl2, renderer }
+ */
+export function probeWebgl() {
+  if (probe) return probe
+  probe = { webgl2: false, renderer: '' }
+  try {
+    const canvas = document.createElement('canvas')
+    const gl = canvas.getContext('webgl2')
+    if (gl) {
+      probe.webgl2 = true
+      const info = gl.getExtension('WEBGL_debug_renderer_info')
+      probe.renderer = info ? String(gl.getParameter(info.UNMASKED_RENDERER_WEBGL)) : ''
+      gl.getExtension('WEBGL_lose_context')?.loseContext()
+    }
+  } catch {
+    probe = { webgl2: false, renderer: '' }
+  }
+  return probe
+}
+
+/**
+ * Reads the real environment: the cached WebGL probe plus the live settings (motion, view,
+ * pointer, width), which change during a session. Returns a TierEnv; with no window it
+ * describes a device without WebGL, which selects 'off'.
  * @returns {TierEnv}
  */
 export function readEnvironment() {
   if (typeof window === 'undefined') return { webgl2: false }
   const html = document.documentElement
   const matches = (q) => (typeof matchMedia === 'function' ? matchMedia(q).matches : false)
-  const env = {
-    webgl2: false,
-    renderer: '',
+  const { webgl2, renderer } = probeWebgl()
+  return {
+    webgl2,
+    renderer,
     motionOff: html.getAttribute('data-motion') === 'off',
     reducedMotion: matches('(prefers-reduced-motion: reduce)') && html.getAttribute('data-motion') !== 'on',
     saveData: Boolean(navigator.connection?.saveData),
@@ -93,17 +120,4 @@ export function readEnvironment() {
     coarsePointer: matches('(pointer: coarse)'),
     width: window.innerWidth,
   }
-  try {
-    const canvas = document.createElement('canvas')
-    const gl = canvas.getContext('webgl2')
-    if (gl) {
-      env.webgl2 = true
-      const info = gl.getExtension('WEBGL_debug_renderer_info')
-      env.renderer = info ? String(gl.getParameter(info.UNMASKED_RENDERER_WEBGL)) : ''
-      gl.getExtension('WEBGL_lose_context')?.loseContext()
-    }
-  } catch {
-    env.webgl2 = false
-  }
-  return env
 }

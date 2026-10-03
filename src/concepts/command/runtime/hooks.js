@@ -13,6 +13,7 @@ import {
 } from '../contract/brief.js'
 import { STATIONS } from '../contract/stations.js'
 import { getStation, registerTrack, subscribeStation } from './scroll.js'
+import { getTierReport, subscribeTierReport } from './tier.js'
 
 // React hooks over the stores and observers of the page. None of them re-render per frame:
 // scroll progress goes out as CSS variables, and these hooks only change when a station,
@@ -92,6 +93,13 @@ export function useHtmlAttribute(name) {
   )
   return useSyncExternalStore(subscribeAttr, () => readAttr(name), () => null)
 }
+
+/**
+ * What the dock's readout reports about rendering: { tier: 'off'|'low'|'high'|null, reasons }.
+ * `tier` is null until the first evaluation (the readout then says N/A). Changes only when the
+ * tier or its reasons do, never per frame.
+ */
+export const useTierReport = () => useSyncExternalStore(subscribeTierReport, getTierReport, getTierReport)
 
 // -- stations ---------------------------------------------------------------------------------
 

@@ -1,6 +1,22 @@
 import { describe, expect, it } from 'vitest'
 import { STATIONS } from '../contract/stations.js'
-import { kAlphaFor, plateau, progressToScrollY, stationAt, trackProgress } from './scroll.js'
+import {
+  getTickFractions,
+  headerHeightFor,
+  kAlphaFor,
+  needsRemeasure,
+  needsRestore,
+  pageProgress,
+  plateau,
+  progressToScrollY,
+  savedScrollY,
+  shouldLandOnHash,
+  stationAt,
+  stationScrollY,
+  stepStation,
+  tickFractions,
+  trackProgress,
+} from './scroll.js'
 
 const VH = 900
 
@@ -186,5 +202,140 @@ describe('stationAt', () => {
     expect(stationAt(10000, VH, sparse)).toBe(6)
     expect(stationAt(0, VH, [undefined, undefined, 500])).toBe(2)
     expect(stationAt(0, VH, [])).toBe(0)
+  })
+})
+
+// ---------------------------------------------------------------------------------------------
+// WP1: deep links, the scrubber, the resize policy
+// ---------------------------------------------------------------------------------------------
+
+describe('deep links and reloads (doc 10.4)', () => {
+  // The same page the stationAt block builds: track tops under a 64 px header, 900 px viewport.
+  const tops = []
+  let y = 64
+  for (const s of STATIONS) {
+    tops.push(y)
+    y += (s.lvh / 100) * VH
+  }
+  const header = headerHeightFor(1440)
+
+  it('a #hash landing (track top just under the header) always reads as that station', () => {
+    for (const s of STATIONS) {
+      const landing = stationScrollY(tops[s.index], header)
+      expect(stationAt(landing, VH, tops)).toBe(s.index)
+    }
+  })
+
+  it('every landing starts a pinned track at progress 0 (no state is skipped)', () => {
+    for (const s of STATIONS.filter((x) => x.pinned)) {
+      const landing = stationScrollY(tops[s.index], header)
+      const height = (s.lvh / 100) * VH
+      expect(trackProgress(landing, tops[s.index], height, VH, s.mode)).toBe(0)
+    }
+  })
+
+  it('the whole state is a function of scrollY alone: a reload mid-track equals scrolling there', () => {
+    const state = (scrollY) => {
+      const raw = Object.fromEntries(
+        STATIONS.map((s) => [s.id, trackProgress(scrollY, tops[s.index], (s.lvh / 100) * VH, VH, s.mode)]),
+      )
+      return { station: stationAt(scrollY, VH, tops), ...kAlphaFor(raw), raw }
+    }
+    const mid = tops[3] + 700
+    const scrolled = [0, 2000, mid].map(state).at(-1)
+    const reloaded = state(mid)
+    expect(reloaded).toEqual(scrolled)
+    expect(reloaded.station).toBe(3)
+  })
+})
+
+describe('header height and landing rules', () => {
+  it('uses the phone header up to 767 px and the desktop header from 768', () => {
+    expect(headerHeightFor(320)).toBe(48)
+    expect(headerHeightFor(767)).toBe(48)
+    expect(headerHeightFor(768)).toBe(64)
+    expect(headerHeightFor(1920)).toBe(64)
+  })
+
+  it('does not scroll to a hash on a reload or a history step, which restore scroll themselves', () => {
+    expect(shouldLandOnHash('#line', 'navigate')).toBe(true)
+    expect(shouldLandOnHash('#line', undefined)).toBe(true)
+    expect(shouldLandOnHash('#line', 'reload')).toBe(false)
+    expect(shouldLandOnHash('#line', 'back_forward')).toBe(false)
+    expect(shouldLandOnHash('', 'navigate')).toBe(false)
+    expect(shouldLandOnHash('#', 'navigate')).toBe(false)
+  })
+
+  it('re-measures layout only when the width changes (a phone toolbar changes height alone)', () => {
+    expect(needsRemeasure(390, 390)).toBe(false)
+    expect(needsRemeasure(390, 844)).toBe(true)
+    expect(needsRemeasure(-1, 1440)).toBe(true)
+  })
+})
+
+describe('scrubber maths', () => {
+  it('pageProgress is scrollY over the scrollable range, clamped, and 0 for a short page', () => {
+    expect(pageProgress(0, 10000, 900)).toBe(0)
+    expect(pageProgress(4550, 10000, 900)).toBeCloseTo(0.5, 10)
+    expect(pageProgress(9100, 10000, 900)).toBe(1)
+    expect(pageProgress(99999, 10000, 900)).toBe(1)
+    expect(pageProgress(-40, 10000, 900)).toBe(0)
+    expect(pageProgress(10, 800, 900)).toBe(0)
+  })
+
+  it('stationScrollY never goes negative', () => {
+    expect(stationScrollY(64, 64)).toBe(0)
+    expect(stationScrollY(30, 64)).toBe(0)
+    expect(stationScrollY(1000, 64)).toBe(936)
+  })
+
+  it('tickFractions puts station 0 at 0, ends inside 0..1, and rises with the station', () => {
+    const tops = [64, 964, 1953, 3304, 5284, 7264, 8074]
+    const ticks = tickFractions(tops, 11000, 900, 64)
+    expect(ticks).toHaveLength(7)
+    expect(ticks[0]).toBe(0)
+    for (let i = 1; i < ticks.length; i += 1) expect(ticks[i]).toBeGreaterThan(ticks[i - 1])
+    expect(ticks.at(-1)).toBeLessThanOrEqual(1)
+  })
+
+  it('tickFractions leaves unmeasured stations null and survives a page that cannot scroll', () => {
+    expect(tickFractions([64, undefined], 11000, 900, 64)[1]).toBeNull()
+    expect(tickFractions([64, 500], 800, 900, 64).every((t) => t === null)).toBe(true)
+  })
+
+  it('stepStation moves one station and stops at both ends', () => {
+    expect(stepStation(3, 1)).toBe(4)
+    expect(stepStation(3, -1)).toBe(2)
+    expect(stepStation(0, -1)).toBe(0)
+    expect(stepStation(6, 1)).toBe(6)
+  })
+
+  it('getTickFractions is safe before anything is measured', () => {
+    expect(getTickFractions()).toHaveLength(7)
+  })
+})
+
+describe('restoring the position after a reload (doc 10.4)', () => {
+  const stored = (y, w) => JSON.stringify({ y, w })
+
+  it('reads the remembered position at the same viewport width only', () => {
+    expect(savedScrollY(stored(6091, 1440), 1440)).toBe(6091)
+    expect(savedScrollY(stored(6091, 1440), 390)).toBeNull()
+    expect(savedScrollY(stored(0, 1440), 1440)).toBe(0)
+  })
+
+  it('ignores anything that is not a saved position', () => {
+    for (const raw of [null, undefined, '', 'not json', '{}', '[]', stored(-5, 1440), stored('x', 1440), stored(NaN, 1440)]) {
+      expect(savedScrollY(raw, 1440)).toBeNull()
+    }
+  })
+
+  it('restores unless the browser already did, the visitor moved, or nothing was saved', () => {
+    expect(needsRestore(6091, 0, false)).toBe(true)
+    expect(needsRestore(6091, 6090, false)).toBe(false)
+    expect(needsRestore(6091, 6094, false)).toBe(true)
+    expect(needsRestore(6091, 0, true)).toBe(false)
+    expect(needsRestore(null, 0, false)).toBe(false)
+    expect(needsRestore(0, 500, false)).toBe(true)
   })
 })

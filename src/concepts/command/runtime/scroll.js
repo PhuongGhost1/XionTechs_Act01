@@ -1,5 +1,5 @@
 import { setActive, setStation } from '../contract/attributes.js'
-import { STATIONS, stationById } from '../contract/stations.js'
+import { FRAME, PHONE_MAX_WIDTH, STATIONS, stationById } from '../contract/stations.js'
 
 // The scroll scalar of the page (doc 6.2, 7.3, 10.4). Native scroll, no hijack: one passive
 // scroll listener marks the frame dirty, one rAF turns scrollY into progress, and the results go
@@ -13,7 +13,10 @@ import { STATIONS, stationById } from '../contract/stations.js'
 // resize-like events (ResizeObserver, resize, orientation, fonts.ready); the scroll path reads
 // window.scrollY and nothing else.
 //
-// WP1 hardens this file (hash settle, landscape phones). Keep the exported names.
+// Hardening (WP1): the scroll path reads window.scrollY and nothing else (viewport size, track
+// rects and document height are cached by the measure pass); a hash in the URL waits for
+// document.fonts.ready and one layout settle, then scrolls once, and never fights a reload or a
+// visitor who already moved; a height-only resize (a phone toolbar) does not re-measure.
 
 // ---------------------------------------------------------------------------------------------
 // Pure functions
@@ -135,6 +138,76 @@ export function stationAt(scrollY, vh, tops, bias = 0.5) {
   return first >= 0 ? first : 0
 }
 
+
+// ---------------------------------------------------------------------------------------------
+// More pure helpers (the dock scrubber, the hash landing, the resize policy)
+// ---------------------------------------------------------------------------------------------
+
+/** Header height in px for a viewport width (the --header-h token: 48 on phones, 64 from 768). */
+export const headerHeightFor = (vw) => (vw <= PHONE_MAX_WIDTH ? FRAME.headerPhone : FRAME.headerDesktop)
+
+/** 0..1 position of the page: scrollY over the largest scrollY the document allows. */
+export function pageProgress(scrollY, docHeight, vh) {
+  const max = docHeight - vh
+  return max > 0 ? clamp01(scrollY / max) : 0
+}
+
+/**
+ * The scrollY that puts a station at the top of the reading area, exactly where a #hash link
+ * lands (the track top just under the fixed header).
+ */
+export const stationScrollY = (top, header) => Math.max(0, top - header)
+
+/** Station ticks of the scrubber: where each station starts, as a 0..1 fraction of the page. */
+export function tickFractions(tops, docHeight, vh, header) {
+  const max = docHeight - vh
+  return STATIONS.map((s) => {
+    const top = tops[s.index]
+    if (!Number.isFinite(top) || !(max > 0)) return null
+    return clamp01(stationScrollY(top, header) / max)
+  })
+}
+
+/** The station reached by stepping `dir` (1 or -1) from `index`, clamped to 0..last. */
+export const stepStation = (index, dir, last = STATIONS.length - 1) => Math.min(last, Math.max(0, index + dir))
+
+/**
+ * Resize policy: only a change of width needs the (layout reading) re-measure. A change of
+ * height alone is a phone toolbar sliding in or out: tracks are lvh based, so only the cached
+ * viewport height changes.
+ */
+export const needsRemeasure = (prevWidth, nextWidth) => prevWidth !== nextWidth
+
+/**
+ * Whether the page should land on the URL hash after load. A reload or a back/forward step
+ * restores the scroll position itself and must not be overridden (doc 10.4: a reload mid-track
+ * gives the state it had).
+ */
+export const shouldLandOnHash = (hash, navigationType) =>
+  typeof hash === 'string' && hash.length > 1 && navigationType !== 'reload' && navigationType !== 'back_forward'
+
+/**
+ * The scroll position to put back after a reload or a history step, or null. `raw` is what
+ * sessionStorage held when the page was left ({ y, w } as JSON); it only applies at the same
+ * viewport width, because track heights (and so every y) change with the width.
+ */
+export function savedScrollY(raw, vw) {
+  try {
+    const saved = JSON.parse(raw)
+    if (!saved || !Number.isFinite(saved.y) || saved.y < 0 || saved.w !== vw) return null
+    return saved.y
+  } catch {
+    return null
+  }
+}
+
+/**
+ * Should the page scroll to `saved`? Not when there is nothing saved, when the browser already
+ * restored the position (within 2 px), or when the visitor has already scrolled or typed.
+ */
+export const needsRestore = (saved, current, moved) =>
+  saved !== null && !moved && Math.abs(saved - current) > 2
+
 // ---------------------------------------------------------------------------------------------
 // Controller
 // ---------------------------------------------------------------------------------------------
@@ -150,16 +223,25 @@ const state = {
   scrollY: 0,
   vw: 0,
   vh: 0,
+  page: 0, // 0..1 position in the whole document (dock scrubber)
+  docHeight: 0,
+  tops: [], // document top of each station's track, indexed by station
 }
+
+const INDEX_OF = new Map(STATIONS.map((s) => [s.id, s.index]))
 
 const tracks = new Map() // id -> { el, plateaus, mode, top, height }
 const stationListeners = new Set()
+const frameListeners = new Set()
+const layoutListeners = new Set()
 let running = false
 let frame = 0
 let observer = null
 let stopListening = null
+let lastWidth = -1
+let writtenStation = -1
 
-/** { station, active, progress, raw, k, alpha, scrollY, vw, vh }. See `state` above. */
+/** { station, active, progress, raw, k, alpha, scrollY, vw, vh, page, docHeight, tops }. */
 export const getState = () => state
 
 /** For useSyncExternalStore: re-renders only when the station index changes. */
@@ -169,14 +251,43 @@ export const subscribeStation = (fn) => {
 }
 export const getStation = () => state.station
 
+/**
+ * Called on every scroll frame with the live state, for things that must follow the scroll
+ * without React (the dock scrubber thumb). Keep the callback to a few style writes.
+ */
+export const subscribeFrame = (fn) => {
+  frameListeners.add(fn)
+  return () => frameListeners.delete(fn)
+}
+
+/** Called after every layout measurement (resize, fonts, a track changing size). */
+export const subscribeLayout = (fn) => {
+  layoutListeners.add(fn)
+  return () => layoutListeners.delete(fn)
+}
+
+/** Scrubber ticks for the current layout: one 0..1 fraction (or null) per station. */
+export const getTickFractions = () => tickFractions(state.tops, state.docHeight, state.vh, headerHeightFor(state.vw))
+
 function measureTrack(t) {
   const r = t.el.getBoundingClientRect()
   t.top = r.top + window.scrollY
   t.height = r.height
 }
 
+// The only function that reads layout. Runs on resize-like events, never on scroll.
 function measureAll() {
   for (const t of tracks.values()) measureTrack(t)
+  state.vw = window.innerWidth
+  state.vh = window.innerHeight
+  state.docHeight = document.documentElement.scrollHeight
+  lastWidth = state.vw
+  state.tops = []
+  for (const [id, t] of tracks) {
+    const index = INDEX_OF.get(id)
+    if (index !== undefined && t.height > 0) state.tops[index] = t.top
+  }
+  layoutListeners.forEach((fn) => fn())
   schedule()
 }
 
@@ -193,36 +304,39 @@ function setVar(el, name, value) {
   if (el.style.getPropertyValue(name) !== next) el.style.setProperty(name, next)
 }
 
+// Runs once per scroll burst frame. The ONLY browser read is window.scrollY; everything else
+// (tops, heights, viewport, document height) was cached by measureAll.
 function update() {
   const scrollY = window.scrollY
-  const vh = window.innerHeight
+  const { vh } = state
   state.scrollY = scrollY
-  state.vw = window.innerWidth
-  state.vh = vh
 
-  const tops = []
   for (const [id, t] of tracks) {
-    const raw = trackProgress(scrollY, t.top, t.height, vh, t.mode)
+    // An unmeasured or collapsed track (display: none) has no progress to report.
+    const raw = t.height > 0 ? trackProgress(scrollY, t.top, t.height, vh, t.mode) : 0
     const shaped = plateau(raw, t.plateaus)
     state.raw[id] = raw
     state.progress[id] = shaped
     setVar(t.el, '--p-raw', raw)
     setVar(t.el, '--p', shaped)
-    const index = stationById(id)?.index
-    if (index !== undefined) tops[index] = t.top
   }
 
   const { k, alpha } = kAlphaFor(state.raw)
   state.k = k
   state.alpha = alpha
+  state.page = pageProgress(scrollY, state.docHeight, vh)
 
-  const station = tracks.size ? stationAt(scrollY, vh, tops) : 0
+  const station = state.tops.some(Number.isFinite) ? stationAt(scrollY, vh, state.tops) : 0
   const changed = station !== state.station
   state.station = station
   state.active = STATIONS[station].id
-  // The attribute setters skip identical writes, so this is cheap on every frame.
-  setStation(state.station)
-  setActive(state.active)
+  // The attribute setters validate with a regex: only call them when the value moved.
+  if (changed || writtenStation !== station) {
+    writtenStation = station
+    setStation(state.station)
+    setActive(state.active)
+  }
+  frameListeners.forEach((fn) => fn(state))
   if (changed) stationListeners.forEach((fn) => fn())
 }
 
@@ -234,7 +348,10 @@ export function registerTrack(id, element, { plateaus = [], mode } = {}) {
   const t = { el: element, plateaus, mode: mode ?? stationById(id)?.mode ?? 'pin', top: 0, height: 0 }
   tracks.set(id, t)
   if (typeof window !== 'undefined') {
+    // Mount time, not scroll time: a layout read here is fine.
     measureTrack(t)
+    const index = INDEX_OF.get(id)
+    if (index !== undefined && t.height > 0) state.tops[index] = t.top
     observer?.observe(element)
     schedule()
   }
@@ -243,6 +360,8 @@ export function registerTrack(id, element, { plateaus = [], mode } = {}) {
     observer?.unobserve(element)
     delete state.raw[id]
     delete state.progress[id]
+    const index = INDEX_OF.get(id)
+    if (index !== undefined && !tracks.has(id)) delete state.tops[index]
     schedule()
   }
 }
@@ -256,8 +375,104 @@ export const remeasureTracks = () => {
 export function scrollToProgress(id, p, behavior = 'auto') {
   const t = tracks.get(id)
   if (!t || typeof window === 'undefined') return false
-  window.scrollTo({ top: progressToScrollY(p, t.top, t.height, window.innerHeight, t.mode), behavior })
+  window.scrollTo({ top: progressToScrollY(p, t.top, t.height, state.vh || window.innerHeight, t.mode), behavior })
   return true
+}
+
+/**
+ * Scrolls to the start of a station, where a #hash link would land it. Used by the dock
+ * scrubber. Returns false when the station has no measured track yet.
+ */
+export function scrollToStation(index, behavior = 'auto') {
+  const top = state.tops[index]
+  if (typeof window === 'undefined' || !Number.isFinite(top)) return false
+  window.scrollTo({ top: stationScrollY(top, headerHeightFor(state.vw || window.innerWidth)), behavior })
+  return true
+}
+
+/** Scrolls to a 0..1 position of the whole page (dragging the scrubber). */
+export function scrollToPage(p, behavior = 'auto') {
+  if (typeof window === 'undefined') return
+  const max = Math.max(0, state.docHeight - state.vh)
+  window.scrollTo({ top: clamp01(p) * max, behavior })
+}
+
+// ---------------------------------------------------------------------------------------------
+// Where the page lands (doc 10.4)
+// ---------------------------------------------------------------------------------------------
+
+// A single page app renders after the browser has already tried to restore the scroll position,
+// at which point the document is still short: on a reload the browser's restoration usually fails
+// and the page opens at the top. So the position is remembered (sessionStorage, written when the
+// page is hidden or left) and put back once fonts and layout have settled.
+//
+//   fresh load with #hash   scroll to the hash target once
+//   reload, back, forward   scroll to the remembered position, unless the browser already did
+//   nothing of the above    leave the page alone
+//
+// Either way the visitor wins: a wheel, touch, key or pointer event before the settle cancels it.
+
+const SCROLL_KEY = 'xt-scroll'
+
+function rememberScroll() {
+  try {
+    sessionStorage.setItem(SCROLL_KEY, JSON.stringify({ y: Math.round(window.scrollY), w: window.innerWidth }))
+  } catch {
+    // Private window: no restore on reload, the browser's own attempt is all there is.
+  }
+}
+
+function recallScroll() {
+  try {
+    return savedScrollY(sessionStorage.getItem(SCROLL_KEY), window.innerWidth)
+  } catch {
+    return null
+  }
+}
+
+// Module level on purpose: React StrictMode mounts the controller twice in dev, and the page
+// must land exactly once.
+let landed = false
+
+function land() {
+  if (landed || typeof window === 'undefined') return
+  landed = true
+  const navType = performance.getEntriesByType?.('navigation')?.[0]?.type
+  const restoring = navType === 'reload' || navType === 'back_forward'
+  const saved = restoring ? recallScroll() : null
+  let id = null
+  if (shouldLandOnHash(window.location.hash, navType)) {
+    try {
+      id = decodeURIComponent(window.location.hash.slice(1))
+    } catch {
+      id = null
+    }
+  }
+  if (saved === null && id === null) return
+
+  // A visitor who already scrolled, typed or tapped has moved on: do not pull them back.
+  let moved = false
+  const events = ['wheel', 'touchstart', 'keydown', 'pointerdown']
+  const note = () => {
+    moved = true
+  }
+  for (const e of events) window.addEventListener(e, note, { passive: true, once: true })
+
+  const settle = () => {
+    for (const e of events) window.removeEventListener(e, note)
+    if (moved) return
+    measureAll()
+    if (saved !== null) {
+      if (needsRestore(saved, window.scrollY, moved)) window.scrollTo({ top: saved, behavior: 'instant' })
+    } else {
+      // scroll-margin-top (the header) makes the target land just under the fixed header.
+      document.getElementById(id)?.scrollIntoView({ block: 'start', behavior: 'instant' })
+    }
+    schedule()
+  }
+  // Fonts change line breaks and so heights: wait for them, then for one painted layout.
+  const fonts = document.fonts?.ready ?? Promise.resolve()
+  fonts.then(() => requestAnimationFrame(() => requestAnimationFrame(settle)))
 }
 
 /**
@@ -269,26 +484,47 @@ export function startScroll() {
   running = true
   const onScroll = () => schedule()
   const onLayout = () => measureAll()
+  const onResize = () => {
+    if (needsRemeasure(lastWidth, window.innerWidth)) measureAll()
+    else {
+      state.vh = window.innerHeight
+      state.docHeight = document.documentElement.scrollHeight
+      schedule()
+    }
+  }
+  const onShow = (e) => e.persisted && measureAll()
+  const onHide = () => {
+    if (document.visibilityState === 'hidden') rememberScroll()
+  }
   window.addEventListener('scroll', onScroll, { passive: true })
-  window.addEventListener('resize', onLayout)
+  window.addEventListener('pagehide', rememberScroll)
+  document.addEventListener('visibilitychange', onHide)
+  window.addEventListener('resize', onResize)
   window.addEventListener('orientationchange', onLayout)
   window.addEventListener('load', onLayout)
-  window.visualViewport?.addEventListener('resize', onLayout)
+  window.addEventListener('pageshow', onShow)
+  window.visualViewport?.addEventListener('resize', onResize)
   document.fonts?.ready.then(onLayout)
   if (typeof ResizeObserver !== 'undefined') {
     observer = new ResizeObserver(onLayout)
     for (const t of tracks.values()) observer.observe(t.el)
+    // The whole document: a track growing moves every track after it.
+    observer.observe(document.body)
   }
   stopListening = () => {
     window.removeEventListener('scroll', onScroll)
-    window.removeEventListener('resize', onLayout)
+    window.removeEventListener('resize', onResize)
     window.removeEventListener('orientationchange', onLayout)
     window.removeEventListener('load', onLayout)
-    window.visualViewport?.removeEventListener('resize', onLayout)
+    window.removeEventListener('pageshow', onShow)
+    window.removeEventListener('pagehide', rememberScroll)
+    document.removeEventListener('visibilitychange', onHide)
+    window.visualViewport?.removeEventListener('resize', onResize)
     observer?.disconnect()
     observer = null
   }
   measureAll()
+  land()
   return stop
 }
 

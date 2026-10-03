@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { SOFTWARE_RENDERER, describeTier, detectTier, offReasons, readEnvironment, tierReasons } from './capability.js'
+import { SOFTWARE_RENDERER, describeTier, detectTier, offReasons, probeWebgl, readEnvironment, tierReasons } from './capability.js'
 
 // A capable desktop: WebGL2, a real GPU, plenty of cores and memory, fine pointer.
 const DESKTOP = {
@@ -79,5 +79,35 @@ describe('detectTier matrix (doc 6.2)', () => {
 describe('readEnvironment', () => {
   it('describes a device without WebGL when there is no window', () => {
     expect(readEnvironment()).toEqual({ webgl2: false })
+  })
+})
+
+describe('probeWebgl', () => {
+  it('reports no WebGL2 where there is no document, and remembers the answer', () => {
+    const first = probeWebgl()
+    expect(first).toEqual({ webgl2: false, renderer: '' })
+    expect(probeWebgl()).toBe(first)
+  })
+})
+
+describe('device matrix: the harness and real phones', () => {
+  it('the SwiftShader renderer of a headless browser gets no canvas, whatever else is true', () => {
+    expect(detectTier({ ...DESKTOP, renderer: 'ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero)))' })).toBe('off')
+    expect(describeTier({ ...DESKTOP, renderer: 'SwiftShader' })).toBe('OFF ( software rasteriser )')
+  })
+
+  it('a phone with WebGL2 is low, and off as soon as RAW or reduced motion is on', () => {
+    const phone = { webgl2: true, renderer: 'Adreno (TM) 730', coarsePointer: true, width: 390, deviceMemory: 8, hardwareConcurrency: 8 }
+    expect(detectTier(phone)).toBe('low')
+    expect(detectTier({ ...phone, rawView: true })).toBe('off')
+    expect(detectTier({ ...phone, reducedMotion: true })).toBe('off')
+  })
+
+  it('an iPad-width coarse pointer at 768 or more is not held to low by its pointer', () => {
+    expect(detectTier({ ...DESKTOP, coarsePointer: true, width: 820 })).toBe('high')
+  })
+
+  it('names every reason when several apply', () => {
+    expect(tierReasons({ webgl2: false, motionOff: true, saveData: true })).toEqual(['no WebGL2', 'motion off', 'save-data'])
   })
 })
