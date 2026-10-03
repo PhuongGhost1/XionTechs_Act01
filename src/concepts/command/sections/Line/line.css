@@ -1,0 +1,290 @@
+/*
+ * THE LINE (station 03, doc 4.5, M08 and M09). Only what Tailwind classes cannot say:
+ * the scroll-linked packet, the word roll, and the failure-beat timeline. Colours come from the
+ * token classes in the markup; nothing here carries a colour value. Everything animates
+ * transform, opacity or stroke-dashoffset.
+ *
+ * Final-state rule (same as motion.css): an element's own style is the finished picture, the
+ * keyframes only describe the way in, so removing the animation always leaves the full page.
+ */
+
+/* ---- the stage on phones ----------------------------------------------------------------------
+   The fixed CTA bar (frame/MobileBar, 56 px, above the dock) covers the bottom of the viewport
+   under 768 px, so the stage ends above it: otherwise the labels of the lower stops sit behind
+   it. --bar-h is the frame's own token when it exists; 56 px is its documented height. */
+@media (max-width: 767.98px) {
+  .stage.line-stage {
+    height: calc(100svh - var(--header-h) - var(--dock-h) - var(--bar-h, 56px));
+  }
+}
+
+/* ---- packet and progress fill: scroll-linked, linear, no transition -------------------------
+   --p is the plateau-shaped progress that runtime/scroll.js writes on the track element. It is 0
+   until the controller has run, which is the REQUEST end of the line. */
+.line-fill {
+  transform: scaleX(var(--p, 0));
+  will-change: transform;
+}
+
+/* The mover is as wide as the rail, so translateX(100%) is one rail length. The packet sits at
+   its left edge. The stage clips whatever sticks out past the rail's end. */
+.line-mover {
+  transform: translateX(calc(var(--p, 0) * 100%));
+  will-change: transform;
+}
+
+.line-packet {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 24px;
+  height: 3px;
+  margin: -1.5px 0 0 -12px;
+}
+
+/* The scroll-linked packet above is the only linear motion of the page (doc 5.1). The core figure
+   in this stage carries an ambient packet of its own; it stays out of this section. */
+.line-stage .core-figure .anim-packet {
+  display: none;
+}
+
+/* ---- step word roll (M08) ----------------------------------------------------------------- */
+.line-word {
+  display: grid;
+  overflow: clip;
+  /* Room for the glyph edges: the clip must not shave the letters at rest. */
+  padding-block: 0.06em;
+  margin-block: -0.06em;
+}
+
+.line-word > * {
+  grid-area: 1 / 1;
+  display: block;
+  min-width: 0;
+}
+
+@keyframes line-roll-in {
+  from {
+    transform: translateY(var(--roll-from, 105%));
+  }
+}
+
+@keyframes line-roll-out {
+  to {
+    transform: translateY(var(--roll-to, -105%));
+  }
+}
+
+.line-word[data-dir='backward'] {
+  --roll-from: -105%;
+  --roll-to: 105%;
+}
+
+.line-word__in[data-roll] {
+  animation: line-roll-in var(--dur-roll) var(--ease-brand) both;
+}
+
+.line-word__out {
+  animation: line-roll-out var(--dur-roll) var(--ease-brand) both;
+}
+
+/* ---- failure beat (M09): one 1400 ms timeline ----------------------------------------------
+   0     solid outline, nothing said
+   200   outline turns dashed, FAILED
+   200   shake 3 px for 240 ms
+   440   ring grows 0.7 to 1.45 while it fades for 600 ms, RETRY
+   1040  outline solid again, tick draws, PASSED
+   1400  end
+   Percentages of 1400 ms: 200 = 14.3, 440 = 31.4, 1040 = 74.3. */
+.line-beat {
+  --beat: 1400ms;
+}
+
+/* Rest state = PASSED. */
+.line-beat__solid {
+  opacity: 1;
+}
+.line-beat__dashed {
+  opacity: 0;
+}
+.line-beat__ring {
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.line-beat__tick {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 0;
+}
+.line-beat__word {
+  grid-area: 1 / 1;
+  opacity: 0;
+}
+.line-beat__word--pass {
+  opacity: 1;
+}
+
+@keyframes line-beat-solid {
+  0%,
+  14% {
+    opacity: 1;
+  }
+  14.3%,
+  74% {
+    opacity: 0;
+  }
+  74.3%,
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes line-beat-dashed {
+  0%,
+  14% {
+    opacity: 0;
+  }
+  14.3%,
+  74% {
+    opacity: 1;
+  }
+  74.3%,
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes line-beat-shake {
+  0%,
+  14.3% {
+    transform: translateX(0);
+  }
+  18% {
+    transform: translateX(-3px);
+  }
+  22% {
+    transform: translateX(3px);
+  }
+  26% {
+    transform: translateX(-3px);
+  }
+  30% {
+    transform: translateX(3px);
+  }
+  31.4%,
+  100% {
+    transform: translateX(0);
+  }
+}
+
+@keyframes line-beat-ring {
+  0%,
+  31.3% {
+    opacity: 0;
+    transform: scale(0.7);
+  }
+  31.4% {
+    opacity: 1;
+    transform: scale(0.7);
+  }
+  74.3%,
+  100% {
+    opacity: 0;
+    transform: scale(1.45);
+  }
+}
+
+@keyframes line-beat-tick {
+  0%,
+  74.3% {
+    stroke-dashoffset: 1;
+  }
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes line-beat-fail {
+  0%,
+  14% {
+    opacity: 0;
+  }
+  14.3%,
+  31% {
+    opacity: 1;
+  }
+  31.4%,
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes line-beat-retry {
+  0%,
+  31% {
+    opacity: 0;
+  }
+  31.4%,
+  74% {
+    opacity: 1;
+  }
+  74.3%,
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes line-beat-pass {
+  0%,
+  74% {
+    opacity: 0;
+  }
+  74.3%,
+  100% {
+    opacity: 1;
+  }
+}
+
+.line-beat[data-animated] .line-beat__solid {
+  animation: line-beat-solid var(--beat) linear both;
+}
+.line-beat[data-animated] .line-beat__dashed {
+  animation: line-beat-dashed var(--beat) linear both;
+}
+.line-beat[data-animated] .line-beat__shake {
+  animation: line-beat-shake var(--beat) linear both;
+}
+.line-beat[data-animated] .line-beat__ring {
+  animation: line-beat-ring var(--beat) cubic-bezier(0, 0, 0.2, 1) both;
+}
+.line-beat[data-animated] .line-beat__tick {
+  animation: line-beat-tick var(--beat) linear both;
+}
+.line-beat[data-animated] .line-beat__word--fail {
+  animation: line-beat-fail var(--beat) linear both;
+}
+.line-beat[data-animated] .line-beat__word--retry {
+  animation: line-beat-retry var(--beat) linear both;
+}
+.line-beat[data-animated] .line-beat__word--pass {
+  animation: line-beat-pass var(--beat) linear both;
+}
+
+/* PAUSE: freeze the whole timeline. Same specificity as the rules above or higher, plus
+   motion.css's [data-paused] rule which is !important. */
+.line-beat[data-paused][data-animated] .line-beat__solid,
+.line-beat[data-paused][data-animated] .line-beat__dashed,
+.line-beat[data-paused][data-animated] .line-beat__shake,
+.line-beat[data-paused][data-animated] .line-beat__ring,
+.line-beat[data-paused][data-animated] .line-beat__tick,
+.line-beat[data-paused][data-animated] .line-beat__word--fail,
+.line-beat[data-paused][data-animated] .line-beat__word--retry,
+.line-beat[data-paused][data-animated] .line-beat__word--pass {
+  animation-play-state: paused;
+}
+
+/* ---- list fallback ------------------------------------------------------------------------ */
+.line-list {
+  /* Not a track: no pinned height, no minimum. */
+  min-height: 0;
+}

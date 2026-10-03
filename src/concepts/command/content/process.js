@@ -37,6 +37,19 @@ export const processContent = {
     pause: draft('process.pause', 'PAUSE'),
     replay: draft('process.replay', 'REPLAY'),
   },
+  // Step 1 shows what the visitor has picked so far (n is counted in code, never typed here).
+  brief: {
+    label: draft('process.brief.label', 'YOUR BRIEF'),
+    empty: draft('process.brief.empty', '( nothing selected yet )'),
+    more: draft('process.brief.more', 'MORE'),
+  },
+  // Accessible names for the pinned stage. The stops are real buttons in an ordered list.
+  a11y: {
+    stops: draft('process.a11y.stops', 'Steps from request to production'),
+    controls: draft('process.a11y.controls', 'Failure beat controls'),
+    pauseHint: draft('process.a11y.pause', 'Pause the failure beat'),
+    replayHint: draft('process.a11y.replay', 'Replay the failure beat'),
+  },
   // Printed under the stage so a visitor knows what kind of content each part is.
   legendLine: draft('process.legend', 'STEPS: DRAFT · FAILURE BEAT: ILLUSTRATIVE'),
   // The single labelled failure (M09): a check fails once, is retried, passes. Not a client run.
