@@ -83,6 +83,34 @@ A design exploration from `docs/idea/01-X-Command.md`, built as a separate page.
 - [ ] **Case study descriptor**: the brief calls StaffXP an "enterprise workforce platform"; the record uses the verified
       "staff experience platform" (education). Confirm which wording the team wants.
 
+## Concept 02: X / Architecture (`/concepts/architecture/`)
+
+A design exploration from `docs/idea/02-X-Architecture.md`, built as a separate page. Spec:
+`docs/concepts/02-architecture-plan.md`. Line-type rule on the page: solid = confirmed, dashed = illustrative or pending.
+Open items before it could replace the main page:
+
+- [ ] **Official logo**: same as Concept 01. Only a 250 × 46 px navy PNG exists; the navy sheets use a generated
+      white-wordmark copy (`public/concepts/architecture/logo-reversed.png`). The X mark drawn in the finale and the hero
+      is built from two strokes (`ui/Marks.jsx`), not traced from the logo. Replace both when a vector logo arrives.
+- [x] ~~Palette~~: the brief's tones are used as written (`#F7F6F1`, `#08234A`, `#F4C400`, `#D9DEE5`, `#101820`). Every
+      text pair is checked by `model/tokens.test.js`; yellow is never text on paper (1.5:1).
+- [ ] **StaffXP technology**: the brief's hover values (React, .NET, MySQL, AI services) and its MOBILE / ADMIN / CRM / HR
+      nodes are not confirmed. Sheet 05 builds its five layers only from what the screenshots show and reads
+      `Pending confirmation` for technology. `content.test.js` fails if those names appear in the StaffXP copy.
+- [ ] **StaffXP dashboard screenshot** still shows the dev environment's test records (see Evidence above).
+- [ ] **Selected work**: Problem and Architecture use the verified descriptors, Technology and Outcome are dashed
+      placeholders. Real outcomes, metrics and technology per project are needed before they can replace the placeholders.
+- [ ] **Agent sheet** (A-006.2) is an illustrative scenario, not a client project; capability labels stay generic.
+- [ ] **Draft wording**: the level descriptions (sheet 02), capability layer sentences marked draft, the process lede and
+      the Architect / Deploy sentences, the work lede, and the hero layer descriptions (`draft: true` in `content.js`).
+      Shown with a "Draft" marker only in `npm run dev` and with `?review`. Section-local UI wording is draft too
+      (the `copy.js` files in `architecture/`, `capabilities/`, `process/`, `staffxp/`, `work/`, `finale/`: for example
+      "Key", "Includes", "Section A-A", "Press a level to hold its load path."). Wording only, no facts.
+- [ ] **Metadata labels** `SYS.01 / ARCH.004 / BUILD.2026` come from the brief as decoration; `REV` is the real commit count.
+      Decide whether to keep them in a production page.
+- [ ] **Nav**: About and Contact both lead to sheet 07 (About text and the title block); there is no separate About page.
+- [ ] **Fonts**: Archivo (variable width axis) and IBM Plex Mono load from Google Fonts like the other concepts. Self-host before launch.
+
 ## Not on the page (kept out on purpose)
 
 - Testimonials: the live site's markup is unrendered theme-demo content. Add a section only
