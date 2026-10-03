@@ -86,6 +86,8 @@ For:
 - generative objects
 - camera movement
 
+**Rule of Thumb:** Avoid using a single global WebGL Canvas that spans the entire page scroll unless absolutely necessary. Confine WebGL to specific hero or feature sections. Use DOM-based motion (Framer Motion / GSAP) for the rest of the page to prevent mobile scrolling jank.
+
 ### Lottie / Rive
 Use only when a pre-authored animation provides a clear benefit.
 
@@ -137,18 +139,22 @@ This creates strong differentiation without turning the page into visual noise.
 
 ## Quality Bar
 
-A successful implementation should work in three levels:
+A successful implementation should work in four levels:
+
+### Level 0 — Loading & Fallback UX
+Before the 3D or heavy motion loads, the page must not appear broken. Use terminal-style text loaders (e.g., `[ INITIALIZING... ]`) or sleek skeletons that fit the concept.
 
 ### Level 1 — No motion
-The page still looks premium.
+The page still looks premium. Typography, spacing, and static layouts stand on their own.
 
 ### Level 2 — Normal motion
-The page feels polished and alive.
+The page feels polished and alive using CSS and layout transitions.
 
 ### Level 3 — Full capability
 3D/WebGL and advanced interactions create the "wow" moments.
 
-This is important because performance, accessibility, and device capability will vary.
+**Accessibility (a11y) Requirement:**
+All typography, especially muted text on dark backgrounds, must pass WCAG AA contrast ratio tests. The UI must remain legible and navigable without relying solely on color signals. This is important because performance, accessibility, and device capability will vary.
 
 ## AI Implementation Workflow
 
@@ -189,3 +195,159 @@ The objective is not:
 The objective is:
 
 > **Give each concept one unforgettable visual idea, then make the entire page support that idea.**
+
+# 17. ZERO-STATE DESIGN PROTOCOL
+
+## Purpose
+
+Every concept branch is an independent design experiment.
+
+When implementing a concept, the agent must behave as if it is receiving a **brand-new website brief**, not redesigning an earlier XionTechs landing page.
+
+The existence of other branches, previous sessions, old screenshots, old layouts, or previously generated sections must not become the default visual/content template.
+
+## Fresh-Research Rule
+
+Before implementation, the agent should independently:
+
+1. Research the selected concept's visual language.
+2. Review relevant high-quality references.
+3. Brainstorm multiple possible compositions.
+4. Select a direction that best fits the concept.
+5. Produce a fresh information architecture.
+6. Only then begin implementation.
+
+Research is for understanding patterns and generating original ideas, not copying a prior XionTechs page.
+
+## Anti-Anchor Rule
+
+The agent must explicitly assume:
+
+> "I have never designed the previous XionTechs landing page."
+
+Do not start by asking:
+
+> "How can I improve the existing landing page?"
+
+Start by asking:
+
+> "Given this brand and this concept, what would I design from scratch today?"
+
+## Previous-Design Contamination Checks
+
+Before coding, inspect whether the current workspace contains:
+
+- previous landing-page components
+- old hero sections
+- old content structure
+- screenshots from previous concepts
+- design tokens created for another concept
+- old animation utilities
+- old copywriting
+- CLAUDE.md / AGENTS.md instructions tied to a previous design
+- project auto-memory that may reference old visual decisions
+
+Do not automatically reuse them.
+
+If old implementation exists only because of repository history, treat it as **reference material**, not the source of truth.
+
+## Existing Codebase Rule
+
+If the branch was created from an older landing-page implementation, the agent must NOT assume that existing components represent the new concept.
+
+Before reusing a component, ask:
+
+> "Would I create this component if this repository were empty?"
+
+If the answer is no, redesign or replace it.
+
+## Content Freshness Rule
+
+Content structure is part of the concept.
+
+Do not merely reuse:
+
+```text
+Hero
+→ Services
+→ About
+→ Process
+→ Why Choose Us
+→ Case Studies
+→ Testimonials
+→ FAQ
+→ Contact
+```
+
+unless research and concept reasoning independently lead to that structure.
+
+The agent should decide:
+- what the visitor needs to understand first
+- what story the concept tells
+- where proof should appear
+- what information can be omitted
+- what interaction replaces a conventional section
+- how case studies fit the narrative
+
+## Separation of Brand vs Concept
+
+Keep these stable:
+
+- Logo
+- Official company facts
+- Brand colors
+- Slogan
+- Real project information
+- Confirmed services
+
+Allow these to change completely:
+
+- Section order
+- Hero composition
+- Information architecture
+- Copy hierarchy
+- Typography treatment
+- Navigation model
+- Visual storytelling
+- 3D / WebGL strategy
+- Motion system
+- Interaction model
+- Case-study presentation
+
+## Fresh-Start Prompt Pattern
+
+Use a prompt equivalent to:
+
+```text
+Treat this as a brand-new project.
+
+Do not redesign or imitate any previous XionTechs landing page.
+Do not assume the existing section order is correct.
+Do not inherit previous visual patterns unless they are required by the brand.
+
+First:
+1. Research the concept.
+2. Brainstorm at least 3 distinct visual/content directions.
+3. Choose one direction and explain why it fits the concept.
+4. Define the information architecture from scratch.
+5. Define the visual system.
+6. Define the signature 3D/motion/interaction idea.
+7. Only then implement.
+```
+
+## Definition of Done for a New Concept
+
+A concept is considered genuinely new only when all of these have been reconsidered:
+
+- Hero composition
+- Navigation
+- Section order
+- Content hierarchy
+- Case-study structure
+- Visual system
+- Interaction model
+- Motion language
+- 3D/effect strategy
+- CTA treatment
+
+Changing colors or typography alone is not sufficient.
