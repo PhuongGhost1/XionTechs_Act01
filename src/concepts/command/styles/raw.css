@@ -1,0 +1,88 @@
+/*
+ * READ | RAW (doc 10.3). html[data-view='raw'] re-styles the same DOM as a plain mono spec sheet:
+ * no canvas, no pins, display type capped at 28 px, lists with dot leaders, screenshots as
+ * framed images. It is the accessibility floor and the proof that the page works without 3D.
+ *
+ * Selectors carry html[data-view='raw'] so they beat the Tailwind utilities (which are class
+ * selectors) without !important. WP1 owns this file and extends it per section; sections mark
+ * decoration with data-decor and let RAW hide it.
+ */
+
+/* Decorative layers go. Meaningful facts are always real DOM text, so nothing is lost. */
+html[data-view='raw'] canvas,
+html[data-view='raw'] [data-decor],
+html[data-view='raw'] [data-core-anchor] svg,
+html[data-view='raw'] .bg-dots,
+html[data-view='raw'] .hatch {
+  display: none !important;
+}
+
+/* The anchors themselves collapse so they leave no empty box. */
+html[data-view='raw'] [data-core-anchor] {
+  display: none;
+}
+
+/* Pins off: every track is as tall as its content and nothing is sticky. */
+html[data-view='raw'] .track,
+html[data-view='raw'] .track--pin {
+  height: auto;
+  min-height: 0;
+}
+
+html[data-view='raw'] .stage {
+  position: static;
+  height: auto;
+  overflow: visible;
+}
+
+/* Everything reads as mono and nothing is taller than 28 px. */
+html[data-view='raw'] body {
+  font-family: 'Geist Mono Variable', 'Geist Mono Fallback', ui-monospace, monospace;
+  font-size: 0.9375rem;
+  line-height: 1.55;
+}
+
+html[data-view='raw'] h1,
+html[data-view='raw'] h2,
+html[data-view='raw'] h3,
+html[data-view='raw'] [class*='text-display'],
+html[data-view='raw'] [class*='text-finale'],
+html[data-view='raw'] [class*='text-statement'],
+html[data-view='raw'] [class*='text-h2'],
+html[data-view='raw'] [class*='text-row'],
+html[data-view='raw'] [class*='text-step'] {
+  font-family: inherit;
+  font-size: 28px;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  font-weight: 500;
+}
+
+/* Reveal and word-lighting states do not apply: all text is lit and visible. */
+html[data-view='raw'] [data-reveal],
+html[data-view='raw'] [data-reveal='out'] {
+  opacity: 1;
+  transform: none;
+}
+
+/* Spec rows and lists keep their dot leaders; plain lists get a mono marker. */
+html[data-view='raw'] ol,
+html[data-view='raw'] ul {
+  list-style: none;
+}
+
+html[data-view='raw'] [data-leader] {
+  border-bottom: 1px dotted var(--c-hair-strong);
+}
+
+/* Screenshots stay, as plain framed images. */
+html[data-view='raw'] img:not([data-logo]) {
+  max-width: 100%;
+  height: auto;
+  border: 1px solid var(--c-hair-strong);
+}
+
+/* The mobile bar and any floating chrome would cover the sheet. */
+html[data-view='raw'] [data-fixed-cta] {
+  position: static;
+}

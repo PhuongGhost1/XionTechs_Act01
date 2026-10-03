@@ -1,0 +1,264 @@
+/*
+ * Pure CSS motion for Concept 01 v2 (doc 7.2). Effects numbered M01..M18 in the design document.
+ *
+ * One rule makes every effect safe: the element's own style is its FINAL state, and the keyframes
+ * only describe the way in (`from`), run with `both`. Turning the animation off therefore always
+ * leaves the finished, fully informative page (Level 1). Only `transform`, `opacity`,
+ * `clip-path` and `stroke-dashoffset` are animated.
+ *
+ * Off switches (both end at the same place):
+ *   html[data-motion='off']   the MOTION toggle, or the pre-paint script after prefers-reduced-motion
+ *   prefers-reduced-motion    no-JS case; a visitor who turned motion on deliberately is data-motion=on
+ *
+ * WebGL motion (M02, M03, M13) lives in core/three and is gated by data-tier, not here.
+ */
+
+/* M01 hairline draw. Set pathLength="1" on the <line> or <path>. The stroke is drawn in place. */
+@keyframes hairline-draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+}
+
+.anim-hairline {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 0;
+  animation: hairline-draw var(--dur-signal) var(--ease-brand) both;
+  animation-delay: var(--delay, 0ms);
+}
+
+/* M01 and M14 clip rise: a line of type rises out of a clip. Stagger with --i (90 ms steps). */
+@keyframes clip-rise {
+  from {
+    clip-path: inset(0 0 100% 0);
+    transform: translateY(0.35em);
+  }
+  to {
+    clip-path: inset(0 0 -0.2em 0);
+    transform: none;
+  }
+}
+
+.anim-clip-rise {
+  animation: clip-rise var(--dur-reveal) var(--ease-brand) both;
+  animation-delay: calc(var(--i, 0) * 90ms + var(--delay, 0ms));
+}
+
+/* M05 signal line: a 1 px yellow line crosses the top of the viewport once, then is gone.
+   The element itself is invisible at rest (the final state). */
+@keyframes signal-line {
+  from {
+    transform: scaleX(0);
+    opacity: 1;
+  }
+  75% {
+    transform: scaleX(1);
+    opacity: 1;
+  }
+  to {
+    transform: scaleX(1);
+    opacity: 0;
+  }
+}
+
+.anim-signal-line {
+  transform-origin: left center;
+  opacity: 0;
+  animation: signal-line var(--dur-signal) var(--ease-brand) both;
+}
+
+/* M10 plate scan: a yellow line crosses its frame top to bottom, linearly, then is gone. */
+@keyframes scan-line {
+  from {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateY(var(--scan-travel, 100%));
+    opacity: 1;
+  }
+}
+
+.anim-scan {
+  opacity: 0;
+  animation: scan-line var(--dur-scan) linear both;
+}
+
+/* M10 plate image: 12% to 100% behind the scan line. */
+@keyframes scan-reveal {
+  from {
+    opacity: 0.12;
+  }
+}
+
+.anim-scan-reveal {
+  animation: scan-reveal var(--dur-scan) linear both;
+}
+
+/* M12 and M16 step flip: counter digits change in six hard steps. */
+@keyframes step-flip {
+  from {
+    opacity: 0.25;
+    transform: translateY(45%);
+  }
+}
+
+.anim-step-flip {
+  animation: step-flip var(--dur-step) steps(6, end) both;
+}
+
+/* Hero caret on the full stop. The only blinking thing on the page. At rest it is solid. */
+@keyframes caret {
+  50% {
+    opacity: 0;
+  }
+}
+
+.anim-caret {
+  animation: caret 1.06s steps(1, end) infinite;
+}
+
+/* M09 failure beat, part one: the check outline shakes 3 px. */
+@keyframes shake {
+  20% {
+    transform: translateX(-3px);
+  }
+  40% {
+    transform: translateX(3px);
+  }
+  60% {
+    transform: translateX(-3px);
+  }
+  80% {
+    transform: translateX(3px);
+  }
+}
+
+.anim-shake {
+  animation: shake var(--dur-step) linear both;
+}
+
+/* M09 part two: an expanding ring. Invisible at rest. */
+@keyframes ring-out {
+  from {
+    transform: scale(0.7);
+    opacity: 1;
+  }
+  to {
+    transform: scale(1.45);
+    opacity: 0;
+  }
+}
+
+.anim-ring {
+  opacity: 0;
+  animation: ring-out var(--dur-scan) var(--ease-out) both;
+}
+
+/* M07 leader line: a hairline draws from tag to hub in 200 ms (SVG, pathLength="1"). */
+@keyframes leader-draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+}
+
+.anim-leader {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 0;
+  animation: leader-draw 200ms var(--ease-ui) both;
+}
+
+/* M08 step word roll: a vertical clip roll on word change, 480 ms. */
+@keyframes word-roll {
+  from {
+    clip-path: inset(0 0 100% 0);
+    transform: translateY(40%);
+  }
+  to {
+    clip-path: inset(0 0 -0.2em 0);
+    transform: none;
+  }
+}
+
+.anim-roll {
+  animation: word-roll var(--dur-roll) var(--ease-brand) both;
+}
+
+/* Reveal (Reveal.jsx): content rises 12 px and fades in once. Without data-reveal the element
+   is simply shown, which is also the no-JS state. */
+[data-reveal='out'] {
+  opacity: 0;
+  transform: translateY(12px);
+}
+
+[data-reveal] {
+  transition: opacity var(--dur-reveal) var(--ease-out), transform var(--dur-reveal) var(--ease-brand);
+  transition-delay: var(--delay, 0ms);
+}
+
+/* M04 packets in the SVG tier: a dash travelling along an edge, linearly. Set --path to an
+   SVG path string, e.g. style="--path: path('M0 0 L100 60')". At rest the packet sits mid edge. */
+@keyframes packet-run {
+  from {
+    offset-distance: 0%;
+  }
+  to {
+    offset-distance: 100%;
+  }
+}
+
+.anim-packet {
+  offset-path: var(--path);
+  offset-distance: 50%;
+  animation: packet-run calc(var(--dur-packet) / var(--flow, 1)) linear infinite;
+}
+
+/* M18 chip highlight (ledger row click): 2 px yellow outline, in 160 ms, out 200 ms.
+   JS toggles data-highlight on the chips for 3 s. */
+[data-chip] {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+  transition: outline-color 200ms var(--ease-ui);
+}
+
+[data-chip][data-highlight] {
+  outline-color: rgb(var(--signal));
+  transition-duration: var(--dur-ui);
+}
+
+/* Loops stop off screen and while the tab is hidden: the owner sets data-paused. */
+[data-paused],
+[data-paused] * {
+  animation-play-state: paused !important;
+}
+
+/* ------------------------------------------------------------------ */
+/* Level 1: no motion. Everything above shows its final state.        */
+/* ------------------------------------------------------------------ */
+html[data-motion='off'] *,
+html[data-motion='off'] *::before,
+html[data-motion='off'] *::after {
+  animation: none !important;
+  transition: none !important;
+  scroll-behavior: auto !important;
+}
+
+html[data-motion='off'] [data-reveal='out'] {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html:not([data-motion='on']) *,
+  html:not([data-motion='on']) *::before,
+  html:not([data-motion='on']) *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+
+  html:not([data-motion='on']) [data-reveal='out'] {
+    opacity: 1;
+    transform: none;
+  }
+}

@@ -1,0 +1,134 @@
+/*
+ * Design tokens for Concept 01 v2 (docs/concepts/command-v2/00-direction.md, section 5).
+ * This file and tailwind.command.config.js are the only places a colour value is written.
+ * Colours are space separated RGB channels so Tailwind can add alpha: rgb(var(--ink) / 0.5).
+ */
+:root {
+  /* Surfaces (5.1) */
+  --void: 5 15 31; /* #050F1F silence bands, screenshot backing, dock */
+  --ground: 7 27 52; /* #071B34 page */
+  --panel: 11 35 66; /* #0B2342 active, hover or selected panel only */
+  --panel-hi: 16 48 79; /* #10304F hover fill (ink-2 text on it, never ink-3) */
+
+  /* Ink */
+  --ink: 255 255 255; /* display and active words */
+  --ink-2: 184 196 212; /* #B8C4D4 body */
+  --ink-3: 132 151 176; /* #8497B0 mono labels, captions, inactive rows */
+  --ink-dim: 90 111 142; /* #5A6F8E unlit LARGE words only (24 px and up) */
+
+  /* The only hue */
+  --signal: 245 196 0; /* #F5C400. Nudge allowed: #F6CA17 (245 -> 246 202 23) if it reads orange. */
+  --on-signal: 7 27 52; /* text on a yellow fill */
+
+  /* Structural tokens: ink-2 at a fixed alpha. Tailwind multiplies the alpha by any modifier. */
+  --hair: var(--ink-2);
+  --hair-a: 0.14;
+  --hair-strong: var(--ink-2);
+  --hair-strong-a: 0.3;
+  --ghost: var(--ink-2);
+  --ghost-a: 0.1;
+  --grid: var(--ink-2);
+  --grid-a: 0.06;
+  --signal-wash: var(--signal);
+  --signal-wash-a: 0.1;
+
+  /* Ready made colours for plain CSS (base.css, motion.css, raw.css) */
+  --c-hair: rgb(var(--hair) / var(--hair-a));
+  --c-hair-strong: rgb(var(--hair-strong) / var(--hair-strong-a));
+  --c-ghost: rgb(var(--ghost) / var(--ghost-a));
+  --c-grid: rgb(var(--grid) / var(--grid-a));
+
+  /* Easing (5.1). Linear and steps() are used inline where meant (packets, scan, counters). */
+  --ease-brand: cubic-bezier(0.32, 0.72, 0, 1); /* transforms, morphs */
+  --ease-ui: cubic-bezier(0.2, 0, 0, 1); /* hover, state */
+  --ease-out: cubic-bezier(0, 0, 0.2, 1); /* opacity reveals */
+
+  /* Durations */
+  --dur-ui: 160ms;
+  --dur-reveal: 500ms;
+  --dur-signal: 700ms;
+  --dur-scan: 600ms;
+  --dur-step: 240ms; /* counter flip, shake */
+  --dur-roll: 480ms; /* step word roll */
+  --dur-boot: 1100ms;
+  --dur-packet: 2400ms; /* one edge, idle */
+
+  /* Spacing scale (5.3): 4 8 12 16 24 32 48 64 96 160 */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-6: 24px;
+  --sp-8: 32px;
+  --sp-12: 48px;
+  --sp-16: 64px;
+  --sp-24: 96px;
+  --sp-40: 160px;
+  --station-gap: 96px; /* vertical rhythm between stations (160 from 768) */
+
+  /* Grid and margins (5.3) */
+  --margin-x: 16px;
+  --gutter: 16px;
+  --content-max: 1600px;
+
+  /* Frame (5.3). Everything that is sticky or fixed reads these two. */
+  --header-h: 48px;
+  --dock-h: calc(56px + env(safe-area-inset-bottom, 0px));
+
+  /* Track heights (5.3), in lvh so a mobile toolbar does not resize them. Mirrored in
+     contract/stations.js; stations.test.js fails if the two drift apart. These are the phone
+     values (about 15% shorter); the desktop values are set from 768 px. */
+  --track-standby: 100lvh;
+  --track-premise: 94lvh;
+  --track-deploy: 128lvh;
+  --track-line: 200lvh;
+  --track-work: 187lvh;
+  --track-ledger: 77lvh;
+  --track-done: 136lvh;
+
+  /* Type scale (5.2). Display XL and the margins change at 640; the rest is fluid. */
+  --fs-display-xl: clamp(2.6rem, 13.4vw, 5rem);
+  --fs-finale: clamp(3rem, 14vw, 14rem);
+  --fs-statement: clamp(1.75rem, 6vw, 5.5rem);
+  --fs-h2: clamp(2rem, 4.4vw, 4rem);
+  --fs-row: clamp(2rem, 6vw, 5.75rem);
+  --fs-step: clamp(2.25rem, 11vw, 11rem);
+  --fs-body: 1rem;
+}
+
+@media (min-width: 640px) {
+  :root {
+    --fs-display-xl: clamp(4.5rem, 10vw, 10.5rem);
+  }
+}
+
+@media (min-width: 768px) {
+  :root {
+    --header-h: 64px;
+    --dock-h: 48px;
+    --margin-x: 24px;
+    --station-gap: 160px;
+    /* Desktop track heights (5.3). ON FILE is 2 x 95 plus 30. */
+    --track-standby: 100lvh;
+    --track-premise: 110lvh;
+    --track-deploy: 150lvh;
+    --track-line: 220lvh;
+    --track-work: 220lvh;
+    --track-ledger: 90lvh;
+    --track-done: 160lvh;
+  }
+}
+
+@media (min-width: 1024px) {
+  :root {
+    --gutter: 24px;
+    --fs-body: 1.125rem;
+  }
+}
+
+@media (min-width: 1280px) {
+  :root {
+    --margin-x: 40px;
+  }
+}
+

@@ -1,0 +1,19 @@
+/*
+ * Entry stylesheet of Concept 01 v2. @import lines must come first (they are inlined by Vite);
+ * the layers then load Tailwind with this concept's own config.
+ *
+ * Order matters: tokens and fonts, then motion/raw as plain CSS, then Tailwind's base layer
+ * (base.css puts its rules in @layer base, so they land after the preflight), components and
+ * utilities. raw.css selectors start with html[data-view='raw'], which outranks utilities.
+ */
+@import './styles/fonts.css';
+@import './styles/tokens.css';
+@import './styles/base.css';
+@import './styles/motion.css';
+@import './styles/raw.css';
+
+@config "../../../tailwind.command.config.js";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;

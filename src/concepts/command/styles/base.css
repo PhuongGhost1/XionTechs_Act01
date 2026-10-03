@@ -1,0 +1,204 @@
+/*
+ * Base layer for Concept 01 v2: element defaults, focus, selection, scrollbar, and the small
+ * helper classes (.bg-dots .hatch .dash .track .stage) that Tailwind utilities cannot express.
+ * Colours come from tokens.css only.
+ */
+@layer base {
+  html {
+    background: rgb(var(--ground));
+    color-scheme: dark;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    scrollbar-width: thin;
+    scrollbar-color: var(--c-hair-strong) rgb(var(--void));
+  }
+
+  body {
+    margin: 0;
+    min-width: 320px;
+    background: rgb(var(--ground));
+    color: rgb(var(--ink-2));
+    font-family: 'Geist Variable', 'Geist Fallback', system-ui, sans-serif;
+    font-size: var(--fs-body);
+    line-height: 1.5;
+    /* clip, not hidden: hidden would make the body a scroll container and break position: sticky. */
+    overflow-x: clip;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Anchored sections land below the fixed header (doc 5.3, 10.4). */
+  [id] {
+    scroll-margin-top: var(--header-h);
+  }
+
+  h1,
+  h2,
+  h3,
+  p,
+  dl,
+  dd,
+  figure,
+  ol,
+  ul {
+    margin: 0;
+  }
+
+  ol,
+  ul {
+    padding: 0;
+    list-style: none;
+  }
+
+  /* Machine truth is always mono and always tabular (doc 5.2). */
+  .font-mono,
+  code,
+  kbd {
+    font-variant-numeric: tabular-nums;
+  }
+
+  button {
+    font: inherit;
+    color: inherit;
+    cursor: pointer;
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  /* Focus ring (doc 10.2): 2 px signal, offset 3 px; ink on yellow fills. Never removed. */
+  :focus-visible {
+    outline: 2px solid rgb(var(--signal));
+    outline-offset: 3px;
+  }
+
+  :focus:not(:focus-visible) {
+    outline: none;
+  }
+
+  .bg-signal:focus-visible,
+  [data-fill='signal']:focus-visible {
+    outline-color: rgb(var(--ink));
+  }
+
+  ::selection {
+    background: rgb(var(--signal));
+    color: rgb(var(--on-signal));
+  }
+
+  /* Minimal scrollbar (WebKit and Blink; Firefox uses scrollbar-color above). */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: rgb(var(--void));
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: var(--c-hair-strong);
+    border: 3px solid rgb(var(--void));
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgb(var(--ink-3));
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Helpers                                                              */
+/* ------------------------------------------------------------------ */
+
+/*
+ * Dot grid (doc 5.4): a dot every 48 px at 6%, and a + every fourth cell (192 px). Gradients
+ * only. Each layer is a tile with the shape at its centre so repeating never clips it; the
+ * plus tile is offset so its centre lands on a dot (dots sit at 24 + 48n, the tile centre at
+ * 96 - 72 = 24). Decorative: mark the element data-decor so RAW hides it.
+ */
+.bg-dots {
+  background-image: radial-gradient(circle at 50% 50%, var(--c-grid) 0 1px, transparent 1.5px),
+    radial-gradient(ellipse 4.5px 0.5px at 50% 50%, var(--c-grid) 0 99%, transparent 100%),
+    radial-gradient(ellipse 0.5px 4.5px at 50% 50%, var(--c-grid) 0 99%, transparent 100%);
+  background-size: 48px 48px, 192px 192px, 192px 192px;
+  background-position: 0 0, -72px -72px, -72px -72px;
+}
+
+/* Illustrative hatch (doc 5.5): 1 px lines at 22% alpha every 5 px, 45 degrees. Always paired
+   with the word ILLUSTRATIVE; never colour or pattern alone. */
+.hatch {
+  background-image: repeating-linear-gradient(45deg, rgb(var(--ink-2) / 0.22) 0 1px, transparent 1px 5px);
+}
+
+/* Dashed outline for pending things (doc 5.5). */
+.dash {
+  border: 1px dashed var(--c-hair-strong);
+}
+
+/*
+ * Tracks (doc 5.3, 10.4). The id of a station sits on its track wrapper; data-track picks the
+ * height token. Pinned tracks (.track--pin) are exactly that tall and hold a sticky .stage; the
+ * others are a minimum, so content can grow them.
+ */
+.track {
+  position: relative;
+  min-height: var(--track-h, 0px);
+}
+
+.track--pin {
+  height: var(--track-h);
+}
+
+.track[data-track='standby'] {
+  --track-h: var(--track-standby);
+}
+.track[data-track='premise'] {
+  --track-h: var(--track-premise);
+}
+.track[data-track='deploy'] {
+  --track-h: var(--track-deploy);
+}
+.track[data-track='line'] {
+  --track-h: var(--track-line);
+}
+.track[data-track='work'] {
+  --track-h: var(--track-work);
+}
+.track[data-track='ledger'] {
+  --track-h: var(--track-ledger);
+}
+.track[data-track='done'] {
+  --track-h: var(--track-done);
+}
+
+/* The pinned stage: native sticky, one viewport minus the frame. svh so a mobile toolbar does
+   not make it jitter. */
+.stage {
+  position: sticky;
+  top: var(--header-h);
+  height: calc(100svh - var(--header-h) - var(--dock-h));
+  overflow: clip;
+}
+
+/* No pins on landscape phones (doc 5.3): show the final states in normal flow. */
+@media (max-height: 499px) and (orientation: landscape) {
+  .track--pin {
+    height: auto;
+  }
+
+  .stage {
+    position: static;
+    height: auto;
+    overflow: visible;
+  }
+}
+
+/* Content column: margins and max width of doc 5.3. Hairlines and the dot grid stay full bleed. */
+.column {
+  width: 100%;
+  max-width: var(--content-max);
+  margin-inline: auto;
+  padding-inline: var(--margin-x);
+}
