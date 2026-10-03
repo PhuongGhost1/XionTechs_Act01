@@ -6,7 +6,8 @@ import { setBrief } from './attributes.js'
 // persisted and nothing leaves the page: the only output is a mailto: URL or text to copy.
 //
 // Selection API: toggleService(id), toggleRecord(id), has(id), count(), items(), clear().
-// Output API (pure): buildMailto({ note }), buildText({ note }), buildBody({ note }).
+// Output API (pure): buildMailto({ note }), buildText({ note }), buildBody({ note }), and
+// isNoteCut({ note }), whether SEND EMAIL has to cut the note (the same computation as buildMailto).
 // Each builder accepts an optional `items` (the shape items() returns) so tests need no store.
 
 /** The mailto: URL and the copied text are capped near this many characters. */
@@ -115,11 +116,31 @@ export function buildBody({ note = '', items: selected = items() } = {}) {
  * encoded with CRLF line breaks, at most MAX_LENGTH characters in total.
  */
 export function buildMailto({ note = '', items: selected } = {}) {
+  const { head, body } = mailtoParts({ note, items: selected })
+  return head + encode(body.fitted)
+}
+
+/**
+ * The pieces of the mailto: URL: its fixed head, and the body before (`full`) and after (`fitted`)
+ * the cap. The cap counts the PERCENT-ENCODED length of the whole URL, which is what a mail
+ * client receives, so an accented note (each letter becomes up to nine characters) runs into it
+ * long before 1800 plain characters.
+ */
+function mailtoParts({ note, items: selected }) {
   const head = `mailto:${EMAIL}?subject=${encode(mail.subject.text)}&body=`
-  const body = fitText(crlf(buildBody({ note, items: selected })), MAX_LENGTH - head.length, mail.truncated.text, (s) =>
-    encode(s).length,
-  )
-  return head + encode(body)
+  const full = crlf(buildBody({ note, items: selected }))
+  const fitted = fitText(full, MAX_LENGTH - head.length, mail.truncated.text, (s) => encode(s).length)
+  return { head, body: { full, fitted } }
+}
+
+/**
+ * True when SEND EMAIL cuts the visitor's note to stay under the cap (so the email ends with the
+ * truncation marker). Decided from the same computation as buildMailto, never from the text:
+ * a note that itself contains the marker, or one that merely looks short, is judged correctly.
+ */
+export function isNoteCut({ note = '', items: selected } = {}) {
+  const { body } = mailtoParts({ note, items: selected })
+  return body.fitted !== body.full
 }
 
 /** Plain text for COPY TEXT: To, Subject, a blank line, the body. At most MAX_LENGTH characters. */

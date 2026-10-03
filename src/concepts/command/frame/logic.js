@@ -15,6 +15,13 @@ export const ctaVariant = (stationIndex) => (stationIndex >= CTA_FILLS_AT ? 'pri
 export const navLit = (item, activeId) =>
   item.section === activeId || (item.section === 'contact' && activeId === 'done')
 
+/**
+ * Everything on the page outside the header: what the open full-screen menu hides from the
+ * keyboard and from assistive tech (the inert attribute). The footer sits outside <main> (it is
+ * the contentinfo landmark), so it is listed on its own. Keep this in step with App.jsx.
+ */
+export const MENU_BEHIND = Object.freeze(['#main', '[data-site-footer]', '[data-frame="dock"]', '[data-fixed-cta]'])
+
 /** Stations whose arrival draws the signal line (M05, doc 7.2): 01 PREMISE, 03, 04, 06. */
 export const SIGNAL_STATIONS = Object.freeze([1, 3, 4, 6])
 

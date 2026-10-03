@@ -49,6 +49,18 @@
 }
 
 /* ---- step word roll (M08) ----------------------------------------------------------------- */
+
+/* The giant word is sized by the width (--fs-step is vw only), but the stage is only one window
+   high: on a short desktop window the word grew up over the section label. Capped by height too.
+   The stage is 100svh less the frame (176 px at the desktop frame of 64 + 48 plus the label row);
+   what the word needs besides itself (label row, a two line sentence, the 100 px panel slot, the
+   rail and legend, and 8 px clear of the label) is about 485 px, so the word may be at most 0.935
+   of the window height less that (its box is 1.07 times its font size). From 1440 x 900 and up
+   this is above the vw size and changes nothing. */
+.line-stage .line-word {
+  font-size: min(var(--fs-step), max(2.25rem, calc(93.5svh - 485px)));
+}
+
 .line-word {
   display: grid;
   overflow: clip;

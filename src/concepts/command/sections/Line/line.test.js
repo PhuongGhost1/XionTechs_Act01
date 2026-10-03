@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs'
 import { createElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
@@ -141,5 +142,27 @@ describe('legend line', () => {
     const review = show(true)
     expect(review).toContain('STEPS: DRAFT')
     expect(review.indexOf('STEPS: DRAFT')).toBeLessThan(review.indexOf('FAILURE BEAT'))
+  })
+})
+
+describe('THE LINE on a short window and without polling', () => {
+  const read = (name) => readFileSync(new URL(name, import.meta.url), 'utf8').replace(/\r\n/g, '\n')
+
+  it('caps the giant word by the window height as well as the width', () => {
+    const css = read('./line.css')
+    const rule = css.match(/\.line-stage \.line-word \{([^}]*)\}/)?.[1] ?? ''
+    expect(rule).toMatch(/font-size: min\(var\(--fs-step\), max\(2\.25rem, calc\(93\.5svh - 485px\)\)\)/)
+  })
+
+  it('treats a word that climbs over the section label as cramped (the list is the fallback)', () => {
+    const source = read('./useStageCramped.js')
+    expect(source).toMatch(/anyOverlap\(\[label\.getBoundingClientRect\(\), word\.getBoundingClientRect\(\)\]\)/)
+  })
+
+  it('follows the step through the scroll controller, not a requestAnimationFrame loop', () => {
+    const source = read('./useLineStep.js')
+    expect(source).toContain('subscribeFrame')
+    expect(source).not.toContain('requestAnimationFrame')
+    expect(source).not.toContain('IntersectionObserver')
   })
 })

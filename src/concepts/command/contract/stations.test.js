@@ -1,5 +1,7 @@
 import { readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
+import { process as line, stationLabels, validateContent } from '../content/index.js'
+import content from '../content/index.js'
 import {
   FRAME,
   HASH_IDS,
@@ -20,6 +22,27 @@ describe('stations', () => {
     expect(STATIONS[0].label).toBe('00 / STANDBY')
     expect(STATIONS[2].label).toBe('02 / WHAT WE CAN DEPLOY')
     expect(STATIONS[6].label).toBe('06 / DONE')
+  })
+
+  it('take their visible labels from content/ (one source, every one with a src tag)', () => {
+    expect(stationLabels.map((l) => l.station)).toEqual(STATION_IDS)
+    expect(STATIONS.map((s) => s.label)).toEqual(stationLabels.map((l) => l.text))
+    expect(stationLabels.every((l) => ['BRIEF', 'DRAFT'].includes(l.src))).toBe(true)
+    // the third label is the process heading, not a second copy of it
+    expect(STATIONS[3].label).toBe(`03 / ${line.heading.text}`)
+    // and they take part in the honesty check like all other copy
+    expect(content.stations).toBe(stationLabels)
+    expect(validateContent(content)).toEqual([])
+    const bad = structuredClone(content)
+    delete bad.stations[2].src
+    expect(validateContent(bad).join('\n')).toMatch(/stations\[2\].*src/)
+  })
+
+  it('has no visible label typed into stations.js itself', () => {
+    const source = readFileSync(new URL('./stations.js', import.meta.url), 'utf8')
+    expect(source).not.toMatch(/label: '/)
+    expect(source).not.toContain('FROM REQUEST TO PRODUCTION')
+    expect(source).not.toContain('WHAT WE CAN DEPLOY')
   })
 
   it('answer to the eight hashes', () => {

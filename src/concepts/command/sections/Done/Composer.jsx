@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { contact } from '../../content/index.js'
+import { isNoteCut } from '../../contract/brief.js'
 import { useBrief } from '../../runtime/hooks.js'
 import { Button } from '../../ui/Button.jsx'
 import { Frame } from '../../ui/Frame.jsx'
@@ -43,8 +44,9 @@ export function Composer() {
 
   const mailto = brief.mailto(note)
   const text = brief.text(note)
-  // The cap of brief.js cut the note: say so, so the visitor is not surprised by the marker.
-  const cut = text.includes(mail.truncated.text)
+  // SEND EMAIL has to cut the note (the cap counts the percent-encoded URL, so it bites earlier than
+  // the plain text does, most of all with accents): say so before the visitor meets the marker.
+  const cut = isNoteCut({ note, items: brief.items })
   const services = brief.items.filter((i) => i.kind === 'service')
   const looked = brief.items.filter((i) => i.kind === 'record')
 

@@ -4,7 +4,7 @@ import { CoreAnchor } from '../../contract/anchors.js'
 import { STATIONS } from '../../contract/stations.js'
 import { CoreFigure } from '../../core/CoreFigure.jsx'
 import { heroHairlines } from '../../core/geometry.js'
-import { useReducedMotion, useTrack } from '../../runtime/hooks.js'
+import { useTrack } from '../../runtime/hooks.js'
 import { Button } from '../../ui/Button.jsx'
 import { cx } from '../../ui/cx.js'
 import { EvidenceDot } from '../../ui/Evidence.jsx'
@@ -23,7 +23,7 @@ import './standby.css'
 //   hairlines   SVG, edge to edge, drawn outward from P at boot (M01). Decoration (data-decor).
 //   core        <CoreAnchor name="hero"> with the static figure. The WebGL core, when it runs, is
 //               placed on this same box (doc 6.4), so the tags never need to know about it.
-//   tags        real buttons on the arm tips, with a leader line that draws on hover and focus.
+//   tags        real links (to #deploy) on the arm tips, with a leader line that draws on hover and focus.
 //   text        label, h1, sentence, CTAs, legend. Readable at first paint: nothing here is a gate.
 //
 // Geometry is one source: heroPlacement(viewport width) -> CSS custom properties on the section.
@@ -63,8 +63,8 @@ function HeroTag({ index, tag, mode, open, onHover, onActivate }) {
         <line className="hero-leader__ghost" x1="0" y1="0" x2={end.dx} y2={end.dy} />
         <line className="hero-leader__lit" x1="0" y1="0" x2={end.dx} y2={end.dy} pathLength="1" />
       </svg>
-      <button
-        type="button"
+      <a
+        href={STATIONS[2].hash}
         className="hero-tag__btn"
         aria-label={`${mod.index} ${mod.short}. ${full}. ${hero.tagAction.text}.`}
         onClick={(e) => onActivate(e, index)}
@@ -83,7 +83,7 @@ function HeroTag({ index, tag, mode, open, onHover, onActivate }) {
             {mod.state.text}
           </span>
         </span>
-      </button>
+      </a>
     </li>
   )
 }
@@ -106,8 +106,7 @@ export default function Standby() {
   const ref = useTrack('standby')
   const station = STATIONS[0]
   const vp = useViewport()
-  const place = heroPlacement(vp.w)
-  const motionOff = useReducedMotion()
+  const place = heroPlacement(vp.w, vp.h)
   const [titleRef, paused] = usePaused()
 
   // Which tag is hovered or focused (-1 none), and which one a touch visitor opened with a first
@@ -125,20 +124,19 @@ export default function Standby() {
   const activate = useCallback(
     (event, index) => {
       // Touch: the first tap opens the full tag (hover has no equivalent there), the second goes
-      // to DEPLOY. A keyboard Enter (detail 0) and a mouse click go straight there.
+      // to DEPLOY. A keyboard Enter (detail 0) and a mouse click follow the link.
       if (coarsePointer() && event.detail > 0 && opened !== index) {
         event.preventDefault()
         setOpened(index)
         return
       }
+      // A real link to #deploy: the browser scrolls, moves the focus starting point there (the next
+      // Tab lands inside DEPLOY, not back in the hero) and does not stack a second history entry
+      // for a hash it is already on.
       setOpened(-1)
       requestArm(index)
-      const target = document.getElementById('deploy')
-      if (!target) return
-      history.pushState(null, '', '#deploy')
-      target.scrollIntoView({ behavior: motionOff ? 'auto' : 'smooth', block: 'start' })
     },
-    [opened, motionOff],
+    [opened],
   )
 
   // A tapped-open tag closes on a tap elsewhere or Escape.
@@ -166,7 +164,7 @@ export default function Standby() {
       aria-labelledby="standby-title"
       className="track hero"
       data-tags={place.tags}
-      style={{ '--px': place.p.x, '--py': place.p.y, '--core': `${place.core}px` }}
+      style={{ '--px': place.p.x, '--py': place.p.y, '--core-max': `${place.core}px` }}
     >
       {/* The two hairlines (M01: drawn outward from P, 700 ms). */}
       <svg

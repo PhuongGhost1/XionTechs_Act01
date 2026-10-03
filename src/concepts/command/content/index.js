@@ -9,6 +9,7 @@ import { core, deploy, modules } from './modules.js'
 import { premise } from './premise.js'
 import { processContent } from './process.js'
 import { onFile, records } from './records.js'
+import { stationLabels } from './stations.js'
 import { validateContent } from './validate.js'
 
 // The single door to the copy of Concept 01 v2. Sections import from here, never hardcode strings.
@@ -32,6 +33,7 @@ export const content = deepFreeze({
   modules,
   deploy,
   process: processContent,
+  stations: stationLabels,
   records,
   onFile,
   hotspots: {
@@ -54,6 +56,7 @@ if (import.meta.env?.DEV) {
 
 export { brand, frame, hero, premise, core, modules, deploy, records, onFile, ledger, contact, legend, flags }
 export { processContent as process }
+export { stationLabel, stationLabels } from './stations.js'
 export { STAFFXP_IMAGE, ESS_IMAGE, STAFFXP_HOTSPOTS, ESS_HOTSPOTS, hotspotEvidence } from './hotspots.js'
 export * from './select.js'
 export { NAME_PRODUCTS, SHOW_REPO_STRIP, isReviewMode, showDraftMarks } from './flags.js'

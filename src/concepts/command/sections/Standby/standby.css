@@ -4,7 +4,8 @@
  *
  * The numbers arrive as custom properties on section.hero (index.jsx, from placement.js):
  *   --px --py   P as fractions of the viewport width and height
- *   --core      the side of the core's square box
+ *   --core-max  the side of the core's square box for this width band (the real --core, set below,
+ *               is that, kept small enough on a short window for the top tags to clear the header)
  *   --x --y     (on each tag) the arm tip as fractions of the core box
  *   --dx --dy   (on each tag) where its leader line ends, relative to the tip
  * Each tag also gets two flags from its placement (nw ne se sw): --w is 1 on the west tags, --n is
@@ -19,6 +20,19 @@
 
 /* The visible hero: the viewport between the header and the dock (--track-h, base.css). The legend
    is pushed to its bottom (margin-top: auto in index.jsx); the text starts where the next rules say. */
+/* The core box. Its position is a fraction of the window height but its size comes from the width
+   band, so on a short window the north tags (which hang above the arm tips: 45 px in axis mode,
+   54 px in stack mode) would slide under the fixed header. The tips sit 0.264 core above P, so
+   the box is capped at what leaves those tags 8 px below the header (never under 112 px). */
+.hero {
+  --reach: 45px;
+  --core: max(112px, min(var(--core-max), calc((var(--py) * 100svh - var(--header-h) - var(--reach) - 8px) / 0.264)));
+}
+
+.hero[data-tags='stack'] {
+  --reach: 54px;
+}
+
 .hero-stage {
   min-height: var(--track-h);
   padding-bottom: 20px;
@@ -386,14 +400,9 @@ html[data-view='raw'] .hero-tag__btn {
   transform: none !important;
 }
 
+/* The caption describes the X core, which RAW does not draw: nothing to describe. */
 html[data-view='raw'] .hero-fig {
-  position: static;
-  left: auto;
-  width: auto;
-  max-width: none;
-  transform: none;
-  padding: 8px var(--margin-x) 0;
-  text-align: left;
+  display: none;
 }
 
 /* No core to clear: the text starts at the top. */

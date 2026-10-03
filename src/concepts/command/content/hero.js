@@ -30,7 +30,7 @@ export const hero = {
   legendLabel: draft('hero.legend.label', 'Evidence key'),
   figCaption: draft(
     'hero.figCaption',
-    'FIG 01 · X CORE · NODES ARE THE SERVICES WE LIST · LAYOUT IS ARTWORK',
+    'FIG 01 · NODES: SERVICES, RECORDS, PENDING · LAYOUT IS ARTWORK',
     { label: 'LAYOUT IS ARTWORK' },
   ),
 }

@@ -23,7 +23,7 @@ export default function Line() {
   const ref = useTrack('line', { plateaus: PLATEAUS })
   const listMode = useListMode()
   const motionOff = useReducedMotion()
-  const step = useLineStep(ref, !listMode)
+  const step = useLineStep(!listMode)
   // Enlarged text can make the stage clip its content: then the section is the list too.
   const cramped = useStageCramped(ref, !listMode, step)
   const list = listMode || cramped

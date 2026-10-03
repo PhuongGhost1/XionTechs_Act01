@@ -26,8 +26,13 @@ export function stageIsCramped(section) {
   // The stop labels must not run into each other.
   if (anyOverlap(rects('[data-stop-label]'))) return true
 
-  // The longest step word must fit its line (the one on screen may be a short one).
+  // The giant word must not climb over the section label (a short window: line.css also caps the
+  // word by the window height, this is the net under it).
   const word = stage.querySelector('.line-word')
+  const label = stage.querySelector('h2')
+  if (label && word && anyOverlap([label.getBoundingClientRect(), word.getBoundingClientRect()])) return true
+
+  // The longest step word must fit its line (the one on screen may be a short one).
   if (word) {
     const probe = document.createElement('span')
     probe.textContent = LONGEST_LABEL

@@ -13,14 +13,16 @@
 //   pin   0 when the track's top reaches the viewport top, 1 when its sticky stage is released
 //   span  0 when the track's top reaches the viewport top, 1 one track height later
 
+import { stationLabel } from '../content/index.js'
+
 export const STATIONS = Object.freeze([
-  { index: 0, id: 'standby', label: '00 / STANDBY', hash: '#standby', lvh: 100, lvhPhone: 100, pinned: false, mode: 'span', anchor: 'hero' },
-  { index: 1, id: 'premise', label: '01 / PREMISE', hash: '#premise', lvh: 110, lvhPhone: 94, pinned: false, mode: 'span', anchor: 'premise' },
-  { index: 2, id: 'deploy', label: '02 / WHAT WE CAN DEPLOY', hash: '#deploy', lvh: 150, lvhPhone: 128, pinned: false, mode: 'pin', anchor: 'deploy' },
-  { index: 3, id: 'line', label: '03 / FROM REQUEST TO PRODUCTION', hash: '#line', lvh: 220, lvhPhone: 200, pinned: true, mode: 'pin', anchor: 'line' },
-  { index: 4, id: 'work', label: '04 / SELECTED DEPLOYMENTS', hash: '#work', lvh: 220, lvhPhone: 187, pinned: false, mode: 'span', anchor: null },
-  { index: 5, id: 'ledger', label: '05 / LEDGER', hash: '#ledger', lvh: 90, lvhPhone: 77, pinned: false, mode: 'span', anchor: null },
-  { index: 6, id: 'done', label: '06 / DONE', hash: '#done', lvh: 160, lvhPhone: 136, pinned: true, mode: 'pin', anchor: 'done' },
+  { index: 0, id: 'standby', label: stationLabel('standby'), hash: '#standby', lvh: 100, lvhPhone: 100, pinned: false, mode: 'span', anchor: 'hero' },
+  { index: 1, id: 'premise', label: stationLabel('premise'), hash: '#premise', lvh: 110, lvhPhone: 94, pinned: false, mode: 'span', anchor: 'premise' },
+  { index: 2, id: 'deploy', label: stationLabel('deploy'), hash: '#deploy', lvh: 150, lvhPhone: 128, pinned: false, mode: 'pin', anchor: 'deploy' },
+  { index: 3, id: 'line', label: stationLabel('line'), hash: '#line', lvh: 220, lvhPhone: 200, pinned: true, mode: 'pin', anchor: 'line' },
+  { index: 4, id: 'work', label: stationLabel('work'), hash: '#work', lvh: 220, lvhPhone: 187, pinned: false, mode: 'span', anchor: null },
+  { index: 5, id: 'ledger', label: stationLabel('ledger'), hash: '#ledger', lvh: 90, lvhPhone: 77, pinned: false, mode: 'span', anchor: null },
+  { index: 6, id: 'done', label: stationLabel('done'), hash: '#done', lvh: 160, lvhPhone: 136, pinned: true, mode: 'pin', anchor: 'done' },
 ])
 
 /** Station ids in page order. */

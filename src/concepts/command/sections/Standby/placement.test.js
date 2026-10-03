@@ -1,6 +1,19 @@
 import { describe, expect, it } from 'vitest'
 import { HERO_P, heroHairlines } from '../../core/geometry.js'
-import { LEADER_LENGTH, STACK_GAP, TABLET_P, hairlineSegments, heroPlacement, leaderEnd, litArm, tipOf } from './placement.js'
+import {
+  LEADER_LENGTH,
+  MIN_CORE,
+  STACK_GAP,
+  TABLET_P,
+  TAG_REACH,
+  hairlineSegments,
+  headerHeight,
+  heroPlacement,
+  leaderEnd,
+  litArm,
+  minPy,
+  tipOf,
+} from './placement.js'
 
 describe('hero placement', () => {
   it('follows the sizes of doc 10.1', () => {
@@ -11,6 +24,30 @@ describe('hero placement', () => {
     expect(heroPlacement(1280)).toMatchObject({ core: 280, tags: 'axis' })
     expect(heroPlacement(1440)).toMatchObject({ core: 280, tags: 'axis' })
     expect(heroPlacement(1920)).toMatchObject({ core: 320, tags: 'axis' })
+  })
+
+  it('leaves P where the design puts it on every ordinary window', () => {
+    for (const [w, h] of [[1440, 900], [1280, 800], [1920, 1080], [1366, 650], [1440, 600], [390, 844], [320, 640], [768, 1024]]) {
+      const base = heroPlacement(w)
+      expect(heroPlacement(w, h).p).toEqual(base.p)
+    }
+  })
+
+  it('moves P down on a very short window so the smallest core still clears the header', () => {
+    for (const [w, h] of [[844, 390], [1024, 400], [1440, 360], [320, 568]]) {
+      const place = heroPlacement(w, h)
+      expect(place.p.y).toBeGreaterThan(heroPlacement(w).p.y)
+      // the top of a north tag: P above the tip offset, less the tag's reach
+      const top = place.p.y * h - 0.264 * MIN_CORE - TAG_REACH[place.tags]
+      expect(top).toBeGreaterThanOrEqual(headerHeight(w) + 8 - 0.01)
+    }
+  })
+
+  it('knows the header height and ignores a missing window height', () => {
+    expect(headerHeight(390)).toBe(48)
+    expect(headerHeight(1440)).toBe(64)
+    expect(minPy(1440, 0, 'axis')).toBe(0)
+    expect(heroPlacement(1440, Number.NaN).p).toEqual(heroPlacement(1440).p)
   })
 
   it('never returns NaN for a bad width', () => {

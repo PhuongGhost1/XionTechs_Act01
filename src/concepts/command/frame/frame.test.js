@@ -11,7 +11,8 @@ import Readout from './Readout.jsx'
 import SignalLine from './SignalLine.jsx'
 import SkipLink from './SkipLink.jsx'
 import ViewToggle from './ViewToggle.jsx'
-import { CTA_FILLS_AT, SIGNAL_STATIONS, ctaVariant, navLit, shouldFire, splitCounter } from './logic.js'
+import { Footer } from '../sections/Done/Footer.jsx'
+import { CTA_FILLS_AT, MENU_BEHIND, SIGNAL_STATIONS, ctaVariant, navLit, shouldFire, splitCounter } from './logic.js'
 
 // The frame renders to a string in Node (no document), which is the state before any effect ran:
 // station 00, an empty brief, no tier yet. These tests hold what the design document fixes.
@@ -118,6 +119,18 @@ describe('Dock', () => {
     expect(html(createElement(Readout))).toContain('RENDER')
     expect(html(createElement(Readout))).toContain('QUALITY')
     expect(html(createElement(Readout))).toContain('MOTION')
+  })
+})
+
+describe('the open menu hides the whole page behind it', () => {
+  it('lists main, the footer (outside main), the dock and the phone CTA bar', () => {
+    expect(MENU_BEHIND).toEqual(['#main', '[data-site-footer]', '[data-frame="dock"]', '[data-fixed-cta]'])
+  })
+
+  it('every listed hook exists on the element it names', () => {
+    expect(html(createElement(Footer))).toContain('data-site-footer')
+    expect(html(createElement(Dock))).toContain('data-frame="dock"')
+    expect(html(createElement(MobileBar))).toContain('data-fixed-cta')
   })
 })
 

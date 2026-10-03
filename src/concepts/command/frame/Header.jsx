@@ -7,7 +7,7 @@ import { handleTrapTab, inertBehind } from '../runtime/focus.js'
 import { useActiveStation, useBrief, useHtmlAttribute } from '../runtime/hooks.js'
 import { Button } from '../ui/Button.jsx'
 import CtaLabel from './CtaLabel.jsx'
-import { ctaVariant, navLit } from './logic.js'
+import { MENU_BEHIND, ctaVariant, navLit } from './logic.js'
 import MenuPanel from './MenuPanel.jsx'
 import MotionToggle from './MotionToggle.jsx'
 import ViewToggle from './ViewToggle.jsx'
@@ -29,8 +29,6 @@ import './frame.css'
 // MENU panel (header[data-crowded], frame.css), where it has room. From 1024 a crowded bar (text
 // enlarged 200 percent) takes the same layout: logo and MENU, everything else in the panel.
 
-// What the open menu hides from the keyboard and from assistive tech.
-const BEHIND = ['#main', '[data-frame="dock"]', '[data-fixed-cta]']
 const MENU_ID = 'site-menu'
 
 function useMenu(rootRef, buttonRef) {
@@ -46,7 +44,7 @@ function useMenu(rootRef, buttonRef) {
 
   useEffect(() => {
     if (!open) return undefined
-    const release = inertBehind(BEHIND)
+    const release = inertBehind(MENU_BEHIND)
     const onKey = (e) => {
       if (e.key === 'Escape') {
         e.preventDefault()

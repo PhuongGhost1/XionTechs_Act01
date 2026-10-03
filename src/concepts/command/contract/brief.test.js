@@ -9,6 +9,7 @@ import {
   fitText,
   getSnapshot,
   has,
+  isNoteCut,
   items,
   subscribe,
   toggleRecord,
@@ -129,6 +130,62 @@ describe('buildMailto', () => {
     const url = buildMailto({ note: '\u{1F600}'.repeat(2000) })
     expect(() => decodeURIComponent(url.split('&body=')[1])).not.toThrow()
     expect(url.length).toBeLessThanOrEqual(MAX_LENGTH)
+  })
+})
+
+describe('isNoteCut (the "note too long" warning)', () => {
+  const sel = [{ kind: 'service', id: 'x', label: 'Cloud Computing' }]
+
+  it('is false for an empty note and for a short one', () => {
+    expect(isNoteCut({ items: sel })).toBe(false)
+    expect(isNoteCut({ note: 'Short.', items: sel })).toBe(false)
+    expect(isNoteCut()).toBe(false)
+  })
+
+  it('agrees with buildMailto at every length, plain English', () => {
+    for (const n of [200, 800, 1000, 1200, 1250, 1300, 1500, 2500]) {
+      const note = 'word '.repeat(Math.ceil(n / 5)).slice(0, n)
+      const url = buildMailto({ note, items: sel })
+      const marked = decode(url).body.endsWith('[ shortened ]')
+      expect(isNoteCut({ note, items: sel }), `n=${n}`).toBe(marked)
+    }
+  })
+
+  it('catches the case the plain-text copy misses: about 1250 English characters', () => {
+    // 1250 characters with spaces: the copy text (cap 1800 plain) is whole, the URL (cap 1800
+    // percent-encoded: a space is 3, a line break 6) is not.
+    const note = 'ab cd '.repeat(209).slice(0, 1250)
+    expect(buildText({ note, items: sel }).endsWith('[ shortened ]')).toBe(false)
+    expect(decode(buildMailto({ note, items: sel })).body.endsWith('[ shortened ]')).toBe(true)
+    expect(isNoteCut({ note, items: sel })).toBe(true)
+  })
+
+  it('catches a Vietnamese note of about 770 characters (every accented letter is 6 to 9 encoded)', () => {
+    const note = 'Chúng tôi cần một hệ thống quản lý nhân sự và chấm công. '.repeat(14).slice(0, 790)
+    expect(note.length).toBeLessThan(800)
+    expect(buildText({ note, items: sel }).endsWith('[ shortened ]')).toBe(false)
+    expect(isNoteCut({ note, items: sel })).toBe(true)
+    const body = decode(buildMailto({ note, items: sel })).body
+    expect(body.endsWith('[ shortened ]')).toBe(true)
+    // the cut never lands inside an accented letter
+    expect(() => decodeURIComponent(buildMailto({ note, items: sel }).split('&body=')[1])).not.toThrow()
+  })
+
+  it('is false for a short Vietnamese note that fits', () => {
+    expect(isNoteCut({ note: 'Cần một ứng dụng di động.', items: sel })).toBe(false)
+  })
+
+  it('is not fooled by a note that contains the marker itself', () => {
+    expect(isNoteCut({ note: 'Please keep the text [ shortened ] as it is.', items: sel })).toBe(false)
+    // and it does not hide a real cut: a long note that also contains the marker is still cut
+    expect(isNoteCut({ note: `[ shortened ] ${'z'.repeat(2500)}`, items: sel })).toBe(true)
+  })
+
+  it('counts the selection too: more selected services leave less room for the note', () => {
+    const many = Array.from({ length: 8 }, (_, i) => ({ kind: 'service', id: `s${i}`, label: 'A fairly long service name here' }))
+    const note = 'n'.repeat(1300)
+    expect(isNoteCut({ note, items: [] })).toBe(false)
+    expect(isNoteCut({ note, items: many })).toBe(true)
   })
 })
 
