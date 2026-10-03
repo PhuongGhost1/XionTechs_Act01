@@ -1,43 +1,32 @@
 /** @type {import('tailwindcss').Config} */
 // Tailwind config for Concept 01, X / Command (src/concepts/command/command.css loads it with
-// @config). It is separate from tailwind.config.js so the concept's utilities do not end up in
-// the main page's stylesheet, and the main page's do not end up in the concept's.
-const cmd = (name) => `rgb(var(--c-${name}) / <alpha-value>)`
+// @config). Separate from tailwind.config.js so this page's utilities stay out of the main page's
+// stylesheet and the other way round. Colour names resolve to CSS variables (RGB channels) so that
+// `data-band="paper"` can re-scope them for the one light section. Never hardcode a hex in a component.
+const x = (name) => `rgb(var(--x-${name}) / <alpha-value>)`
 
 export default {
   content: ['./concepts/command/**/*.html', './src/concepts/command/**/*.{js,jsx}'],
   theme: {
     extend: {
       colors: {
-        // Semantic names; a `data-band="paper"` ancestor re-scopes them for the one light section.
-        cmd: {
-          bg: cmd('bg'),
-          surface: cmd('surface'),
-          raise: cmd('raise'),
-          line: cmd('line'),
-          text: cmd('text'),
-          muted: cmd('muted'),
-          faint: cmd('faint'),
-          signal: cmd('signal'),
-          'signal-fg': cmd('signal-fg'),
-          'signal-ink': cmd('signal-ink'),
-          ok: cmd('ok'),
-          danger: cmd('danger'),
+        x: {
+          bg: x('bg'),
+          bg2: x('bg2'),
+          line: x('line'),
+          text: x('text'),
+          mute: x('mute'),
+          faint: x('faint'),
+          signal: x('signal'),
+          ink: x('ink'),
         },
       },
-      transitionTimingFunction: {
-        cmd: 'var(--cmd-ease)',
-      },
-      transitionDuration: {
-        micro: 'var(--dur-micro)',
-        base: 'var(--dur-base)',
-        section: 'var(--dur-section)',
-      },
       fontFamily: {
-        'cmd-display': ['Archivo', 'Inter', 'system-ui', 'sans-serif'],
-        'cmd-sans': ['Inter', 'system-ui', 'sans-serif'],
-        'cmd-mono': ['"JetBrains Mono"', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'Consolas', 'monospace'],
+        sans: ['Geist', 'system-ui', 'sans-serif'],
+        mono: ['"Geist Mono"', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'Consolas', 'monospace'],
       },
+      maxWidth: { page: '1320px' },
+      transitionTimingFunction: { x: 'var(--x-ease)' },
     },
   },
   plugins: [],
