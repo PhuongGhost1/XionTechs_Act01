@@ -131,3 +131,9 @@ content. If you add a new section, follow the same pattern.
   `writing-guidelines` fetch their rules from GitHub; new UI and copy follow them (Title Case
   buttons and nav, sentence-case headings, `…` and curly quotes, no `transition: all`,
   reduced-motion variants, explicit image sizes, no em dashes in new body copy).
+
+## Concept 01 v2 (X / COMMAND): `/concepts/command/`
+- Everything under `src/concepts/command/` follows `docs/concepts/command-v2/00-direction.md` (the design document and build contract; briefs in `docs/idea/v2/`). The rules above about page rhythm, serif headlines, Title Case, the 71 kB bundle budget and `DraftMark` describe the main page only. The challenge rules (no invented content, labelled placeholders, commit as yourself, `PROMPT_LOG.md`) still apply.
+- Zero-state rule: no import from outside `src/concepts/command/` except npm packages (`npm run lint` enforces it, and bans `lucide-react`, `gsap` and `framer-motion` there). Do not read or copy the old page. Colours only through the tokens in `styles/tokens.css` and `tailwind.command.config.js`; copy only in `content/`, every string with a `src` tag (`content.test.js`); `<html>` state attributes are written only by `contract/attributes.js`.
+- Tailwind config is `tailwind.command.config.js` (loaded by `command.css` with `@config`); the main config keeps excluding `src/concepts/**`. `/concepts/command/?tokens` is the token story for review.
+- QA: render with headless Edge through `puppeteer-core`, run from PowerShell (Git Bash cannot launch it), and look at the screenshots.
