@@ -16,6 +16,24 @@ const rowOf = (kind, text, where, extra) => ({
 
 export const ledger = {
   heading: draft('ledger.heading', 'What on this page is real.'),
+  // Panel anatomy (doc 4.7): title, scope, one sentence of definition, then the table.
+  panel: {
+    title: draft('ledger.panel.title', 'PROVENANCE'),
+    scope: draft('ledger.panel.scope', 'SCOPE ( THIS PAGE )'),
+    definition: draft(
+      'ledger.panel.definition',
+      'Every chip on this page is one of these kinds. Select a row to outline each chip of that kind.',
+    ),
+  },
+  columns: {
+    kind: draft('ledger.col.kind', 'KIND'),
+    meaning: draft('ledger.col.meaning', 'WHAT IT MEANS'),
+    where: draft('ledger.col.where', 'WHERE IT APPEARS'),
+  },
+  // Spoken and printed after a row is selected. The count is how many chips were outlined.
+  outlined: draft('ledger.outlined', 'chips outlined'),
+  outlinedOne: draft('ledger.outlined.one', 'chip outlined'),
+  none: draft('ledger.none', 'No chip of this kind is on the page right now.'),
   rows: [
     rowOf(
       'live',

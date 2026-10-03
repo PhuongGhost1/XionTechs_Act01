@@ -1,0 +1,782 @@
+/*
+ * ON FILE (station 04): plates, the screenshot viewer, the region index, DEP-003, the end line.
+ * Plain CSS for what Tailwind classes cannot say (percent-positioned layers over an image, clip
+ * paths, sticky on phones). Colours come from tokens.css only. Only transform and opacity are
+ * animated; motion.css cancels every animation and transition under data-motion=off and
+ * prefers-reduced-motion, so the final states below are what a reduced-motion visitor sees.
+ */
+
+.of-section {
+  padding-block: var(--station-gap);
+}
+
+.of-intro {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-6);
+  margin-bottom: var(--sp-12);
+}
+
+/* ------------------------------------------------------------------ */
+/* Plate                                                               */
+/* ------------------------------------------------------------------ */
+
+.of-plate {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  padding-block: var(--sp-8) var(--sp-12);
+  border-top: 1px solid var(--c-hair);
+}
+
+@media (min-width: 768px) {
+  .of-plate {
+    /* About one screen per record (doc 4.6). The content is taller than that at 1440, so this is
+       a floor, not a cap. */
+    min-height: 95svh;
+    padding-block: var(--sp-12) var(--sp-16);
+    gap: var(--sp-4);
+  }
+}
+
+.of-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--sp-2) var(--sp-6);
+}
+
+.of-head__descriptor {
+  max-width: 36ch;
+}
+
+/* The giant name (doc 8.2): 16 vw for StaffXP, 22 vw for ESS. The vw multiplier stops growing at
+   a 1600 px viewport, the content maximum, so the name never outgrows its column. Caps have no
+   descenders, so the line box can sit tight. */
+.of-name {
+  margin: 0;
+  font-size: calc(var(--name-vw, 16) * min(1vw, 16px));
+  line-height: 0.8;
+  letter-spacing: -0.055em;
+  overflow-wrap: anywhere;
+}
+
+@media (min-width: 1024px) {
+  .of-head {
+    grid-template-columns: minmax(0, auto) minmax(14rem, 1fr);
+    grid-template-areas:
+      'id id'
+      'name desc';
+    align-items: end;
+  }
+
+  .of-head__id {
+    grid-area: id;
+  }
+
+  .of-name {
+    grid-area: name;
+  }
+
+  .of-head__descriptor {
+    grid-area: desc;
+    justify-self: end;
+    padding-bottom: 0.4em;
+  }
+
+  /* Plate 04.2 mirrors plate 04.1: the name flush right, the descriptor on the left. */
+  .of-plate[data-mirrored] .of-head {
+    grid-template-columns: minmax(14rem, 1fr) minmax(0, auto);
+    grid-template-areas:
+      'id id'
+      'desc name';
+  }
+
+  .of-plate[data-mirrored] .of-head__id {
+    justify-self: end;
+    text-align: right;
+  }
+
+  .of-plate[data-mirrored] .of-name {
+    text-align: right;
+  }
+
+  .of-plate[data-mirrored] .of-head__descriptor {
+    justify-self: start;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Viewer                                                              */
+/* ------------------------------------------------------------------ */
+
+.of-viewer {
+  position: relative;
+}
+
+/* The window has the image's own aspect ratio (set inline from the file's width and height), so
+   at rest the stage fills it exactly and a percent of the stage is a percent of the picture. */
+.of-window {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+}
+
+.of-stage {
+  position: absolute;
+  inset: 0;
+  transform-origin: 0 0;
+  /* Tap-zoom to a region: 360 ms (M11). Cancelled to instant by motion.css when motion is off. */
+  transition: transform 360ms var(--ease-brand);
+}
+
+.of-img {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* Before the scan (M10) the picture is at 12 percent. Never the final state: the scan, reduced
+   motion, no observer and RAW all end at full opacity. */
+.of-img--dim {
+  opacity: 0.12;
+}
+
+/* Sector grid A to H by 1 to 5 with edge ticks (doc 8.5): decorative, faint, no labels at rest. */
+.of-grid {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: linear-gradient(90deg, var(--c-grid) 1px, transparent 1px),
+    linear-gradient(0deg, var(--c-grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--c-hair-strong) 1px, transparent 1px),
+    linear-gradient(90deg, var(--c-hair-strong) 1px, transparent 1px),
+    linear-gradient(0deg, var(--c-hair-strong) 1px, transparent 1px),
+    linear-gradient(0deg, var(--c-hair-strong) 1px, transparent 1px);
+  background-size: 12.5% 100%, 100% 20%, 12.5% 6px, 12.5% 6px, 6px 20%, 6px 20%;
+  background-position: 0 0, 0 0, 0 0, 0 100%, 0 0, 100% 0;
+  background-repeat: repeat, repeat, repeat-x, repeat-x, repeat-y, repeat-y;
+}
+
+/* Veil: dims everything but the active region to 35 percent (the box is cut out by clip-path). */
+.of-veil {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: rgb(var(--void) / 0.65);
+  opacity: 0;
+  transition: opacity var(--dur-ui) var(--ease-ui);
+}
+
+.of-veil[data-on] {
+  opacity: 1;
+}
+
+/* Boxes and tags appear with the scan, a little after it starts. */
+.of-boxes {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 300ms var(--ease-out) 300ms;
+}
+
+.of-boxes[data-revealed] {
+  opacity: 1;
+}
+
+.of-box {
+  position: absolute;
+}
+
+/* The 1 px yellow box is a pseudo element so only its opacity animates (M11, 160 ms). */
+.of-box::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  /* A box-shadow spread, not a border: a border is snapped up to one pixel before the stage is
+     scaled, so it would be 4 px thick in a 4x zoom. --zoom keeps the line at one screen pixel. */
+  box-shadow: inset 0 0 0 calc(1px / var(--zoom, 1)) rgb(var(--signal));
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--dur-ui) var(--ease-ui);
+}
+
+.of-box[data-state='active'] {
+  z-index: 3;
+}
+
+.of-box[data-state='active']::before {
+  opacity: 1;
+}
+
+/* Limited tag, e.g. UI-03 CALENDAR. Only on wide screens (see below): a small picture cannot carry them. */
+.of-tag,
+.of-tag-full {
+  position: absolute;
+  display: none;
+  pointer-events: none;
+  font-family: 'Geist Mono Variable', 'Geist Mono Fallback', ui-monospace, monospace;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  background: rgb(var(--void) / 0.9);
+}
+
+.of-tag {
+  left: 0;
+  padding: 0 4px;
+  color: rgb(var(--ink-2));
+  white-space: nowrap;
+  transition: opacity var(--dur-ui) var(--ease-ui);
+}
+
+.of-tag[data-edge='right'] {
+  left: auto;
+  right: 0;
+}
+
+.of-tag[data-side='above'] {
+  bottom: 100%;
+}
+
+.of-tag[data-side='below'] {
+  top: 100%;
+}
+
+.of-box[data-state='dim'] .of-tag {
+  opacity: 0.5;
+}
+
+.of-box[data-state='active'] .of-tag {
+  opacity: 0;
+}
+
+/* Full tag, three lines: id, label, evidence (doc 8.5). */
+.of-tag-full {
+  flex-direction: column;
+  width: max-content;
+  max-width: min(17rem, 60vw);
+  padding: 4px 8px;
+  border: 1px solid var(--c-hair-strong);
+  background: rgb(var(--void) / 0.96);
+  opacity: 0;
+  z-index: 4;
+  transition: opacity var(--dur-ui) var(--ease-ui);
+}
+
+.of-tag-full[data-open] {
+  opacity: 1;
+}
+
+.of-tag-full[data-h='left'] {
+  left: 0;
+}
+.of-tag-full[data-h='right'] {
+  right: 0;
+}
+.of-tag-full[data-v='top'] {
+  top: 0;
+}
+.of-tag-full[data-v='bottom'] {
+  bottom: 0;
+}
+
+@media (min-width: 768px) {
+  .of-tag-full {
+    display: flex;
+  }
+}
+
+/* The picture is about 940 px wide from 1024: wide enough for ten tags. Below that they would
+   cover the capture, so only the full tag of the active region shows. */
+@media (min-width: 1024px) {
+  .of-tag {
+    display: block;
+  }
+}
+
+/* Plate scan (M10): a 1 px yellow line crosses the capture once, top to bottom, linearly. The
+   element is as tall as the window and its top border is the line, so a translate of 100 percent
+   (the default --scan-travel) carries the line the whole way. */
+.of-scan {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  border-top: 1px solid rgb(var(--signal));
+  pointer-events: none;
+  z-index: 6;
+}
+
+.of-scan__label {
+  position: absolute;
+  top: 6px;
+  padding: 0 4px;
+  font-family: 'Geist Mono Variable', 'Geist Mono Fallback', ui-monospace, monospace;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  letter-spacing: 0.06em;
+  color: rgb(var(--ink));
+  background: rgb(var(--void) / 0.85);
+}
+
+.of-scan__label--left {
+  left: 6px;
+}
+
+.of-scan__label--right {
+  right: 6px;
+}
+
+/* Readout under the capture, phones only: names the active region and undoes the zoom. */
+.of-readout {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  min-height: 44px;
+}
+
+.of-readout__text {
+  display: flex;
+  flex-direction: column;
+  font-family: 'Geist Mono Variable', 'Geist Mono Fallback', ui-monospace, monospace;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.of-reset {
+  flex: none;
+  min-height: 44px;
+  padding: 0 var(--sp-3);
+  border: 1px solid var(--c-hair-strong);
+  background: rgb(var(--ground));
+  font-family: 'Geist Mono Variable', 'Geist Mono Fallback', ui-monospace, monospace;
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgb(var(--ink));
+}
+
+.of-reset[hidden] {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .of-readout {
+    display: none;
+  }
+
+  /* A touch tablet zooms too, and the tags (12 px text inside a scaled stage) are then hidden:
+     the readout names the region instead. */
+  .of-viewer[data-zoomed] .of-readout {
+    display: flex;
+  }
+}
+
+.of-viewer[data-zoomed] .of-tag,
+.of-viewer[data-zoomed] .of-tag-full,
+.of-viewer[data-zoomed] .of-grid {
+  display: none;
+}
+
+/* Phones: once a region is zoomed the viewer sticks under the header, so the rows that are being
+   tapped stay below a window that stays in view. It is in flow (never fixed over text) and only
+   sticks while zoomed; the plate is its containing block, so it lets go at the end of the plate. */
+@media (max-width: 767px) {
+  .of-viewer {
+    padding-top: var(--sp-2);
+  }
+
+  .of-viewer[data-zoomed] {
+    position: sticky;
+    top: var(--header-h);
+    z-index: 20;
+    background: rgb(var(--ground));
+  }
+}
+
+/* ?debug=hotspots: every box drawn with its id and numbers, to check alignment by eye. */
+.of-box[data-debug] {
+  outline: 1px dashed rgb(var(--signal));
+  outline-offset: -1px;
+}
+
+.of-debug-id {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  z-index: 5;
+  padding: 0 3px;
+  font-family: 'Geist Mono Variable', 'Geist Mono Fallback', ui-monospace, monospace;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  white-space: nowrap;
+  color: rgb(var(--ink));
+  background: rgb(var(--void) / 0.9);
+}
+
+/* ------------------------------------------------------------------ */
+/* Caption and spec list                                                */
+/* ------------------------------------------------------------------ */
+
+.of-caption {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp-2) var(--sp-3);
+}
+
+.of-spec {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--sp-6);
+  margin-top: var(--sp-4);
+}
+
+/* Phones: the region index first, so the rows sit right under the window that reacts to them. */
+.of-regions {
+  order: 1;
+}
+.of-facts {
+  order: 2;
+}
+.of-add {
+  order: 3;
+}
+
+.of-facts {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+}
+
+.of-facts > * {
+  padding-inline: var(--sp-3);
+}
+
+.of-regions > p:first-child {
+  padding-inline: var(--sp-3);
+  padding-bottom: var(--sp-2);
+}
+
+@media (min-width: 1024px) {
+  .of-spec {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-rows: auto 1fr;
+    grid-template-areas:
+      'facts regions'
+      'add regions';
+    column-gap: var(--sp-16);
+    row-gap: var(--sp-4);
+  }
+
+  .of-facts {
+    grid-area: facts;
+    order: 0;
+  }
+  .of-regions {
+    grid-area: regions;
+    order: 0;
+  }
+  .of-add {
+    grid-area: add;
+    order: 0;
+  }
+
+  .of-plate[data-mirrored] .of-spec {
+    grid-template-areas:
+      'regions facts'
+      'regions add';
+  }
+}
+
+/* Region row: a button that looks like a spec row: code, dot leader, label. */
+.of-regions__list {
+  display: flex;
+  flex-direction: column;
+}
+
+.of-row {
+  position: relative;
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-3);
+  width: 100%;
+  min-height: 44px;
+  padding: 10px var(--sp-3);
+  border: 0;
+  background: transparent;
+  text-align: left;
+  font-family: 'Geist Mono Variable', 'Geist Mono Fallback', ui-monospace, monospace;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: rgb(var(--ink-2));
+  isolation: isolate;
+}
+
+/* The panel fill is a pseudo element so that only its opacity animates. */
+.of-row::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: rgb(var(--panel));
+  opacity: 0;
+  transition: opacity var(--dur-ui) var(--ease-ui);
+}
+
+.of-row__code {
+  flex: none;
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgb(var(--ink-3));
+}
+
+.of-row__leader {
+  flex: 1 1 1rem;
+  min-width: 1rem;
+  border-bottom: 1px dotted var(--c-hair-strong);
+}
+
+.of-row__label {
+  flex: 0 1 auto;
+  max-width: 62%;
+  margin-left: auto;
+  text-align: right;
+}
+
+/* The active marker is a 2 px yellow bar, so only its opacity animates. */
+.of-row::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: rgb(var(--signal));
+  opacity: 0;
+  transition: opacity var(--dur-ui) var(--ease-ui);
+}
+
+.of-row[data-active] {
+  color: rgb(var(--ink));
+}
+
+.of-row[data-active]::after {
+  opacity: 1;
+}
+
+.of-row[data-active]::before {
+  opacity: 1;
+}
+
+/* ADD TO BRIEF (M16): a real checkbox, drawn. Selected = a yellow tick and a yellow ring. */
+.of-check {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-3);
+  min-height: 44px;
+  padding-inline: var(--sp-3);
+  cursor: pointer;
+  font-family: 'Geist Mono Variable', 'Geist Mono Fallback', ui-monospace, monospace;
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgb(var(--ink));
+}
+
+.of-check__box {
+  appearance: none;
+  position: relative;
+  flex: none;
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  border: 1px solid rgb(var(--ink-3));
+  border-radius: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.of-check__box:checked::after {
+  content: '';
+  position: absolute;
+  left: 6px;
+  top: 2px;
+  width: 5px;
+  height: 10px;
+  border: solid rgb(var(--signal));
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+.of-check__ring {
+  position: absolute;
+  left: calc(var(--sp-3) - 4px);
+  top: 50%;
+  width: 28px;
+  height: 28px;
+  margin-top: -14px;
+  border: 2px solid rgb(var(--signal));
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--dur-ui) var(--ease-ui);
+}
+
+.of-check__box:checked ~ .of-check__ring {
+  opacity: 1;
+}
+
+/* ------------------------------------------------------------------ */
+/* DEP-003 and the end line                                             */
+/* ------------------------------------------------------------------ */
+
+.of-demo {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: var(--sp-3) var(--sp-4);
+  padding-block: var(--sp-6);
+  border-top: 1px dashed var(--c-hair-strong);
+  border-bottom: 1px dashed var(--c-hair-strong);
+}
+
+.of-demo__id {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+}
+
+.of-demo__chip,
+.of-demo__sentence,
+.of-demo .of-link {
+  grid-column: 2;
+  justify-self: start;
+}
+
+@media (min-width: 1024px) {
+  .of-demo {
+    grid-template-columns: auto minmax(0, 1.1fr) auto minmax(0, 1.6fr) auto;
+    column-gap: var(--sp-8);
+  }
+
+  .of-demo__chip,
+  .of-demo__sentence,
+  .of-demo .of-link {
+    grid-column: auto;
+  }
+}
+
+.of-end {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp-1) var(--sp-4);
+  padding-top: var(--sp-12);
+}
+
+/* Text link with a drawn arrow (M15): the stem grows from 24 to 56 px on hover and focus. */
+.of-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-3);
+  min-height: 44px;
+  font-family: 'Geist Mono Variable', 'Geist Mono Fallback', ui-monospace, monospace;
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgb(var(--ink));
+}
+
+.of-arrow {
+  position: relative;
+  display: block;
+  flex: none;
+  width: 56px;
+  height: 10px;
+}
+
+.of-arrow__stem {
+  position: absolute;
+  right: 1px;
+  top: 50%;
+  width: 100%;
+  height: 1px;
+  background: currentColor;
+  transform: translateY(-50%) scaleX(0.43);
+  transform-origin: right center;
+  transition: transform var(--dur-ui) var(--ease-ui);
+}
+
+.of-link:hover .of-arrow__stem,
+.of-link:focus-visible .of-arrow__stem {
+  transform: translateY(-50%) scaleX(1);
+}
+
+.of-arrow__head {
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 6px;
+  height: 10px;
+}
+
+/* ------------------------------------------------------------------ */
+/* RAW: the same facts as a plain sheet; the screenshot stays as a framed image                 */
+/* ------------------------------------------------------------------ */
+
+html[data-view='raw'] .of-name {
+  font-size: 28px;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+}
+
+html[data-view='raw'] .of-plate {
+  min-height: 0;
+}
+
+html[data-view='raw'] .of-viewer {
+  position: static;
+}
+
+html[data-view='raw'] .of-window {
+  aspect-ratio: auto !important;
+  overflow: visible;
+}
+
+html[data-view='raw'] .of-stage {
+  position: static;
+  transform: none !important;
+}
+
+html[data-view='raw'] .of-img {
+  height: auto;
+  opacity: 1;
+}
+
+html[data-view='raw'] .of-readout {
+  display: none;
+}
+
+/* RAW is a plain sheet: no mirrored plate, the head reads top to bottom. */
+html[data-view='raw'] .of-head,
+html[data-view='raw'] .of-plate[data-mirrored] .of-head {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--sp-1);
+}
+
+html[data-view='raw'] .of-plate[data-mirrored] .of-head__id,
+html[data-view='raw'] .of-plate[data-mirrored] .of-name {
+  text-align: left;
+}

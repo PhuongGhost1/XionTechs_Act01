@@ -149,4 +149,9 @@ export const onFile = {
   endCta: brief('onfile.end.cta', 'START A PROJECT', { href: '#contact', arrow: 'right' }),
   // Caption under the viewer's sector grid and the touch hint, WP5 may extend.
   tapHint: draft('onfile.tap', 'Tap a row to zoom to its region.'),
+  // The region index beside the spec facts: the accessible twin of the boxes over the capture.
+  regionsLabel: draft('onfile.regions', 'REGIONS IN THE CAPTURE'),
+  resetZoom: draft('onfile.reset', 'SHOW FULL SCREEN'),
+  // Tells assistive tech what the region buttons do (the boxes over the image are decorative).
+  regionsHint: draft('onfile.regions.hint', 'Select a region to mark it on the capture.'),
 }

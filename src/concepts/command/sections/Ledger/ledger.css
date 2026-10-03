@@ -1,0 +1,165 @@
+/*
+ * LEDGER (station 05): the provenance panel. A hairline frame, a head line, one sentence, a
+ * table whose rows are buttons, a foot with the build stamp. Colours from tokens.css only; the
+ * only things that move are opacities (160 ms).
+ */
+
+.ld-section {
+  padding-block: var(--station-gap);
+}
+
+.ld-intro {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-6);
+  margin-bottom: var(--sp-12);
+}
+
+.ld-panel {
+  max-width: 100%;
+}
+
+.ld-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--sp-1) var(--sp-4);
+  padding: var(--sp-4) var(--sp-4) 0;
+}
+
+.ld-definition {
+  max-width: 62ch;
+  padding: var(--sp-3) var(--sp-4) var(--sp-6);
+  color: rgb(var(--ink-2));
+}
+
+/* Column labels: desktop only. On phones each row is a stack and names its own parts. */
+.ld-cols {
+  display: none;
+}
+
+.ld-rows {
+  border-top: 1px solid var(--c-hair);
+}
+
+.ld-row {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--sp-2);
+  align-items: start;
+  width: 100%;
+  min-height: 56px;
+  padding: var(--sp-4);
+  border: 0;
+  border-bottom: 1px solid var(--c-hair);
+  background: transparent;
+  text-align: left;
+  color: rgb(var(--ink-2));
+  isolation: isolate;
+}
+
+/* The hover and selected fill is a pseudo element so that only its opacity animates. */
+.ld-row::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: rgb(var(--panel));
+  opacity: 0;
+  transition: opacity var(--dur-ui) var(--ease-ui);
+}
+
+.ld-row:hover::after,
+.ld-row[data-active]::after {
+  opacity: 1;
+}
+
+/* Selected (3 s) marker: a 2 px yellow bar at the edge, only its opacity animates. */
+.ld-row::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: rgb(var(--signal));
+  opacity: 0;
+  transition: opacity var(--dur-ui) var(--ease-ui);
+}
+
+.ld-row[data-active]::before {
+  opacity: 1;
+}
+
+.ld-row__chip {
+  display: flex;
+  align-items: flex-start;
+}
+
+.ld-row__text {
+  max-width: 62ch;
+  color: rgb(var(--ink-2));
+}
+
+.ld-row[data-active] .ld-row__text,
+.ld-row:hover .ld-row__text {
+  color: rgb(var(--ink));
+}
+
+.ld-row__where {
+  font-family: 'Geist Mono Variable', 'Geist Mono Fallback', ui-monospace, monospace;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgb(var(--ink-3));
+}
+
+.ld-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp-2) var(--sp-4);
+  padding: var(--sp-4) var(--sp-4) 0;
+}
+
+.ld-foot__stamp {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp-3);
+}
+
+.ld-note {
+  max-width: 62ch;
+  padding: var(--sp-3) var(--sp-4) var(--sp-4);
+  color: rgb(var(--ink-2));
+}
+
+/* Reserved line for the status the screen reader also hears, so nothing shifts when it appears. */
+.ld-status {
+  min-height: 2.8em;
+  margin-top: var(--sp-3);
+}
+
+@media (min-width: 1024px) {
+  .ld-cols {
+    display: grid;
+    grid-template-columns: 11rem minmax(0, 1fr) 17rem;
+    gap: var(--sp-6);
+    padding: 0 var(--sp-4) var(--sp-2);
+  }
+
+  .ld-row {
+    grid-template-columns: 11rem minmax(0, 1fr) 17rem;
+    gap: var(--sp-6);
+    align-items: baseline;
+  }
+}
+
+/* RAW: plain rows, no hover fills. */
+html[data-view='raw'] .ld-row {
+  min-height: 0;
+}

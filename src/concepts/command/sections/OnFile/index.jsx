@@ -1,27 +1,44 @@
-import { displayName, onFile, records } from '../../content/index.js'
+import { onFile, records } from '../../content/index.js'
 import { STATIONS } from '../../contract/stations.js'
 import { useTrack } from '../../runtime/hooks.js'
 import { Label } from '../../ui/Label.jsx'
+import { Reveal } from '../../ui/Reveal.jsx'
+import Arrow from './Arrow.jsx'
+import DemoRow from './DemoRow.jsx'
+import Plate from './Plate.jsx'
+import './onfile.css'
 
-// STUB (WP5 replaces this file). Station 04 ON FILE, id "work" (the nav word is WORK). WP5 builds
-// doc 4.6 and 8: one plate per record with the real screenshot, dot-leader spec rows from
-// specRows(), two-way hotspots, the scan (M10), DEP-003 as a dashed row. The core is absent here.
+// Station 04 ON FILE, id "work" (the nav word is WORK). Doc 4.6 and 8: two real products shown
+// by their real, sanitized screens, plus one clearly labelled illustrative record. No grid, no
+// carousel, no logos. The core is absent here (no anchor): the silence is the point.
 export default function OnFile() {
   const ref = useTrack('work')
+  const real = records.filter((r) => r.image)
+  const demo = records.find((r) => !r.image)
+
   return (
-    <section id="work" ref={ref} data-track="work" aria-labelledby="work-title" className="track">
-      <div className="column flex flex-col gap-6 py-[var(--station-gap)]">
-        <Label>{STATIONS[4].label}</Label>
-        <h2 id="work-title" className="font-display text-h2 font-medium text-ink">
-          {onFile.heading.text} <span className="text-ink2">{onFile.headingMuted.text}</span>
-        </h2>
-        <ul className="flex flex-col gap-3 font-mono text-label uppercase text-ink2">
-          {records.map((r) => (
-            <li key={r.id}>
-              {r.code.text} / {displayName(r)}
-            </li>
-          ))}
-        </ul>
+    <section id="work" ref={ref} data-track="work" aria-labelledby="work-title" className="track of-section">
+      <div className="column of-column">
+        <header className="of-intro">
+          <Label>{STATIONS[4].label}</Label>
+          <Reveal as="h2" id="work-title" className="font-display text-h2 font-medium text-ink">
+            {onFile.heading.text} <span className="text-ink2">{onFile.headingMuted.text}</span>
+          </Reveal>
+        </header>
+
+        {real.map((record, i) => (
+          <Plate key={record.id} record={record} index={i} mirrored={i % 2 === 1} />
+        ))}
+
+        {demo && <DemoRow record={demo} index={real.length} />}
+
+        <p className="of-end">
+          <span className="text-ink2">{onFile.endLine.text}</span>
+          <a className="of-link group" href={onFile.endCta.href}>
+            <span>{onFile.endCta.text}</span>
+            <Arrow />
+          </a>
+        </p>
       </div>
     </section>
   )
