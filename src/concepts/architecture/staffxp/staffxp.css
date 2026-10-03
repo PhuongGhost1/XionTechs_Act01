@@ -1,0 +1,964 @@
+/* Sheet 05, "StaffXP, opened". Plain CSS, tokens only (rgb(var(--bp-*))). Three parts: the live layout (a sticky
+   stage), the CSS 3D model, and the static layout for narrow, short and reduced-motion screens.
+   3D rules worth knowing: opacity, filter, overflow and clip on a preserve-3d element flatten it, so planes fade
+   through their leaves (face, edges, shadow, tag) and never through the plane itself. */
+
+/* ------------------------------------------------------------------ live layout */
+.sx-run {
+  position: relative;
+  height: 300vh;
+}
+.sx-sticky {
+  position: sticky;
+  top: 3.5rem;
+  height: calc(100vh - 3.5rem);
+  height: calc(100svh - 3.5rem);
+}
+.sx-top {
+  padding-top: 4.5rem;
+  padding-bottom: 2rem;
+}
+.sx-sechead {
+  margin-top: 2.25rem;
+}
+.sx-sechead h2 {
+  margin-top: 0.6rem;
+  font-size: clamp(2.2rem, 9.5vw, 4rem);
+}
+.sx-sechead .bp-lede {
+  max-width: 34rem;
+  font-size: clamp(0.9375rem, 0.8rem + 0.25vw, 1.0625rem);
+  line-height: 1.5;
+}
+@media (min-width: 900px) {
+  .sx-sechead {
+    display: grid;
+    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+    align-items: end;
+    column-gap: clamp(1.25rem, 2.2vw, 2rem);
+  }
+  .sx-sechead > p:first-child {
+    grid-column: 1 / -1;
+  }
+  .sx-sechead h2 {
+    grid-column: 1;
+    font-size: clamp(2.2rem, 4.4vw, 4rem);
+  }
+  .sx-sechead .bp-lede {
+    grid-column: 2;
+    margin-top: 0;
+    padding-bottom: 0.35rem;
+  }
+}
+.sx-grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  grid-template-rows: minmax(0, 1fr);
+  column-gap: clamp(1.25rem, 2.2vw, 2rem);
+  height: 100%;
+  padding-block: 0.9rem 1rem;
+}
+.sx-left {
+  grid-column: 1 / span 5;
+  grid-row: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+.sx-left > * {
+  flex: none;
+}
+.sx-stage {
+  grid-column: 6 / span 7;
+  grid-row: 1;
+}
+@media (min-width: 1280px) {
+  .sx-left {
+    grid-column: 1 / span 4;
+  }
+  .sx-stage {
+    grid-column: 5 / span 8;
+  }
+}
+
+/* Readout: which view the model is in, and a progress rule that follows the scroll. */
+.sx-readout {
+  display: grid;
+  gap: 0.1rem;
+}
+.sx-readout__cap {
+  margin: 0;
+  font-weight: 700;
+  font-size: 1.2rem;
+  line-height: 1.15;
+  animation: sx-cap 420ms var(--bp-ease) both;
+}
+@keyframes sx-cap {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.sx-readout__rule {
+  container-type: inline-size;
+  position: relative;
+  display: block;
+  height: 9px;
+  margin-top: 0.45rem;
+  border-inline: 1px solid rgb(var(--bp-line));
+}
+.sx-readout__rule::before {
+  content: '';
+  position: absolute;
+  inset: 4px 0 auto;
+  height: 1px;
+  background: rgb(var(--bp-line));
+}
+.sx-readout__tick {
+  position: absolute;
+  top: 1px;
+  width: 1px;
+  height: 7px;
+  background: rgb(var(--bp-line));
+}
+.sx-readout__mark {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform: translateX(calc(var(--p, 0) * 100cqw));
+  width: 9px;
+  height: 9px;
+  margin-left: -4.5px;
+  background: rgb(var(--bp-signal));
+  outline: 1px solid rgb(var(--bp-line));
+}
+
+/* Layer index: real buttons. Selected = a yellow bar; dashed mark = not confirmed. */
+.sx-index {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid rgb(var(--bp-line));
+}
+.sx-row {
+  position: relative;
+  display: grid;
+  grid-template-columns: 2.7rem minmax(0, 1fr) auto;
+  align-items: center;
+  width: 100%;
+  min-height: 2.3rem;
+  padding: 0.25rem 0.5rem 0.25rem 0.8rem;
+  border: 0;
+  border-bottom: 1px solid rgb(var(--bp-rule));
+  background: transparent;
+  color: rgb(var(--bp-text));
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 160ms var(--bp-ease);
+}
+.sx-row::before {
+  content: '';
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 4px;
+  background: transparent;
+}
+.sx-row:hover,
+.sx-row[data-hover='true'] {
+  background: rgb(var(--bp-bg2));
+}
+.sx-row[aria-pressed='true']::before {
+  background: rgb(var(--bp-signal));
+  box-shadow: 1px 0 0 rgb(var(--bp-line));
+}
+.sx-row__code {
+  color: rgb(var(--bp-mute));
+}
+.sx-row__label {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  line-height: 1.25;
+}
+.sx-row[aria-pressed='true'] .sx-row__label {
+  font-weight: 750;
+}
+.sx-row__mark {
+  width: 0.65rem;
+  height: 0.65rem;
+  border: 1px solid rgb(var(--bp-line));
+  background: rgb(var(--bp-signal));
+}
+.sx-row[data-dashed='true'] .sx-row__mark,
+.sx-acc__item[data-dashed='true'] .sx-row__mark {
+  border-style: dashed;
+  background: transparent;
+}
+.sx-hint {
+  margin: -0.1rem 0 0;
+  color: rgb(var(--bp-mute));
+}
+
+/* Detail card: dashed outline when the layer is not confirmed. */
+.sx-card {
+  min-height: 15.1rem;
+  padding: 0.8rem 1rem 0.9rem;
+  border: 1px solid rgb(var(--bp-line));
+  background: rgb(var(--bp-bg));
+}
+.sx-card[data-dashed='true'] {
+  border-style: dashed;
+}
+.sx-card__head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.05rem 0.75rem;
+  margin-bottom: 0.55rem;
+}
+.sx-card__head > p {
+  grid-column: 1 / -1;
+  margin: 0;
+}
+.sx-card__title {
+  margin: 0;
+  font-size: 1.3rem;
+}
+.sx-card__list {
+  display: grid;
+  gap: 0.45rem;
+  margin: 0;
+}
+.sx-card__list > div {
+  display: grid;
+  grid-template-columns: 5.3rem minmax(0, 1fr);
+  gap: 0.75rem;
+}
+.sx-card__list dt {
+  padding-top: 0.12rem;
+  color: rgb(var(--bp-mute));
+}
+.sx-card__list dd {
+  margin: 0;
+  font-size: 0.875rem;
+  line-height: 1.42;
+}
+.sx-card__note {
+  margin: 0.55rem 0 0;
+  font-size: 0.8125rem;
+  line-height: 1.42;
+  color: rgb(var(--bp-mute));
+}
+.sx-modelnote {
+  display: grid;
+  gap: 0.45rem;
+  justify-items: start;
+}
+.sx-modelnote p {
+  margin: 0;
+  font-size: 0.8125rem;
+  line-height: 1.42;
+  color: rgb(var(--bp-mute));
+}
+
+/* ------------------------------------------------------------------ stage and 3D model */
+.sx-stage {
+  --open: 1;
+  --assemble: 1;
+  --explode: 0;
+  --labels: 0;
+  --pins: 1;
+  position: relative;
+  min-width: 0;
+  min-height: 0;
+  container-type: size;
+  overflow: clip;
+}
+.sx-backdrop {
+  position: absolute;
+  inset: 0;
+  --g: 64px;
+  opacity: 0.55;
+  -webkit-mask-image: radial-gradient(ellipse 78% 72% at 50% 46%, rgb(var(--bp-text)) 30%, transparent 100%);
+  mask-image: radial-gradient(ellipse 78% 72% at 50% 46%, rgb(var(--bp-text)) 30%, transparent 100%);
+  pointer-events: none;
+}
+.sx-stage > .sx-reg,
+.sx-fig__frame > .sx-reg {
+  position: absolute;
+  color: rgb(var(--bp-line));
+}
+.sx-stage > .sx-reg--tl {
+  left: 0;
+  top: 0;
+}
+.sx-stage > .sx-reg--tr {
+  right: 0;
+  top: 0;
+}
+.sx-stage > .sx-reg--bl {
+  left: 0;
+  bottom: 0;
+}
+.sx-stage > .sx-reg--br {
+  right: 0;
+  bottom: 0;
+}
+.sx-titleblock {
+  position: absolute;
+  left: 1.5rem;
+  top: 1.1rem;
+  z-index: 2;
+  display: grid;
+  gap: 0.1rem;
+  margin: 0;
+}
+.sx-titleblock__name {
+  font-size: 1.6rem;
+}
+
+.sx-viewport {
+  position: absolute;
+  inset: 0;
+  perspective: 2600px;
+  perspective-origin: 50% 44%;
+  /* One plane is the screenshot's shape (1869 x 958). W is the width of a plane at rest. */
+  --W: min(92cqw, max(300px, calc((100cqh - 270px) * 1.9509)));
+  --H: calc(var(--W) / 1.9509);
+  --gap: max(calc(var(--W) * 0.2), min(calc(var(--W) * 0.32), 17cqh)); /* spacing between planes, fully open */
+  --th: 6px; /* slab thickness */
+  --shift: min(-6cqw, calc(18.7cqw - 170px)); /* open, the stack moves left to leave room for the tags */
+  --rx: calc(var(--explode) * 63deg);
+  --rz: calc(var(--explode) * -34deg);
+  --s: calc(1 - var(--explode) * 0.38);
+}
+.sx-model {
+  position: absolute;
+  left: 50%;
+  top: 44%;
+  width: var(--W);
+  height: var(--H);
+  margin-left: calc(var(--W) / -2);
+  margin-top: calc(var(--H) / -2);
+  transform-style: preserve-3d;
+  transform: translate3d(calc(var(--explode) * var(--shift)), calc(var(--explode) * -0.6cqh), 0) scale(var(--s)) rotateX(var(--rx)) rotateZ(var(--rz));
+}
+.sx-run[data-active='true'] .sx-model,
+.sx-run[data-active='true'] .sx-plane {
+  will-change: transform;
+}
+
+.sx-plane {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+  /* Closed, the planes sit 2px apart so nothing z-fights; open, they are one gap apart; the fronted plane is lifted 10px once assembled. */
+  transform: translateZ(calc((2 - var(--idx)) * (2px + var(--gap) * var(--explode)) + var(--front) * var(--assemble) * 10px));
+  --fade: calc(1 - var(--assemble) * (1 - var(--front)));
+  pointer-events: none;
+}
+
+.sx-face {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: rgb(var(--bp-bg));
+  transform: translateZ(calc(var(--th) / 2));
+  opacity: var(--fade);
+  pointer-events: auto;
+  cursor: pointer;
+}
+.sx-stage[data-phase='assembled'] .sx-plane:not([data-front='true']) .sx-face {
+  pointer-events: none;
+}
+.sx-stage[data-phase='assembled'] .sx-face {
+  cursor: default;
+}
+.sx-face::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border: 1px solid rgb(var(--bp-line));
+  pointer-events: none;
+  transition: box-shadow 180ms var(--bp-ease);
+}
+.sx-plane[data-state='active'] .sx-face::after {
+  box-shadow: inset 0 0 0 3px rgb(var(--bp-signal));
+}
+.sx-stage[data-phase='assembled'] .sx-plane[data-state='active'] .sx-face::after {
+  box-shadow: none;
+}
+.sx-img,
+.sx-svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.sx-img {
+  object-fit: cover;
+  user-select: none;
+}
+.sx-veil {
+  position: absolute;
+  inset: 0;
+  background: rgb(var(--bp-bg));
+  opacity: 0;
+  transition: opacity 220ms var(--bp-ease);
+  pointer-events: none;
+}
+.sx-plane[data-state='dim'] .sx-veil {
+  opacity: 0.66;
+}
+.sx-stage[data-phase='assembled'] .sx-veil {
+  opacity: 0 !important;
+}
+
+/* The slab's edges: four thin navy strips that give each plane its thickness. */
+.sx-edge {
+  position: absolute;
+  background: rgb(var(--bp-line));
+  opacity: var(--fade);
+  pointer-events: none;
+}
+.sx-edge--t,
+.sx-edge--b {
+  left: 0;
+  width: 100%;
+  height: var(--th);
+  transform: rotateX(90deg);
+}
+.sx-edge--t {
+  top: calc(var(--th) / -2);
+}
+.sx-edge--b {
+  top: calc(100% - var(--th) / 2);
+}
+.sx-edge--l,
+.sx-edge--r {
+  top: 0;
+  width: var(--th);
+  height: 100%;
+  transform: rotateY(90deg);
+}
+.sx-edge--l {
+  left: calc(var(--th) / -2);
+}
+.sx-edge--r {
+  left: calc(100% - var(--th) / 2);
+}
+
+/* A soft shadow that falls on the plane below (or on the ground). A blurred leaf, no glow. */
+.sx-shadow {
+  position: absolute;
+  inset: 5% 2% 1% 5%;
+  background: rgb(var(--bp-line));
+  filter: blur(calc(var(--W) * 0.022));
+  opacity: calc(var(--explode) * 0.17 * var(--fade));
+  transform: translateZ(calc(var(--gap) * var(--explode) * -0.95)) translate(calc(var(--W) * 0.012), calc(var(--W) * 0.018));
+  pointer-events: none;
+}
+
+/* Ground sheet and construction rails: they only exist while the model is open. */
+.sx-ground {
+  position: absolute;
+  inset: -7% -4%;
+  --g: calc(var(--W) / 12);
+  border: 1px solid rgb(var(--bp-line) / 0.6);
+  background-color: rgb(var(--bp-bg));
+  opacity: var(--labels);
+  transform: translateZ(calc(-3 * (2px + var(--gap) * var(--explode))));
+  pointer-events: none;
+}
+/* Closed, four hairline sheets peek out behind the front one: the stack, before it opens. */
+.sx-sheetedge {
+  position: absolute;
+  inset: 0;
+  border: 1px solid rgb(var(--bp-line));
+  background: rgb(var(--bp-bg));
+  opacity: calc(1 - var(--open) * 4);
+  transform: translate3d(calc(var(--k) * 6px), calc(var(--k) * 6px), calc(var(--k) * -3px - 6px));
+  pointer-events: none;
+}
+.sx-rail {
+  position: absolute;
+  width: 2px;
+  margin-left: -1px;
+  height: calc(var(--gap) * 5);
+  margin-top: calc(var(--gap) * -2.5);
+  background: repeating-linear-gradient(to bottom, rgb(var(--bp-line) / 0.7) 0 6px, transparent 6px 11px);
+  opacity: var(--labels);
+  transform: translateZ(calc(var(--gap) * var(--explode) * -0.5)) rotateX(90deg) scaleY(calc(var(--explode) + 0.001));
+  pointer-events: none;
+}
+.sx-rail--0 {
+  left: 0;
+  top: 0;
+}
+.sx-rail--1 {
+  left: 100%;
+  top: 0;
+}
+.sx-rail--2 {
+  left: 0;
+  top: 100%;
+}
+.sx-rail--3 {
+  left: 100%;
+  top: 100%;
+}
+
+/* Tags: the label and leader line of each plane. The anchor is the plane's lower right corner; the tag turns
+   against the model's rotation and scale, so it stays upright and the same size on screen. */
+.sx-tag {
+  position: absolute;
+  left: 100%;
+  top: 100%;
+  width: 0;
+  height: 0;
+  transform-style: preserve-3d;
+  pointer-events: none;
+}
+.sx-tag__in {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 10.25rem;
+  transform-origin: 0 0;
+  transform: rotateZ(calc(var(--rz) * -1)) rotateX(calc(var(--rx) * -1)) scale(calc(1 / var(--s)));
+  opacity: calc(var(--labels) * var(--fade));
+}
+.sx-tag__box {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  transition: opacity 200ms var(--bp-ease);
+}
+.sx-plane[data-state='dim'] .sx-tag__box {
+  opacity: 0.3;
+}
+.sx-plane[data-state='active'] .sx-tag__dot {
+  background: rgb(var(--bp-signal));
+  outline: 1px solid rgb(var(--bp-line));
+}
+.sx-tag__dot {
+  position: absolute;
+  left: -4px;
+  top: -4px;
+  width: 8px;
+  height: 8px;
+  background: rgb(var(--bp-line));
+}
+.sx-tag[data-selected='true'] .sx-tag__dot {
+  background: rgb(var(--bp-signal));
+  outline: 1px solid rgb(var(--bp-line));
+  outline-offset: 0;
+}
+.sx-tag__rule {
+  position: absolute;
+  left: 4px;
+  right: 0;
+  top: 0;
+  border-top: 1px solid rgb(var(--bp-line));
+}
+.sx-tag[data-dashed='true'] .sx-tag__rule {
+  border-top-style: dashed;
+}
+.sx-tag__name {
+  position: absolute;
+  left: 14px;
+  right: 0;
+  bottom: 5px;
+  font-size: 0.8125rem;
+  font-weight: 650;
+  line-height: 1.15;
+  color: rgb(var(--bp-text));
+}
+.sx-tag__code {
+  margin-right: 0.35rem;
+  color: rgb(var(--bp-mute));
+}
+.sx-tag__status {
+  position: absolute;
+  left: 14px;
+  top: 5px;
+  white-space: nowrap;
+  color: rgb(var(--bp-mute));
+}
+
+/* The yellow dimension: the width of the plane at rest, only while the model is closed or assembled. */
+.sx-dim {
+  position: absolute;
+  left: 50%;
+  top: calc(44% - var(--H) / 2 - 3rem);
+  width: var(--W);
+  margin-left: calc(var(--W) / -2);
+  opacity: calc(1 - var(--explode) * 2);
+  pointer-events: none;
+}
+.sx-dim__cap {
+  position: absolute;
+  left: 0;
+  top: 1.5rem;
+}
+
+/* Numbered regions on the dashboard, and the list that is their real text. */
+.sx-pins {
+  position: absolute;
+  inset: 0;
+  opacity: var(--pins, 1);
+  pointer-events: none;
+}
+.sx-pin {
+  position: absolute;
+  border: 2px solid rgb(var(--bp-signal));
+  transition: background-color 160ms var(--bp-ease);
+}
+.sx-stage[data-phase='assembled'] .sx-plane[data-front='true'] .sx-pin,
+.sx-fig .sx-pin {
+  pointer-events: auto;
+}
+.sx-pin[data-on='true'] {
+  background: rgb(var(--bp-signal) / 0.2);
+}
+.sx-pins[data-hot] .sx-pin:not([data-on='true']) {
+  border-color: rgb(var(--bp-signal) / 0.5);
+}
+.sx-pin__n {
+  position: absolute;
+  left: -2px;
+  top: -1.2rem;
+  display: grid;
+  min-width: 1.2rem;
+  height: 1.2rem;
+  place-items: center;
+  background: rgb(var(--bp-signal));
+  color: rgb(var(--bp-on-signal));
+  font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  line-height: 1;
+}
+.sx-under {
+  position: absolute;
+  left: 1.25rem;
+  right: 1.25rem;
+  top: calc(44% + var(--H) / 2 + 2.4rem);
+  opacity: var(--pins, 1);
+  pointer-events: none;
+}
+.sx-caption {
+  max-width: 40rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid rgb(var(--bp-line));
+}
+.sx-caption h3 {
+  margin: 0 0 0.35rem;
+}
+.sx-caption p {
+  margin: 0;
+  font-size: 0.9375rem;
+  line-height: 1.45;
+}
+.sx-caption .sx-card__note {
+  margin-top: 0.4rem;
+  font-size: 0.8125rem;
+  color: rgb(var(--bp-mute));
+}
+.sx-stage[data-phase='assembled'] .sx-under {
+  pointer-events: auto;
+}
+.sx-list {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.2rem 1.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.sx-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  padding: 0.3rem 0.35rem;
+  border-top: 1px solid rgb(var(--bp-rule));
+  font-size: 0.8125rem;
+  line-height: 1.35;
+  transition: background-color 160ms var(--bp-ease);
+}
+.sx-list li[data-on='true'] {
+  background: rgb(var(--bp-bg2));
+}
+.sx-list__n {
+  display: grid;
+  flex: none;
+  width: 1.3rem;
+  height: 1.3rem;
+  place-items: center;
+  background: rgb(var(--bp-signal));
+  color: rgb(var(--bp-on-signal));
+  outline: 1px solid rgb(var(--bp-line));
+}
+
+@container (max-width: 700px) {
+  .sx-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* ------------------------------------------------------------------ drawn faces (SVG, 800 x 410) */
+.sx-stroke-ink {
+  stroke: rgb(var(--bp-line));
+}
+.sx-fill-signal {
+  fill: rgb(var(--bp-signal));
+}
+.sx-hair {
+  fill: none;
+  stroke-width: 1;
+  opacity: 0.45;
+}
+.sx-dash {
+  stroke-width: 1.5;
+  stroke-dasharray: 6 5;
+}
+.sx-bay {
+  stroke-width: 1.75;
+}
+.sx-rec path {
+  opacity: 0.3;
+}
+.sx-hatch {
+  stroke-width: 1;
+  opacity: 0.22;
+}
+.sx-plate {
+  fill: rgb(var(--bp-bg));
+}
+.sx-t-ink {
+  fill: rgb(var(--bp-text));
+}
+.sx-t-mute {
+  fill: rgb(var(--bp-mute));
+}
+.sx-t-mono {
+  font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.sx-t-bay {
+  font-family: Archivo, system-ui, sans-serif;
+  font-size: 19px;
+  font-weight: 650;
+}
+.sx-t-name {
+  font-family: Archivo, system-ui, sans-serif;
+  font-size: 34px;
+  font-weight: 780;
+  font-stretch: 76%;
+  letter-spacing: -0.005em;
+  text-transform: uppercase;
+}
+
+/* The static stack diagram: the same planes at the open attitude, no scroll, no labels beyond the code. */
+.sx-diagram-fig {
+  margin: 0 0 2rem;
+}
+.sx-diagram-fig figcaption {
+  display: grid;
+  gap: 0.2rem;
+  margin-top: 0.5rem;
+  font-size: 0.8125rem;
+  line-height: 1.42;
+  color: rgb(var(--bp-mute));
+}
+.sx-diagram {
+  height: 23rem;
+  border-top: 1px solid rgb(var(--bp-line));
+  border-bottom: 1px solid rgb(var(--bp-rule));
+}
+.sx-diagram .sx-viewport {
+  --W: min(88cqw, 22rem);
+  --gap: calc(var(--W) * 0.23);
+  --shift: -12cqw;
+}
+.sx-diagram .sx-model {
+  top: 45%;
+}
+.sx-diagram .sx-tag__label,
+.sx-diagram .sx-tag__status {
+  display: none;
+}
+.sx-diagram .sx-tag__in {
+  width: 3.4rem;
+}
+
+/* ------------------------------------------------------------------ legend */
+.sx-legend {
+  padding-block: 1.75rem 3.5rem;
+}
+
+/* ------------------------------------------------------------------ static layout */
+.sx-static {
+  padding-bottom: 1rem;
+}
+.sx-static__rest {
+  margin-top: 2.25rem;
+}
+.sx-fig {
+  margin: 0;
+}
+.sx-fig__title {
+  display: grid;
+  gap: 0.1rem;
+  margin: 0 0 1.25rem;
+}
+.sx-fig__title .bp-h3 {
+  font-size: 1.6rem;
+}
+.sx-fig__dim {
+  position: relative;
+  margin-bottom: 1.9rem;
+}
+.sx-fig__dim .sx-dim__cap {
+  top: 1.4rem;
+}
+.sx-fig__frame {
+  position: relative;
+  aspect-ratio: 1869 / 958;
+  border: 1px solid rgb(var(--bp-line));
+  background: rgb(var(--bp-bg));
+}
+.sx-fig__frame > .sx-reg--tl {
+  left: -8px;
+  top: -8px;
+}
+.sx-fig__frame > .sx-reg--tr {
+  right: -8px;
+  top: -8px;
+}
+.sx-fig__frame > .sx-reg--bl {
+  left: -8px;
+  bottom: -8px;
+}
+.sx-fig__frame > .sx-reg--br {
+  right: -8px;
+  bottom: -8px;
+}
+.sx-fig__cap {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+  margin-top: 0.75rem;
+}
+.sx-fig .sx-list {
+  grid-template-columns: 1fr;
+}
+.sx-acc {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid rgb(var(--bp-line));
+}
+.sx-acc__item {
+  border-bottom: 1px solid rgb(var(--bp-rule));
+}
+.sx-acc__item h3 {
+  margin: 0;
+}
+.sx-acc__btn {
+  display: grid;
+  grid-template-columns: 2.7rem minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 0 0.75rem;
+  width: 100%;
+  min-height: 3rem;
+  padding: 0.5rem 0.25rem;
+  border: 0;
+  background: transparent;
+  color: rgb(var(--bp-text));
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.sx-acc__btn[aria-expanded='true'] .sx-row__label {
+  font-weight: 750;
+}
+.sx-acc__chev {
+  width: 1.25rem;
+  text-align: center;
+}
+.sx-acc__panel {
+  padding: 0.25rem 0.25rem 1.25rem 3.45rem;
+}
+.sx-acc__panel[hidden] {
+  display: none;
+}
+.sx-acc__visual {
+  position: relative;
+  aspect-ratio: 1869 / 958;
+  margin-top: 0.9rem;
+  border: 1px solid rgb(var(--bp-line));
+  background: rgb(var(--bp-bg));
+}
+.sx-acc__visual[data-dashed='true'] {
+  border-style: dashed;
+}
+
+@media (max-width: 479px) {
+  .sx-acc__panel {
+    padding-left: 0.25rem;
+  }
+  .sx-card__list > div {
+    grid-template-columns: 1fr;
+    gap: 0.1rem;
+  }
+}
+@media (min-width: 640px) {
+  .sx-fig .sx-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (min-width: 1024px) {
+  .sx-static {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: 2rem;
+    align-items: start;
+  }
+  .sx-static__rest {
+    grid-column: 1 / span 5;
+    grid-row: 1;
+    margin-top: 0;
+  }
+  .sx-static__fig {
+    grid-column: 6 / span 7;
+    grid-row: 1;
+    position: sticky;
+    top: 5rem;
+  }
+  .sx-fig .sx-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sx-readout__cap {
+    animation: none;
+  }
+  .sx-row,
+  .sx-pin,
+  .sx-list li,
+  .sx-veil,
+  .sx-face::after {
+    transition: none;
+  }
+}
