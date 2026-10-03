@@ -270,18 +270,8 @@
   animation: line-beat-pass var(--beat) linear both;
 }
 
-/* PAUSE: freeze the whole timeline. Same specificity as the rules above or higher, plus
-   motion.css's [data-paused] rule which is !important. */
-.line-beat[data-paused][data-animated] .line-beat__solid,
-.line-beat[data-paused][data-animated] .line-beat__dashed,
-.line-beat[data-paused][data-animated] .line-beat__shake,
-.line-beat[data-paused][data-animated] .line-beat__ring,
-.line-beat[data-paused][data-animated] .line-beat__tick,
-.line-beat[data-paused][data-animated] .line-beat__word--fail,
-.line-beat[data-paused][data-animated] .line-beat__word--retry,
-.line-beat[data-paused][data-animated] .line-beat__word--pass {
-  animation-play-state: paused;
-}
+/* PAUSE: data-paused on .line-beat freezes the whole timeline through motion.css, whose !important
+   rule pauses every descendant; nothing more is needed here. */
 
 /* ---- list fallback ------------------------------------------------------------------------ */
 .line-list {

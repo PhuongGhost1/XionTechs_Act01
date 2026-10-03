@@ -28,6 +28,10 @@
    SW tags (the gap between them is about half the core's height, the line is shorter), so the
    longest word never runs into a tag, and the hairlines cross at the end of the word. The 33 px is
    the label above the headline (16.8 px line plus the 16 px gap). */
+.hero[data-tags='axis'] {
+  --ann: min(0.75rem, max(12px, 1.25vw));
+}
+
 .hero[data-tags='axis'] .hero-stage {
   padding-top: calc(var(--py) * 100svh - var(--header-h) - 0.46 * var(--fs-display-xl) - 33px);
 }
@@ -73,12 +77,17 @@
   top: calc(var(--py) * 100svh - var(--header-h) + var(--core) / 2 + 28px);
 }
 
+.hero .hero-fig {
+  font-size: var(--ann);
+}
+
 @media (min-width: 640px) {
   .hero-fig {
     right: auto;
     left: calc(var(--px) * 100%);
     transform: translateX(-50%);
-    width: 40ch;
+    /* centred on P, so no wider than twice the room to its right (enlarged text) */
+    width: min(40ch, calc((1 - var(--px)) * 200% - 2 * var(--margin-x)));
     text-align: center;
   }
 }
@@ -93,14 +102,20 @@
    bottom anchored and the core sits at 30% of the height, so on a short window a taller headline
    would climb into the NW tag. Checked at 1024 to 2560 wide, 720 to 1200 high. */
 .hero {
-  --fs-display-xl: clamp(2.6rem, 13.4vw, 5rem);
+  /* Size of the annotations (the four tags and FIG 01): 12 px, and with enlarged text only as large
+     as the layout has room for (stack: 4vw, so the lower pair never meets at 320; axis: 1.25vw,
+     so PRODUCT stays clear of the headline). At 100% text this is exactly 0.75rem. */
+  --ann: min(0.75rem, 4vw);
+  /* The vw cap keeps ENGINEERING inside the screen when the reader enlarges text (the rem floor of
+     the old clamp grew with it); at 100% text the two forms are identical from 320 px up. */
+  --fs-display-xl: min(13.4vw, 5rem);
   /* Belt and braces: nothing in the hero may widen the page, hidden tags included. */
   overflow-x: clip;
 }
 
 @media (min-width: 640px) {
   .hero {
-    --fs-display-xl: clamp(4.5rem, min(8.8vw, 14.5svh), 9.75rem);
+    --fs-display-xl: min(clamp(4.5rem, min(8.8vw, 14.5svh), 9.75rem), max(72px, 8.8vw));
   }
 }
 
@@ -233,7 +248,7 @@
   background: rgb(var(--ground));
   color: rgb(var(--ink-2));
   font-family: 'Geist Mono Variable', 'Geist Mono Fallback', ui-monospace, monospace;
-  font-size: 0.75rem;
+  font-size: var(--ann);
   line-height: 1.4;
   letter-spacing: 0.06em;
   text-transform: uppercase;

@@ -2,7 +2,8 @@ import { cx } from './cx.js'
 
 // <Button variant="primary|ghost|outline" size="md|sm" arrow="right|down" href flow>: a system
 // command (doc 4.9, M15). 0 radius, mono caps. 48 px high (`md`), or 44 px (`sm`, the header's
-// size: still a full 44 px target). Renders <a> when `href` is given, otherwise <button type=button>.
+// size: still a full 44 px target). Both are minimums, so a label wrapped by enlarged text grows the
+// button. Renders <a> when `href` is given, otherwise <button type=button>.
 //   primary  yellow fill, navy text. One per viewport.
 //   ghost    1 px neutral outline, white text.
 //   outline  1 px yellow outline, white text: the header CTA before the WORK station (doc 4.9).
@@ -32,7 +33,7 @@ function Arrow({ direction }) {
     )
   }
   return (
-    <span aria-hidden="true" className="relative block h-[10px] w-14 shrink-0">
+    <span aria-hidden="true" className="relative block h-[10px] w-[56px] shrink-0">
       <span className="absolute right-[1px] top-1/2 h-px w-full origin-right -translate-y-1/2 scale-x-[0.43] bg-current transition-transform duration-ui ease-ui group-hover:scale-x-100 group-focus-visible:scale-x-100 motion-off:transition-none" />
       {head}
     </span>
@@ -46,8 +47,9 @@ const LOOK = {
 }
 
 const SIZE = {
-  md: 'h-12 px-6',
-  sm: 'h-11 px-4',
+  // Heights are px minimums, not rem: an enlarged-text label may wrap, and the button grows with it.
+  md: 'min-h-[48px] px-6 py-2',
+  sm: 'min-h-[44px] px-4 py-2',
 }
 
 export function Button({ variant = 'primary', size = 'md', arrow, href, flow = false, className, children, ...rest }) {

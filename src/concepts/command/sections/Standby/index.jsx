@@ -222,7 +222,7 @@ export default function Standby() {
             variant="ghost"
             href={hero.cta.secondary.href}
             arrow="down"
-            className="max-sm:!h-11 max-sm:w-full max-sm:justify-between"
+            className="max-sm:min-h-[44px] max-sm:w-full max-sm:justify-between"
             onPointerEnter={warmWork}
             onFocus={warmWork}
           >

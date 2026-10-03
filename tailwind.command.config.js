@@ -16,9 +16,28 @@ const channel = (name) => `rgb(var(--${name}) / <alpha-value>)`
 const faint = (name) => ({ opacityValue }) =>
   `rgb(var(--${name}) / calc(var(--${name}-a) * ${opacityValue ?? 1}))`
 
+// Source text reduced to its string literals (comments removed first).
+function stringsOnly(source) {
+  const code = source.replace(/\/\*[\s\S]*?\*\//g, ' ').replace(/(^|\s)\/\/[^\n]*/g, '$1')
+  return (code.match(/"(?:[^"\\\n]|\\.)*"|'(?:[^'\\\n]|\\.)*'|`(?:[^`\\]|\\.)*`/g) || []).join('\n')
+}
+
 /** @type {import('tailwindcss').Config} */
 export default {
-  content: ['./concepts/command/index.html', './src/concepts/command/**/*.{js,jsx}'],
+  // Tailwind scans raw text, so a word in a comment ("ring", "table", "static", "collapse") or in
+  // a method call (".filter(") would emit a utility nobody uses. The transform keeps only the
+  // string literals of .js and .jsx files, and the exclusions drop files that hold prose or no
+  // class names at all (tests, copy, runtime, contract, three.js). A class name written outside a
+  // string, or inside one of those folders, is not generated.
+  content: {
+    files: [
+      './concepts/command/index.html',
+      './src/concepts/command/**/*.{js,jsx}',
+      '!./src/concepts/command/**/*.test.js',
+      '!./src/concepts/command/{content,core/three,runtime,contract}/**',
+    ],
+    transform: { js: stringsOnly, jsx: stringsOnly },
+  },
   theme: {
     extend: {
       colors: {
@@ -83,6 +102,7 @@ export default {
       },
     },
   },
+  corePlugins: { preflight: false }, // reset lives in styles/base.css (trimmed to what the page renders)
   plugins: [
     // State on <html> is the single source of truth (doc 11.3 item 3), so variants read it.
     plugin(({ addVariant }) => {

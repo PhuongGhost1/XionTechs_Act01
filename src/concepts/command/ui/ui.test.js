@@ -88,7 +88,7 @@ describe('Button', () => {
 
   it('is 48 px high, square, and yellow only when primary', () => {
     const primary = html(createElement(Button, { variant: 'primary' }, 'GO'))
-    expect(primary).toContain('h-12')
+    expect(primary).toContain('min-h-[48px]')
     expect(primary).toContain('rounded-none')
     expect(primary).toContain('bg-signal')
     expect(primary).toContain('data-fill="signal"')

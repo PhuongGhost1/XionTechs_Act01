@@ -15,8 +15,5 @@ html[data-webgl='drawn'] .core-figure {
   opacity: 0;
 }
 
-/* The packets' own pause rule: they set the `animation` shorthand (motion.css .anim-packet), so
-   the pause has to be at least as specific. The figure sets data-paused while it is off screen. */
-.core-figure[data-paused] .anim-packet {
-  animation-play-state: paused;
-}
+/* While the figure is off screen it carries data-paused, and motion.css (!important) pauses the
+   packets under it; no rule is needed here. */

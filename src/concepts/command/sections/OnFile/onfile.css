@@ -534,6 +534,7 @@
 .of-row {
   position: relative;
   display: flex;
+  flex-wrap: wrap; /* enlarged text: the label drops under the code instead of overflowing */
   align-items: baseline;
   gap: var(--sp-3);
   width: 100%;
@@ -587,13 +588,15 @@
 }
 
 .of-row__leader {
-  flex: 1 1 1rem;
-  min-width: 1rem;
+  flex: 1 1 16px;
+  min-width: 16px;
   border-bottom: 1px dotted var(--c-hair-strong);
 }
 
 .of-row__label {
-  max-width: 62%;
+  min-width: 0;
+  max-width: max(62%, 12ch);
+  overflow-wrap: anywhere; /* backstop: a word longer than the row breaks instead of leaving it */
   margin-left: auto;
   text-align: right;
 }

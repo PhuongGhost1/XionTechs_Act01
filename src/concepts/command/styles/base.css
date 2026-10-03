@@ -20,6 +20,63 @@
 }
 
 @layer base {
+  /*
+   * Reset. Tailwind's preflight is switched off (tailwind.command.config.js) because most of it
+   * styles elements this page never renders (table, pre, sub, summary, search inputs, ...). This
+   * is the part that matters here, with the same values.
+   */
+  *,
+  ::before,
+  ::after {
+    box-sizing: border-box;
+    border: 0 solid #e5e7eb;
+  }
+
+  ::before,
+  ::after {
+    --tw-content: '';
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-size: inherit;
+    font-weight: inherit;
+  }
+
+  button,
+  input,
+  textarea {
+    font: inherit;
+    letter-spacing: inherit;
+    color: inherit;
+    margin: 0;
+    padding: 0;
+  }
+
+  button {
+    text-transform: none;
+    background: transparent;
+    -webkit-appearance: button;
+    appearance: button;
+  }
+
+  img,
+  svg,
+  canvas {
+    display: block;
+    vertical-align: middle;
+  }
+
+  img {
+    max-width: 100%;
+    height: auto;
+  }
+
+  [hidden]:where(:not([hidden='until-found'])) {
+    display: none;
+  }
+
   html {
     -webkit-tap-highlight-color: transparent;
     background: rgb(var(--ground));
@@ -75,8 +132,6 @@
   }
 
   button {
-    font: inherit;
-    color: inherit;
     cursor: pointer;
   }
 

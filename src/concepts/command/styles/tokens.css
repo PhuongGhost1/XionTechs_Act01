@@ -35,7 +35,6 @@
   /* Ready made colours for plain CSS (base.css, motion.css, raw.css) */
   --c-hair: rgb(var(--hair) / var(--hair-a));
   --c-hair-strong: rgb(var(--hair-strong) / var(--hair-strong-a));
-  --c-ghost: rgb(var(--ghost) / var(--ghost-a));
   --c-grid: rgb(var(--grid) / var(--grid-a));
 
   /* Easing (5.1). Linear and steps() are used inline where meant (packets, scan, counters). */
@@ -50,10 +49,9 @@
   --dur-scan: 600ms;
   --dur-step: 240ms; /* counter flip, shake */
   --dur-roll: 480ms; /* step word roll */
-  --dur-boot: 1100ms;
   --dur-packet: 2400ms; /* one edge, idle */
 
-  /* Spacing scale (5.3): 4 8 12 16 24 32 48 64 96 160 */
+  /* Spacing scale (5.3): 4 8 12 16 24 32 48 64 (96 and 160 are written as --station-gap) */
   --sp-1: 4px;
   --sp-2: 8px;
   --sp-3: 12px;
@@ -62,8 +60,6 @@
   --sp-8: 32px;
   --sp-12: 48px;
   --sp-16: 64px;
-  --sp-24: 96px;
-  --sp-40: 160px;
   --station-gap: 96px; /* vertical rhythm between stations (160 from 768) */
 
   /* Grid and margins (5.3) */
@@ -86,13 +82,15 @@
   --track-ledger: 77lvh;
   --track-done: 136lvh;
 
-  /* Type scale (5.2). Display XL and the margins change at 640; the rest is fluid. */
+  /* Type scale (5.2). Display XL and the margins change at 640; the rest is fluid. The vw cap on
+     the four middle sizes is the rem floor at a 320 px screen (28, 32, 32, 36 px): it changes
+     nothing at 100% text, and stops enlarged text from pushing a word past the screen. */
   --fs-display-xl: clamp(2.6rem, 13.4vw, 5rem);
   --fs-finale: clamp(3rem, 14vw, 14rem);
-  --fs-statement: clamp(1.75rem, 6vw, 5.5rem);
-  --fs-h2: clamp(2rem, 4.4vw, 4rem);
-  --fs-row: clamp(2rem, 6vw, 5.75rem);
-  --fs-step: clamp(2.25rem, 11vw, 11rem);
+  --fs-statement: min(clamp(1.75rem, 6vw, 5.5rem), 8.75vw);
+  --fs-h2: min(clamp(2rem, 4.4vw, 4rem), 10vw);
+  --fs-row: min(clamp(2rem, 6vw, 5.75rem), 10vw);
+  --fs-step: min(clamp(2.25rem, 11vw, 11rem), 11.25vw);
   --fs-body: 1rem;
 }
 

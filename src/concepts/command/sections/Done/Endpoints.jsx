@@ -9,7 +9,7 @@ import { cx } from '../../ui/cx.js'
 function Arrow() {
   // Same drawn arrow as Button: a stem that extends on hover and focus (M15), transform only.
   return (
-    <span aria-hidden="true" data-decor="" className="relative block h-[10px] w-14 shrink-0 max-sm:hidden">
+    <span aria-hidden="true" data-decor="" className="relative block h-[10px] w-[56px] shrink-0 max-sm:hidden">
       <span className="absolute right-px top-1/2 h-px w-full origin-right -translate-y-1/2 scale-x-[0.43] bg-current transition-transform duration-ui ease-ui group-hover:scale-x-100 group-focus-visible:scale-x-100 motion-off:transition-none" />
       <svg viewBox="0 0 6 10" className="absolute right-0 top-0 h-[10px] w-[6px]">
         <path d="M1 1L5 5L1 9" fill="none" stroke="currentColor" strokeWidth="1" />
