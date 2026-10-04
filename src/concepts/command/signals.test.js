@@ -77,9 +77,9 @@ describe('deployments (content.js)', () => {
   it('does not call the work shipped or deployed while the status is pending', () => {
     expect(`${deployments.label} ${deployments.title}`).not.toMatch(/ship|deploy|production/i)
   })
-  it('links the agent demo to the main page, where the demo lives', () => {
+  it('links the agent demo to the flight plan section of this page', () => {
     const agent = deployments.records.find((r) => r.id === 'agents')
     expect(agent.illustrative).toBe(true)
-    expect(agent.link.href).toBe('/#ai-agents')
+    expect(agent.link.href).toBe('#agent')
   })
 })

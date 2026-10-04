@@ -6,6 +6,7 @@ import Hero from './Hero'
 import Modules from './Modules'
 import Process from './Process'
 import Deployments from './Deployments'
+import FlightSection from './flight/FlightSection'
 import Signals from './Signals'
 import FinalCta from './FinalCta'
 import Footer from './Footer'
@@ -68,13 +69,14 @@ export default function CommandApp() {
         </Suspense>
       )}
       <BuildHud />
-      {/* Sections are transparent (the fixed canvas shows through) except `signals`, the one
-          opaque paper band, which covers it. */}
+      {/* Sections are transparent (the fixed canvas shows through) except `agent` (the flight plan, with
+          its own canvas) and `signals`, the opaque bands that cover it. */}
       <main id="main" className="relative z-10">
         <Hero />
         <Modules />
         <Process />
         <Deployments />
+        <FlightSection />
         <Signals />
         <FinalCta />
       </main>

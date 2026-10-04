@@ -44,6 +44,7 @@ export const QUALITY_SETTINGS = {
 const FOV = 35 // degrees; a mild perspective so the depth of the X shows when it turns
 const TAN_HALF_FOV = Math.tan((FOV * Math.PI) / 360)
 const SIGNALS_INDEX = SECTION_IDS.indexOf('signals')
+const COVER_ID = 'agent' // the opaque flight plan section (not one of the six scene phases)
 
 const PHASE_RATE = 7 // how quickly the phase follows the scroll position (about 1 / seconds to settle)
 const PACKET_SPEED = 80 // px per second at idle flow
@@ -262,6 +263,8 @@ export function createXCore({ container, quality = 'high', onFirstFrame, onConte
   const sectionRects = SECTION_IDS.map(() => ({ top: 0, bottom: 0 }))
   const sectionRectArr = SECTION_IDS.map(() => null) // the rect, or null while the section is not in the page
   let logo = null
+  let coverEl = null // the flight plan band: opaque like the paper band, so the core need not draw behind it
+  const coverRect = { top: 0, bottom: 0 }
 
   function queryElements() {
     anchors.clear()
@@ -271,6 +274,7 @@ export function createXCore({ container, quality = 'high', onFirstFrame, onConte
       if (!anchors.has(id)) anchors.set(id, { cx: 0, cy: 0, w: 0, h: 0, el }) // a duplicate id: the first wins
     }
     sectionEls = SECTION_IDS.map((id) => document.getElementById(id))
+    coverEl = document.getElementById(COVER_ID)
   }
 
   function measureSections() {
@@ -441,6 +445,12 @@ export function createXCore({ container, quality = 'high', onFirstFrame, onConte
       }
       measureSections()
       covered = coversViewport(sectionRectArr[SIGNALS_INDEX], viewport.height)
+      if (!covered && coverEl?.isConnected) {
+        const r = coverEl.getBoundingClientRect()
+        coverRect.top = r.top
+        coverRect.bottom = r.bottom
+        covered = coversViewport(coverRect, viewport.height)
+      }
       if (!covered) {
         measureAnchors()
         layoutDirty = true

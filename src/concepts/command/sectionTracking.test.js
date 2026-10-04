@@ -63,8 +63,8 @@ describe('signal sections', () => {
 })
 
 describe('readout', () => {
-  it('reads "BUILD 003 / 006 · PIPELINE" for the process section', () => {
-    expect(readout(pageSections, 'process')).toEqual({ build: '003', total: '006', label: 'Pipeline' })
+  it('reads "BUILD 003 / 007 · PIPELINE" for the process section', () => {
+    expect(readout(pageSections, 'process')).toEqual({ build: '003', total: '007', label: 'Pipeline' })
   })
 
   it('covers every section id the page uses', () => {

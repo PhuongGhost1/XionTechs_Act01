@@ -27,14 +27,16 @@ export const nav = {
   cta: { label: 'Start a Project', href: finalCta.primary.href }, // SITE: opens an email
 }
 
-// The six sections in page order. `build` feeds the scroll counter (CONCEPT §14, "Build Counter").
+// The seven sections in page order. The data core scene still counts six (scene/store.js SECTION_IDS):
+// `agent` is an opaque band that covers it, like `signals`. `build` feeds the scroll counter (CONCEPT §14, "Build Counter").
 export const sections = [
   { id: 'top', build: '001', label: 'Command' },
   { id: 'modules', build: '002', label: 'Modules' },
   { id: 'process', build: '003', label: 'Pipeline' },
   { id: 'deployments', build: '004', label: 'Deployments' },
-  { id: 'signals', build: '005', label: 'Signals' },
-  { id: 'contact', build: '006', label: 'Deploy' },
+  { id: 'agent', build: '005', label: 'Flight plan' },
+  { id: 'signals', build: '006', label: 'Signals' },
+  { id: 'contact', build: '007', label: 'Deploy' },
 ]
 
 // CONCEPT §5.
@@ -102,7 +104,7 @@ export const modules = {
       title: 'AI systems',
       desc: 'Agents and automation that understand requests, make decisions, use your tools, and hand exceptions to people.',
       points: ['AI agents and workflow automation', 'AI-driven analytics', 'Human-in-the-loop approval'],
-      link: { label: 'See an Agent Work', href: '/#ai-agents' }, // the real, illustrative demo on the main page
+      link: { label: 'See an Agent Work', href: '#agent' }, // the Flight plan section of this page (an illustrative demo)
       source: 'SITE',
     },
     {
@@ -200,17 +202,56 @@ export const deployments = {
       tags: [],
       screen: null,
       illustrative: true,
-      link: { label: selectedWork.agentsLink.label, href: '/#ai-agents' }, // SITE label; the demo lives on the main page
+      link: { label: selectedWork.agentsLink.label, href: '#agent' }, // SITE label; the demo is the Flight plan section of this page
       stack: null,
       status: null,
     },
   ],
 }
 
+// Section 05, the AI agent demo as a flight plan. The scenarios, steps and journeys are the main page's
+// ILLUSTRATIVE demo data (src/content/site.js, via src/workflow/useAgentDemo.js), never copied. The
+// wording below is DRAFT, written for this concept pending team sign-off; it makes no claim about a
+// client, a number or a capability. Capability tags are PLACEHOLDER until the real services are confirmed.
+export const flightPlan = {
+  index: '05',
+  label: 'Flight plan',
+  title: 'Watch an agent fly a mission.',
+  intro:
+    'Each scenario is a mission. The agent climbs through its steps, forks where it has to decide, and holds at a gate until a person says go.',
+  draft: true,
+  badge: 'Illustrative scenario, not a client case study', // SITE badge wording; always visible
+  missionLabel: 'Mission',
+  viewLabel: 'View',
+  views: [
+    { id: 'workflow', label: 'Mission plan' },
+    { id: 'agent', label: 'Agent at work' },
+  ],
+  stageLabel: 'Flight plot',
+  stageHint: 'Drag, or use the arrow keys, to turn the plot. Escape resets the view.',
+  resetView: 'Reset View',
+  // Interface chrome for the node kinds, in the plot's vocabulary.
+  kinds: { trigger: 'Launch', agent: 'Waypoint', router: 'Burn', human: 'Gate', outcome: 'Orbit', abort: 'Abort', resource: 'Resource', skill: 'Skill', compact: 'Compaction' },
+  capabilityNote: 'Dashed tags are placeholder capabilities until the real services are confirmed.',
+  gate: {
+    title: 'Go / no-go',
+    waiting: 'The craft holds at the gate. Your call:',
+    idle: 'The craft flies to the gate and holds there for a decision.',
+    approve: 'Approve',
+    reject: 'Reject',
+    journey: 'One agent works through a long task. The ring shows its working context, which drains when it compacts.',
+  },
+  problem: { title: 'Inject a problem', none: 'Run clean', hint: 'Throw one of two predefined problems at the agent.' },
+  controls: { replay: 'Replay', otherPath: 'Other Path', pause: 'Pause', play: 'Play' },
+  readout: { title: 'Mission readout', phase: 'Phase', status: 'Status', log: 'Execution log', path: 'Flight path', stops: 'Stops', context: 'Context', contextWords: { filling: 'Filling', compacting: 'Compacting', fresh: 'Fresh', full: 'Full' } },
+  pauseMotion: { pause: 'Pause Motion', play: 'Play Motion' },
+  fallbackNote: 'Flat top view. The same mission, drawn without 3D.',
+}
+
 // CONCEPT §7 / 05. Engineering signals. Only figures the live site states are shown as numbers
 // (SITE team.facts). Figures that do not exist yet are PLACEHOLDER tiles, never invented numbers.
 export const signals = {
-  index: '05',
+  index: '06',
   label: 'Engineering signals',
   title: 'What the system is made of.',
   intro: 'The figures we can stand behind today, the technologies the live site names, and the numbers still to come.',
@@ -247,14 +288,14 @@ export const capabilityMap = toCapabilityMap()
 
 // CONCEPT §7 / 06 and §15. The closing statement and the signature ending.
 export const finale = {
-  index: '06',
+  index: '07',
   kicker: 'Have a system to build?',
   title: 'Let’s get it done.',
   slogan: ['Get', 'IT', 'Done.'], // set as a staircase; the accessible name is `title`
   primary: { ...finalCta.primary, label: 'Start a Project' }, // SITE href: opens an email to contact@xiontechs.com
   primaryNote: finalCta.primaryNote,
-  secondary: finalCta.secondary, // SITE: "See an Agent Work" -> #ai-agents (main page)
-  agentHref: '/#ai-agents',
+  secondary: finalCta.secondary, // SITE: "See an Agent Work"
+  agentHref: '#agent', // the Flight plan section of this page
 }
 
 export const footer = {
