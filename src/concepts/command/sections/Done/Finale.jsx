@@ -92,7 +92,7 @@ export function Finale() {
       <div ref={stageRef} className="stage">
         <div className="column relative z-10 flex h-full flex-col justify-center gap-5 lg:grid lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center lg:gap-12">
           <div className="min-w-0">
-            <Label>{STATIONS[6].label}</Label>
+            <Label>{STATIONS[7].label}</Label>
             <p className="mt-1 font-mono text-label uppercase text-ink2">{finale.kicker.text}</p>
             <h2
               id="done-title"

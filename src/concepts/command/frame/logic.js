@@ -22,8 +22,8 @@ export const navLit = (item, activeId) =>
  */
 export const MENU_BEHIND = Object.freeze(['#main', '[data-site-footer]', '[data-frame="dock"]', '[data-fixed-cta]'])
 
-/** Stations whose arrival draws the signal line (M05, doc 7.2): 01 PREMISE, 03, 04, 06. */
-export const SIGNAL_STATIONS = Object.freeze([1, 3, 4, 6])
+/** Stations whose arrival draws the signal line (M05, doc 7.2): 01 PREMISE, 03, 04, and 07 DONE. */
+export const SIGNAL_STATIONS = Object.freeze([1, 3, 4, 7])
 
 /** Does station `index` fire a signal line, given the stations already fired this session? */
 export const shouldFire = (index, seen) => SIGNAL_STATIONS.includes(index) && !seen.includes(index)

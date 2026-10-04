@@ -15,6 +15,10 @@ import { validateContent } from './validate.js'
 // The single door to the copy of Concept 01 v2. Sections import from here, never hardcode strings.
 // Frozen deeply, and in dev (and tests) checked against the rules of doc 12.4 at import time, so a
 // broken edit shows up as an error on the page instead of as a quietly dishonest label.
+//
+// The AGENT RUN group (content/agent.js) is deliberately not in this aggregate: it is the copy of a
+// lazily loaded section and travels with it, so it stays out of the entry bundle. It follows the same
+// rules: sections/Agent checks it in dev, and content.test.js runs validateContent on both together.
 
 function deepFreeze(value) {
   if (value && typeof value === 'object' && !Object.isFrozen(value)) {

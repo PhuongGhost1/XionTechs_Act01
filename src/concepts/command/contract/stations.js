@@ -1,7 +1,7 @@
-// The seven stations of the page (doc 4.1, 5.3). The order, ids, labels and track heights live
+// The eight stations of the page (doc 4.1, 5.3). The order, ids, labels and track heights live
 // here and nowhere else. Sections, the dock, the header and the scroll controller read them.
 //
-//   00 STANDBY   01 PREMISE   02 DEPLOY   03 LINE   04 ON FILE   05 LEDGER   06 DONE
+//   00 STANDBY   01 PREMISE   02 DEPLOY   03 LINE   04 ON FILE   05 AGENT RUN   06 LEDGER   07 DONE
 //
 // The id of a station is the id of its track wrapper (section#line, ...). `work` is the id of
 // "On File" because the nav word is WORK and the hash is #work.
@@ -21,14 +21,15 @@ export const STATIONS = Object.freeze([
   { index: 2, id: 'deploy', label: stationLabel('deploy'), hash: '#deploy', lvh: 150, lvhPhone: 128, pinned: false, mode: 'pin', anchor: 'deploy' },
   { index: 3, id: 'line', label: stationLabel('line'), hash: '#line', lvh: 220, lvhPhone: 200, pinned: true, mode: 'pin', anchor: 'line' },
   { index: 4, id: 'work', label: stationLabel('work'), hash: '#work', lvh: 220, lvhPhone: 187, pinned: false, mode: 'span', anchor: null },
-  { index: 5, id: 'ledger', label: stationLabel('ledger'), hash: '#ledger', lvh: 90, lvhPhone: 77, pinned: false, mode: 'span', anchor: null },
-  { index: 6, id: 'done', label: stationLabel('done'), hash: '#done', lvh: 160, lvhPhone: 136, pinned: true, mode: 'pin', anchor: 'done' },
+  { index: 5, id: 'agent', label: stationLabel('agent'), hash: '#agent', lvh: 320, lvhPhone: 0, pinned: true, mode: 'pin', anchor: null },
+  { index: 6, id: 'ledger', label: stationLabel('ledger'), hash: '#ledger', lvh: 90, lvhPhone: 77, pinned: false, mode: 'span', anchor: null },
+  { index: 7, id: 'done', label: stationLabel('done'), hash: '#done', lvh: 160, lvhPhone: 136, pinned: true, mode: 'pin', anchor: 'done' },
 ])
 
 /** Station ids in page order. */
 export const STATION_IDS = Object.freeze(STATIONS.map((s) => s.id))
 
-/** Short counter text for the dock: BUILD 000 .. BUILD 006 (doc 4.7, M12). */
+/** Short counter text for the dock: BUILD 000 .. BUILD 007 (doc 4.7, M12). */
 export const buildCounter = (index) => `00${index}`
 
 /** Mobile breakpoint of the frame (header 48, dock 56): below this width the phone values apply. */
@@ -44,9 +45,9 @@ export const FRAME = Object.freeze({
 
 /**
  * Every hash the page answers to. #contact is the composer below the pinned finale: it belongs
- * to station 06 but has no track of its own. Exported in this order.
+ * to station 07 but has no track of its own. Exported in this order.
  */
-export const HASH_IDS = Object.freeze(['#standby', '#premise', '#deploy', '#line', '#work', '#ledger', '#done', '#contact'])
+export const HASH_IDS = Object.freeze(['#standby', '#premise', '#deploy', '#line', '#work', '#agent', '#ledger', '#done', '#contact'])
 
 export const HASH_TO_STATION = Object.freeze({
   '#standby': 0,
@@ -54,9 +55,10 @@ export const HASH_TO_STATION = Object.freeze({
   '#deploy': 2,
   '#line': 3,
   '#work': 4,
-  '#ledger': 5,
-  '#done': 6,
-  '#contact': 6,
+  '#agent': 5,
+  '#ledger': 6,
+  '#done': 7,
+  '#contact': 7,
 })
 
 /** Station index for a location hash, or -1 when the hash is not one of ours. */

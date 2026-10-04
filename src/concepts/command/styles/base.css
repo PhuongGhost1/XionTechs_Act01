@@ -241,6 +241,9 @@
 .track[data-track='work'] {
   --track-h: var(--track-work);
 }
+.track[data-track='agent'] {
+  --track-h: var(--track-agent);
+}
 .track[data-track='ledger'] {
   --track-h: var(--track-ledger);
 }

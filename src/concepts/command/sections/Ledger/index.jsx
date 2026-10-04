@@ -55,7 +55,7 @@ export default function Ledger() {
     <section id="ledger" ref={ref} data-track="ledger" aria-labelledby="ledger-title" className="track ld-section">
       <div className="column ld-column">
         <header className="ld-intro">
-          <Label>{STATIONS[5].label}</Label>
+          <Label>{STATIONS[6].label}</Label>
           <Reveal as="h2" id="ledger-title" className="font-display text-h2 font-medium text-ink">
             {ledger.heading.text}
           </Reveal>

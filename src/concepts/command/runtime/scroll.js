@@ -84,7 +84,7 @@ const lerp = (a, b, t) => a + (b - a) * t
  * The scene scalars from the raw progress of every track (doc 6.2):
  *   k      0..4, which layout pair the core shows (L0 X, L1 ARMS, L2 LINE, L3 FIELD, L4 MARK)
  *   alpha  0..1, how visible the whole object is
- * `progress` is { standby, premise, deploy, line, work, ledger, done }, each 0..1. A missing key
+ * `progress` is { standby, premise, deploy, line, work, agent, ledger, done }, each 0..1. A missing key
  * counts as 0. Tracks are applied in page order and a later track that has started wins.
  *
  *   STANDBY  alpha 1 -> 0.35 over the first HERO_LEG_END of the track (the same leg that carries
@@ -94,6 +94,7 @@ const lerp = (a, b, t) => a + (b - a) * t
  *   DEPLOY   k 0 -> 1 over the first third; alpha 0.35 -> 1 over the first 15%
  *   LINE     k 1 -> 2 over the first 15%
  *   WORK     alpha 1 -> 0 over the first 8% (about the first 15% of plate one); k 2 -> 3 across
+ *   AGENT    no change: WORK has ended, the core stays out (k 3, alpha 0); the tape is CSS
  *   LEDGER   no 3D: alpha 0, k 3
  *   DONE     alpha 0 -> 1 over 0..0.2, hold to 0.4, k 3 -> 4 over 0.4..0.8, hold to 1
  */

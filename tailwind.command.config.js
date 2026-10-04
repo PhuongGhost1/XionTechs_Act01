@@ -102,7 +102,20 @@ export default {
       },
     },
   },
-  corePlugins: { preflight: false }, // reset lives in styles/base.css (trimmed to what the page renders)
+  // The reset lives in styles/base.css (trimmed to what the page renders). Every other switch is a
+  // plugin whose utilities this page never uses: Tailwind writes one block of --tw-* defaults per
+  // enabled plugin (twice, for * and ::backdrop), and these are about 2 kB of CSS for nothing.
+  corePlugins: {
+    preflight: false,
+    ringWidth: false, ringColor: false, ringOffsetWidth: false, ringOffsetColor: false,
+    boxShadow: false, boxShadowColor: false, dropShadow: false,
+    blur: false, brightness: false, contrast: false, grayscale: false, hueRotate: false, invert: false, saturate: false, sepia: false, filter: false,
+    backdropBlur: false, backdropBrightness: false, backdropContrast: false, backdropFilter: false, backdropGrayscale: false, backdropHueRotate: false, backdropInvert: false, backdropOpacity: false, backdropSaturate: false, backdropSepia: false,
+    gradientColorStops: false, scrollSnapType: false, touchAction: false, fontVariantNumeric: false, borderSpacing: false, contain: false,
+    // Colours carry their own alpha (a modifier such as border-hair/50, or the token's default): the
+    // --tw-*-opacity indirection would only repeat in every colour rule.
+    backgroundOpacity: false, borderOpacity: false, textOpacity: false, divideOpacity: false, placeholderOpacity: false,
+  },
   plugins: [
     // State on <html> is the single source of truth (doc 11.3 item 3), so variants read it.
     plugin(({ addVariant }) => {

@@ -1,5 +1,6 @@
 import { readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
+import { agent } from './agent.js'
 import { content, displayName, records, services, specRows, visibleLedgerRows } from './index.js'
 import {
   ESS_HOTSPOTS,
@@ -20,6 +21,22 @@ const clone = () => structuredClone(content)
 describe('the shipped content', () => {
   it('passes every honesty rule', () => {
     expect(validateContent(content)).toEqual([])
+  })
+
+  it('keeps the agent run group (loaded with its own section) as honest as the rest', () => {
+    expect(validateContent({ ...content, agent })).toEqual([])
+    let carriers = 0
+    walk(agent, (v) => {
+      if (v && typeof v === 'object' && (typeof v.text === 'string' || typeof v.label === 'string')) {
+        carriers += 1
+        expect(SOURCES, JSON.stringify(v).slice(0, 80)).toContain(v.src)
+      }
+    })
+    expect(carriers).toBeGreaterThan(120)
+    // the invented scenarios are illustrative, the capability words are placeholders, the interface is draft
+    expect(agent.workflows.every((w) => w.src === 'ILLUSTRATIVE' && w.nodes.every((n) => n.src === 'ILLUSTRATIVE'))).toBe(true)
+    expect(Object.values(agent.capabilities).every((c) => c.src === 'PLACEHOLDER')).toBe(true)
+    expect(agent.heading.src).toBe('DRAFT')
   })
 
   it('names a source on every string group and node', () => {

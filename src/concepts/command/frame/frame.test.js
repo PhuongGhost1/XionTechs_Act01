@@ -37,8 +37,8 @@ describe('frame logic', () => {
     expect(navLit(services, 'work')).toBe(false)
   })
 
-  it('draws the signal line for stations 01, 03, 04 and 06, once each', () => {
-    expect([...SIGNAL_STATIONS]).toEqual([1, 3, 4, 6])
+  it('draws the signal line for stations 01, 03, 04 and 07 (DONE), once each', () => {
+    expect([...SIGNAL_STATIONS]).toEqual([1, 3, 4, 7])
     for (const i of SIGNAL_STATIONS) {
       expect(shouldFire(i, [])).toBe(true)
       expect(shouldFire(i, [i])).toBe(false)
@@ -107,9 +107,9 @@ describe('Dock', () => {
     expect(out).toMatch(/BRIEF \(/)
   })
 
-  it('the scrubber is a slider over the seven stations with a station name as its value text', () => {
+  it('the scrubber is a slider over the eight stations with a station name as its value text', () => {
     expect(out).toContain('aria-valuemin="0"')
-    expect(out).toContain('aria-valuemax="6"')
+    expect(out).toContain('aria-valuemax="7"')
     expect(out).toContain('aria-valuenow="0"')
     expect(out).toContain('aria-valuetext="00 / STANDBY"')
   })

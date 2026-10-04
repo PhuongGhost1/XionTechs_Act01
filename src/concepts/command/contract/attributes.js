@@ -7,7 +7,7 @@
 //   data-tier     off | low | high      capability + governor
 //   data-motion   on | off              MotionToggle, media query
 //   data-view     read | raw            ViewToggle, pre-paint script
-//   data-station  0..6                  scroll controller
+//   data-station  0..7                  scroll controller
 //   data-active   section id            scroll controller
 //   data-webgl    drawn (else absent)   CoreCanvas
 //   data-brief    count                 brief store
@@ -52,7 +52,7 @@ export function normalise(name, value) {
       return VIEWS.includes(value) ? value : null
     case ATTR.station: {
       const n = Number(value)
-      return Number.isInteger(n) && n >= 0 && n <= 6 ? String(n) : null
+      return Number.isInteger(n) && n >= 0 && n <= 7 ? String(n) : null
     }
     case ATTR.active:
       return typeof value === 'string' && /^[a-z][a-z0-9-]*$/.test(value) ? value : null

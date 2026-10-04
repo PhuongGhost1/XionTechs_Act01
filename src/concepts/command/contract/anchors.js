@@ -52,7 +52,7 @@ export const ease = (t) => {
  *                      above 0) holds the core on the premise anchor
  *   deploy             premise -> deploy, over the first third of DEPLOY
  *   line               deploy -> line, over the first 15% of THE LINE
- *   work, ledger       line (the core is invisible here)
+ *   work, agent, ledger  line (the core is invisible here; WORK stays above 0 through AGENT)
  *   done               done (the core reappears at the finale)
  */
 export function coreAnchorSegment(progress = {}) {

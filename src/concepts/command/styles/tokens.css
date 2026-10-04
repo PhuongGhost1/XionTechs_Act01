@@ -79,6 +79,7 @@
   --track-deploy: 128lvh;
   --track-line: 200lvh;
   --track-work: 187lvh;
+  --track-agent: 0lvh; /* no pin on phones: the tape flows (sections/Agent) */
   --track-ledger: 77lvh;
   --track-done: 136lvh;
 
@@ -112,6 +113,7 @@
     --track-deploy: 150lvh;
     --track-line: 220lvh;
     --track-work: 220lvh;
+    --track-agent: 320lvh; /* pinned from 1024 px wide (agent.css), a flowing tape below */
     --track-ledger: 90lvh;
     --track-done: 160lvh;
   }

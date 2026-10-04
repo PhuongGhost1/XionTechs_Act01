@@ -1,0 +1,64 @@
+/*
+ * AGENT RUN (station 05): the printer tape. This file is only the keyframes of the printed line.
+ * Everything else (the grid, the depth of the strip, the printer) is utilities and inline style in
+ * Tape.jsx, Controls.jsx and index.jsx, which keeps the stylesheet inside its budget: the placement
+ * depends on the layout (`wide`, `stacked`) that the components already know. Colours come from the
+ * tokens. Only transform, opacity and clip-path are animated.
+ *
+ * Final-state rule (motion.css): an element's own style is the finished picture; keyframes describe
+ * the way in. data-motion=off and reduced motion remove every animation and transition, which
+ * leaves the whole printed tape at rest.
+ */
+
+/* A new row comes up out of the roller: low and tipped toward the reader, it rises and flattens
+   into the place its age gives it (--y is set on the stacked strip only). */
+@keyframes tp-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, calc(var(--y, 0px) * -1 + 40px), -20px) rotateX(-32deg);
+  }
+}
+
+/* A line prints left to right: the ink is laid down under a clip that opens (leaf element only). */
+@keyframes tp-ink {
+  from {
+    clip-path: inset(-8px 100% -8px 0);
+  }
+  to {
+    clip-path: inset(-8px -2px -8px 0);
+  }
+}
+
+/* A failed line is struck through. */
+@keyframes tp-strike {
+  from {
+    transform: scaleX(0);
+  }
+}
+
+/* The stamp presses in (180 ms): it comes forward in z and settles, in the perspective of its box. */
+@keyframes tp-stamp {
+  from {
+    opacity: 0;
+    transform: translateZ(110px) rotate(-7deg);
+  }
+  55% {
+    opacity: 1;
+  }
+}
+
+/* The tear-off slip falls away; at rest it is gone (the status line keeps its words). */
+@keyframes tp-tear {
+  0%,
+  45% {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* The print head sweeps the slot once per printed line (100cqw is the width of the roller). */
+@keyframes tp-sweep {
+  to {
+    transform: translateX(calc(100cqw - 14px));
+  }
+}

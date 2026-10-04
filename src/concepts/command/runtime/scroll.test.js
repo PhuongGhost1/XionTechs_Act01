@@ -171,6 +171,12 @@ describe('kAlphaFor', () => {
     expect(kAlphaFor({ ...base, work: 1 })).toEqual({ k: 3, alpha: 0 })
   })
 
+  it('keeps the core out through the AGENT RUN, which has no 3D of the core (it is a CSS tape)', () => {
+    const base = done('standby', 'premise', 'deploy', 'line', 'work')
+    expect(kAlphaFor({ ...base, agent: 0 })).toEqual({ k: 3, alpha: 0 })
+    expect(kAlphaFor({ ...base, agent: 0.5 })).toEqual({ k: 3, alpha: 0 })
+  })
+
   it('has no 3D in the LEDGER', () => {
     expect(kAlphaFor({ ...done('standby', 'premise', 'deploy', 'line', 'work'), ledger: 0.5 })).toEqual({ k: 3, alpha: 0 })
   })
@@ -215,7 +221,7 @@ describe('stationAt', () => {
     expect(stationAt(0, VH, tops)).toBe(0)
     expect(stationAt(tops[3], VH, tops)).toBe(3)
     expect(stationAt(tops[3] - VH / 2 - 1, VH, tops)).toBe(2)
-    expect(stationAt(tops[6] + 5000, VH, tops)).toBe(6)
+    expect(stationAt(tops[7] + 5000, VH, tops)).toBe(7)
   })
 
   it('lands on the right station when a hash puts a track top at the viewport top', () => {
@@ -223,9 +229,9 @@ describe('stationAt', () => {
   })
 
   it('skips stations that are not registered yet', () => {
-    const sparse = [0, undefined, undefined, 3000, undefined, undefined, 9000]
+    const sparse = [0, undefined, undefined, 3000, undefined, undefined, undefined, 9000]
     expect(stationAt(4000, VH, sparse)).toBe(3)
-    expect(stationAt(10000, VH, sparse)).toBe(6)
+    expect(stationAt(10000, VH, sparse)).toBe(7)
     expect(stationAt(0, VH, [undefined, undefined, 500])).toBe(2)
     expect(stationAt(0, VH, [])).toBe(0)
   })
@@ -316,9 +322,9 @@ describe('scrubber maths', () => {
   })
 
   it('tickFractions puts station 0 at 0, ends inside 0..1, and rises with the station', () => {
-    const tops = [64, 964, 1953, 3304, 5284, 7264, 8074]
-    const ticks = tickFractions(tops, 11000, 900, 64)
-    expect(ticks).toHaveLength(7)
+    const tops = [64, 964, 1953, 3304, 5284, 7264, 10144, 10954]
+    const ticks = tickFractions(tops, 14000, 900, 64)
+    expect(ticks).toHaveLength(8)
     expect(ticks[0]).toBe(0)
     for (let i = 1; i < ticks.length; i += 1) expect(ticks[i]).toBeGreaterThan(ticks[i - 1])
     expect(ticks.at(-1)).toBeLessThanOrEqual(1)
@@ -333,11 +339,11 @@ describe('scrubber maths', () => {
     expect(stepStation(3, 1)).toBe(4)
     expect(stepStation(3, -1)).toBe(2)
     expect(stepStation(0, -1)).toBe(0)
-    expect(stepStation(6, 1)).toBe(6)
+    expect(stepStation(7, 1)).toBe(7)
   })
 
   it('getTickFractions is safe before anything is measured', () => {
-    expect(getTickFractions()).toHaveLength(7)
+    expect(getTickFractions()).toHaveLength(8)
   })
 })
 

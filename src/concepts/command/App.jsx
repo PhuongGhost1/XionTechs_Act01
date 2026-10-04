@@ -21,7 +21,7 @@ import Premise from './sections/Premise/index.jsx'
 import Standby from './sections/Standby/index.jsx'
 
 // Composition root of Concept 01 v2. Everything visual lives in frame/ and sections/; this file
-// only wires the page: the seven stations in order inside <main>, the fixed frame around them,
+// only wires the page: the eight stations in order inside <main>, the fixed frame around them,
 // and the runtime (scroll controller, flow watcher, ambient pauser, tier control).
 //
 // Tier (doc 6.2) is decided by runtime/tier.js and read back here from <html data-tier>, the
@@ -31,9 +31,14 @@ import Standby from './sections/Standby/index.jsx'
 // paint and an idle moment, and unmounts the moment it becomes "off" (RAW, MOTION off, a lost
 // context, a governor drop). If its chunk fails to load the page stays on the SVG tier.
 //
-// Both lazy chunks stay out of the entry bundle: the canvas (WP2 grows it to the three.js scene,
-// at most 180 kB gzip) and the token story (?tokens, a review page owned by WP0).
+// The lazy chunks stay out of the entry bundle: the canvas (WP2 grows it to the three.js scene,
+// at most 180 kB gzip), the token story (?tokens, a review page owned by WP0) and the AGENT RUN
+// station (the printer tape and its ported run logic: 02-agent-demo-notes.md). The station loads once
+// the browser is idle after first paint; until then a placeholder of the same id and height holds its
+// place in the page, so anchors and the scroll length do not move when it arrives.
 
+const loadAgent = () => import('./sections/Agent/index.jsx')
+const Agent = lazy(loadAgent)
 const CoreCanvas = lazy(() => import('./core/CoreCanvas.jsx'))
 const TokenStory = lazy(() => import('./TokenStory.jsx'))
 
@@ -64,6 +69,11 @@ function whenIdle(fn) {
   return () => window.clearTimeout(id)
 }
 
+/** Holds the place of #agent until its chunk arrives (same id, same pinned height on wide screens). */
+function AgentPlaceholder() {
+  return <section id="agent" aria-hidden="true" className="track" style={{ minHeight: 'var(--track-agent)' }} />
+}
+
 function Page() {
   const tier = useHtmlAttribute(ATTR.tier)
   const [idle, setIdle] = useState(false)
@@ -71,7 +81,10 @@ function Page() {
   // The runtime lives as long as the page. Each start is idempotent and StrictMode safe.
   useEffect(() => {
     const stops = [startScroll(), startFlowWatcher(), startAmbient(), startTier()]
-    const cancelIdle = whenIdle(() => setIdle(true))
+    const cancelIdle = whenIdle(() => {
+      setIdle(true)
+      loadAgent()
+    })
     return () => {
       cancelIdle()
       stops.forEach((stop) => stop())
@@ -94,6 +107,9 @@ function Page() {
         <Deploy />
         <Line />
         <OnFile />
+        <Suspense fallback={<AgentPlaceholder />}>
+          <Agent />
+        </Suspense>
         <Ledger />
         <Done />
       </main>

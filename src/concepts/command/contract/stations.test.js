@@ -16,12 +16,13 @@ import {
 const css = readFileSync(new URL('../styles/tokens.css', import.meta.url), 'utf8')
 
 describe('stations', () => {
-  it('are the seven of the design document, in order', () => {
-    expect(STATION_IDS).toEqual(['standby', 'premise', 'deploy', 'line', 'work', 'ledger', 'done'])
-    expect(STATIONS.map((s) => s.index)).toEqual([0, 1, 2, 3, 4, 5, 6])
+  it('are the seven of the design document plus the agent run, in order', () => {
+    expect(STATION_IDS).toEqual(['standby', 'premise', 'deploy', 'line', 'work', 'agent', 'ledger', 'done'])
+    expect(STATIONS.map((s) => s.index)).toEqual([0, 1, 2, 3, 4, 5, 6, 7])
     expect(STATIONS[0].label).toBe('00 / STANDBY')
     expect(STATIONS[2].label).toBe('02 / WHAT WE CAN DEPLOY')
-    expect(STATIONS[6].label).toBe('06 / DONE')
+    expect(STATIONS[5].label).toBe('05 / AGENT RUN')
+    expect(STATIONS[7].label).toBe('07 / DONE')
   })
 
   it('take their visible labels from content/ (one source, every one with a src tag)', () => {
@@ -45,28 +46,32 @@ describe('stations', () => {
     expect(source).not.toContain('WHAT WE CAN DEPLOY')
   })
 
-  it('answer to the eight hashes', () => {
-    expect(HASH_IDS).toEqual(['#standby', '#premise', '#deploy', '#line', '#work', '#ledger', '#done', '#contact'])
+  it('answer to the nine hashes', () => {
+    expect(HASH_IDS).toEqual(['#standby', '#premise', '#deploy', '#line', '#work', '#agent', '#ledger', '#done', '#contact'])
     for (const h of HASH_IDS) expect(stationForHash(h)).toBe(HASH_TO_STATION[h])
-    expect(stationForHash('#contact')).toBe(6)
+    expect(stationForHash('#agent')).toBe(5)
+    expect(stationForHash('#contact')).toBe(7)
     expect(stationForHash('#nope')).toBe(-1)
     for (const s of STATIONS) expect(s.hash).toBe(`#${s.id}`)
   })
 
-  it('keep the track heights of doc 5.3 (page length about 11.5 viewports)', () => {
-    expect(STATIONS.map((s) => s.lvh)).toEqual([100, 110, 150, 220, 220, 90, 160])
-    expect(STATIONS.reduce((sum, s) => sum + s.lvh, 0)).toBeLessThanOrEqual(1050)
+  it('keep the track heights of doc 5.3, plus 320 lvh of pinned dwell for the agent run (02-agent-demo-notes)', () => {
+    expect(STATIONS.map((s) => s.lvh)).toEqual([100, 110, 150, 220, 220, 320, 90, 160])
+    // 1050 lvh of doc 5.3 (page length about 11.5 viewports) plus the agent station.
+    expect(STATIONS.reduce((sum, s) => sum + s.lvh, 0)).toBeLessThanOrEqual(1050 + 320)
+    expect(trackLvh('agent')).toBe(320)
+    expect(trackLvh('agent', true)).toBe(0) // phones and tablets: no pin, the tape flows
     expect(trackLvh('line', true)).toBe(200)
     expect(trackLvh('line')).toBe(220)
     expect(trackLvh('nope')).toBe(0)
   })
 
-  it('pin only THE LINE and DONE as full stages', () => {
-    expect(STATIONS.filter((s) => s.pinned).map((s) => s.id)).toEqual(['line', 'done'])
+  it('pin THE LINE, the agent run and DONE as full stages', () => {
+    expect(STATIONS.filter((s) => s.pinned).map((s) => s.id)).toEqual(['line', 'agent', 'done'])
   })
 
-  it('count BUILD 000 to 006', () => {
-    expect(STATIONS.map((s) => buildCounter(s.index))).toEqual(['000', '001', '002', '003', '004', '005', '006'])
+  it('count BUILD 000 to 007', () => {
+    expect(STATIONS.map((s) => buildCounter(s.index))).toEqual(['000', '001', '002', '003', '004', '005', '006', '007'])
   })
 
   it('match the --track-* tokens in tokens.css, desktop and phone', () => {
