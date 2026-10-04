@@ -346,3 +346,17 @@ just at the end.
   - **First checkout was the wrong base.** The auto-created worktree branched from `main`, which lacks `docs/idea/*`, the multi-page setup and `site.js`'s verified data; found by listing `docs/`, fixed by resetting the (empty) branch to `5a81f0a` after the user confirmed.
   - **Search results disagreed** on Firefox support for `animation-timeline`; the plan does not rely on it instead of picking one claim.
 - Not done: nothing implemented; the font CSS2 URL was not fetched, so axes are unverified (first implementation step).
+
+
+## 2026-10-04 - Concept 03 v2, X / Edition "The Proof": implementation (Danh + Claude Fable 5.1)
+- Prompt: after switching the model, "start implementing from plan §12". Built in one session by one agent (no parallel agents): scaffold, tokens, pure pass logic, primitives, chrome, eight sections, tests, QA, docs.
+- Decisions made while building (all recorded in plan §14): struck words fade out unless there is room for a proofreader's note; Dispatches as three broadsheet columns instead of a second horizontal run; each StaffXP chapter keeps its own figure; no editorial cursor.
+- Where the AI got it wrong:
+  - **The proofreader's note collided with the line above** in every multi-line headline (leading 0.9 leaves no gap). Seen only in screenshots; the plan had assumed the note could always stay.
+  - **Contrast**: inactive role names used the rule colour (1.9:1). axe caught it; the plan itself says that colour is never text. Now the mute token.
+  - **Horizontal overflow on phones, three times**: a grid item without `min-w-0` around the hand-scrolled ESS frame (555 px wide page at 390), the rotated "+" of the index (1 px at 360), and the header after its pause button was set to `nowrap` (376 px at 360). Each found by a script that scrolls the whole page and lists elements past the viewport.
+  - **Layout by guesswork**: "BUSINESS." ran off the page at a 34% indent, the role names overlapped their side panel at 10rem, and "GET IT DONE." wrapped so its rule cut through the second line. All sized from measured widths afterwards.
+  - Smaller: `fetchPriority` is not known to React 18 (console warning), a full stop wrapped onto its own line after a `nowrap` word, the folio numeral was clipped by its own overflow box.
+  - The built-in browser pane resized itself mid-check, so QA moved to headless Edge with `puppeteer-core` and `axe-core` installed in a temp folder outside the repo.
+- Verification: 625 tests (42 files), lint and build pass. axe-core (wcag2a/2aa/21aa/22aa + best-practice): 0 violations at 1440, 1024, 390, 360 and with reduced motion; contrast "incomplete" nodes remain where text sits on the highlighter gradient or over images, token pairs are computed by `tokens.test.js`. No horizontal overflow at 1440, 1024, 768, 390, 360. No `three` request. Screenshots reviewed at 1440 (whole page), 1024, 390 and 360 (parts).
+- Not done: keyboard path and the contents dialog were not exercised by hand; no Safari / Firefox / real phone; no screen-reader pass; Vercel `web-design-guidelines` review not run; not pushed.

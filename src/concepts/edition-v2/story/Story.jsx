@@ -121,14 +121,14 @@ export default function Story() {
         </div>
       ) : (
         <div ref={run} className="pf-wrap mt-12 grid gap-10 lg:grid-cols-12">
-          <div className="lg:col-span-8 lg:col-start-5 lg:row-start-1">
+          <div className="min-w-0 lg:col-span-8 lg:col-start-5 lg:row-start-1">
             <div role="region" aria-label={story.figure.caption} tabIndex={0} className="overflow-x-auto border border-pf-rule/60 bg-pf-bg2">
               <Screen active={active} className="h-[min(70vw,420px)] w-max lg:h-[440px]" />
             </div>
             <p className="mt-3 text-[15px] text-pf-mute">{story.scrollHint}</p>
             <Caption />
           </div>
-          <div className="lg:col-span-4 lg:row-start-1">
+          <div className="min-w-0 lg:col-span-4 lg:row-start-1">
             <Areas active={active} setActive={setActive} />
           </div>
         </div>

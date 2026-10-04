@@ -32,7 +32,7 @@ export default function Feature() {
           <div className="lg:col-span-5">
             <div className="lg:sticky lg:top-[calc(var(--pf-header)+32px)]">
               <p className="flex items-end gap-5">
-                <span aria-hidden="true" className="font-display text-[clamp(7.5rem,17vw,17.5rem)] font-light italic leading-[0.72] text-pf-mark">
+                <span aria-hidden="true" className="font-display text-[clamp(7.5rem,17vw,17.5rem)] font-light italic leading-[0.8] text-pf-mark">
                   {feature.numeral}
                 </span>
                 <span className="pf-mono pb-2 text-pf-mute">{feature.kicker}</span>

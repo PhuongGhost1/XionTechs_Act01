@@ -8,20 +8,27 @@ import { editParts } from '../pass/states.js'
 export function Edited({ text, edit, mark }) {
   const parts = editParts(text, edit ? edit.insert : mark)
   if (!parts) return text
+  // Trailing punctuation stays with the word so it cannot wrap onto a line of its own.
+  const tail = parts.after.match(/^S*/)[0]
+  const keep = edit?.keep === 'lg' ? 'pf-edit--keep-lg' : edit?.keep ? 'pf-edit--keep' : ''
   return (
     <>
       {parts.before}
       {edit ? (
-        <span className={`pf-edit ${edit.end ? 'pf-edit--end' : ''}`}>
+        <span className={`pf-edit ${edit.end ? 'pf-edit--end' : ''} ${keep}`}>
           <del aria-hidden="true" className="pf-edit__old">
             {edit.strike}
           </del>
           <span className="pf-edit__new pf-hl">{parts.match}</span>
+          {tail}
         </span>
       ) : (
-        <span className="pf-hl">{parts.match}</span>
+        <span className="whitespace-nowrap">
+          <span className="pf-hl">{parts.match}</span>
+          {tail}
+        </span>
       )}
-      {parts.after}
+      {parts.after.slice(tail.length)}
     </>
   )
 }
@@ -43,8 +50,8 @@ export function Folio({ no, head, className = '' }) {
   const seen = useInView(ref, { threshold: 0.6 })
   return (
     <div ref={ref} data-in={seen} className={`flex items-end gap-4 border-b border-pf-rule/60 pb-3 ${className}`}>
-      <span className="pf-folio__clip overflow-hidden" aria-hidden="true">
-        <span className="pf-folio__num font-display text-[clamp(3rem,6vw,5.5rem)] font-light italic leading-[0.8] text-pf-text">{no}</span>
+      <span className="pf-folio__clip overflow-hidden pr-2 pt-[0.16em] font-display text-[clamp(3rem,6vw,5.5rem)] font-light italic leading-[0.8] text-pf-text" aria-hidden="true">
+        <span className="pf-folio__num">{no}</span>
       </span>
       <span className="pf-mono pb-1 text-pf-mute">
         <span className="sr-only">Section {no}: </span>

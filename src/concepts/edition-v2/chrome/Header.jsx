@@ -14,10 +14,10 @@ export default function Header() {
       <a href="#main" className="pf-mono sr-only bg-pf-text px-3 py-2 text-pf-bg focus:not-sr-only focus:absolute focus:left-2 focus:top-2">
         {chrome.skip}
       </a>
-      <div className="pf-wrap flex h-14 items-center justify-between gap-6">
-        <a href="#top" className="flex items-center gap-3">
+      <div className="pf-wrap flex h-14 items-center justify-between gap-3 sm:gap-6">
+        <a href="#top" className="flex shrink-0 items-center gap-3">
           <img src={edition.logo.src} alt="XionTechs" width={edition.logo.width} height={edition.logo.height} className="h-6 w-auto" />
-          <span className="pf-mono text-pf-mute" aria-hidden="true">
+          <span className="pf-mono hidden text-pf-mute sm:inline" aria-hidden="true">
             / 01
           </span>
         </a>
@@ -33,8 +33,10 @@ export default function Header() {
           </ul>
         </nav>
         <div className="flex items-center gap-2">
-          <button type="button" onClick={togglePaused} aria-pressed={paused} className="pf-mono min-h-[32px] px-2 text-pf-mute hover:text-pf-text">
-            {paused ? chrome.play : chrome.pause}
+          <button type="button" onClick={togglePaused} aria-pressed={paused} className="pf-mono min-h-[32px] whitespace-nowrap px-2 text-pf-mute hover:text-pf-text">
+            {/* The second word drops on narrow phones; the accessible name keeps it. */}
+            {(paused ? chrome.play : chrome.pause).split(' ')[0]}
+            <span className="max-sm:sr-only"> {(paused ? chrome.play : chrome.pause).split(' ')[1]}</span>
           </button>
           <button
             type="button"

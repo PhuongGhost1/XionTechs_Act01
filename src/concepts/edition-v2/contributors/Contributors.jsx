@@ -27,7 +27,7 @@ export default function Contributors() {
                   onClick={() => setActive(r.id)}
                   onMouseEnter={() => setActive(r.id)}
                   onFocus={() => setActive(r.id)}
-                  className={`pf-display block w-full text-left text-[clamp(3rem,12vw,10rem)] transition-colors duration-300 ${active === r.id ? '' : '!text-pf-rule/70'}`}
+                  className={`pf-display block w-full text-left text-[clamp(2.5rem,13vw,7rem)] transition-colors duration-300 lg:text-[clamp(4rem,8.2vw,7.4rem)] ${active === r.id ? '' : '!text-pf-mute'}`}
                 >
                   <span className={active === r.id ? 'pf-hl !bg-[length:100%_var(--pf-hl-size)]' : ''}>{r.name}</span>
                 </button>

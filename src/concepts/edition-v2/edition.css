@@ -137,7 +137,9 @@
   text-decoration: none;
   color: rgb(var(--pf-mute));
   transform-origin: left bottom;
-  transition: transform 520ms var(--pf-ease) 380ms;
+  transition:
+    transform 520ms var(--pf-ease) 380ms,
+    opacity 300ms linear 420ms;
 }
 .pf-edit--end .pf-edit__old {
   left: auto;
@@ -171,8 +173,21 @@
 .pf-hl:not(.pf-edit__new) {
   transition: background-size 520ms var(--pf-ease) 300ms;
 }
+/* Passed: the struck word leaves. Where the layout has room above the word (`--keep`), it stays as a
+   proofreader's note instead. */
 [data-pass='clean'] .pf-edit__old {
-  transform: translateY(-0.86em) scale(0.24);
+  opacity: 0;
+  transform: translateY(-0.2em);
+}
+[data-pass='clean'] .pf-edit--keep .pf-edit__old {
+  opacity: 1;
+  transform: translateY(-0.93em) scale(0.24);
+}
+@media (min-width: 1024px) {
+  [data-pass='clean'] .pf-edit--keep-lg .pf-edit__old {
+    opacity: 1;
+    transform: translateY(-0.93em) scale(0.24);
+  }
 }
 [data-pass='clean'] .pf-edit__old::after {
   transform: scaleX(1);

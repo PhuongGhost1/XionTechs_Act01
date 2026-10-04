@@ -301,3 +301,27 @@ code-drawn abstract art labelled Illustrative; Dispatches stay on the page as DR
 Open for the team: (1) is "People" allowed to stay typographic until real photos are approved? (2) may the StaffXP
 chapter text name the project as "Education / staff experience" (already on the live-sourced descriptor)? (3) keep the
 `PEOPLE → ENGINEERS` correction in the cover, or would the team rather not show an edit on the very first screen?
+
+## 14. As built: where the build differs from the plan
+
+- **Struck words leave by default.** With display leading at 0.9 there is no room above a word inside a multi-line
+  headline, so the proofreader's note collided with the line above. After the strike the old word now fades out; it
+  stays as a small note only where the layout has free space above it (`keep` in `content.js`: the cover on every
+  width, the manifesto from 1024 px).
+- **No `<ins>`.** The final word is a plain `span`, the struck word a `del aria-hidden`. Screen readers read only the
+  final copy without an "insertion" announcement.
+- **Dispatches are three broadsheet columns**, not a horizontal strip. Three short pieces fit one desktop viewport, so
+  a second pinned horizontal run (ESS already has one) added nothing. The lead column is wider and starts higher.
+- **Feature figures do not swap.** Each StaffXP chapter carries its own figure and the pinned column only tracks the
+  active chapter; the same markup serves mobile.
+- **ESS pan** uses a container-query unit (`100cqw - 100%`) so the track ends flush at any size; the pinned run needs
+  1024 x 640, otherwise the screen sits in a hand-scrolled frame with the hint.
+- **Editorial cursor (tier 2) not built.** Edge marker shows from 1560 px (below that it would sit on the content).
+- **Pause Motion** has no loop to stop (the page has none); it ends transitions and switches the pinned run and the
+  plate to their final states, like reduced motion. On phones the button reads "Pause" (full name kept for assistive
+  tech).
+- **Files.** Hooks live in one `hooks/index.js`; primitives in `ui/primitives.jsx`; the contents menu is a
+  `<dialog>` inside `chrome/Header.jsx`; the colophon is the footer of `signoff/Signoff.jsx`; scroll progress is a
+  pure function in `pass/states.js`.
+- **Measured.** Entry JS 6.7 kB gzip, lazy sections 4.8 kB, CSS 6.5 kB; no `three` request; the main page's CSS is
+  unchanged (57.50 kB).

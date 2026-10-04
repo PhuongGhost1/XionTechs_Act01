@@ -46,7 +46,7 @@ export const chrome = {
 
 export const cover = {
   lines: ['The', 'Engineers', 'Behind', 'Digital', 'Products.'], // BRIEF §5
-  edit: { strike: 'People', insert: 'Engineers', end: true },
+  edit: { strike: 'People', insert: 'Engineers', end: true, keep: true },
   standfirst: company.positioning, // SITE (PLAN §0)
   primary: { label: 'Read the Feature', href: '#feature' }, // DRAFT (UI label)
   secondary: { label: finalCta.primary.label, href: '#contact' }, // SITE
@@ -59,7 +59,7 @@ export const cover = {
 
 export const manifesto = {
   lines: ['Software', 'should', 'move', 'business.'], // BRIEF §7
-  edit: { strike: 'support', insert: 'move' },
+  edit: { strike: 'support', insert: 'move', keep: 'lg' },
   // SITE: hero intro (PLAN §3).
   body: hero.intro,
   // SITE: MOTION §17 equation, set as a marginal note.

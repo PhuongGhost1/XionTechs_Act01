@@ -9,14 +9,20 @@ export default function CapabilityIndex() {
   const [open, setOpen] = useState(index.items[0].id)
 
   return (
-    <section id={meta.id} data-band={meta.band} aria-labelledby="index-title">
+    <section id={meta.id} data-band={meta.band} aria-labelledby="index-title" className="overflow-x-clip">
       <div className="pf-wrap py-20 lg:py-32">
         <Folio no={meta.no} head={meta.head} />
         <div className="mt-12 grid gap-10 lg:grid-cols-12">
-          <PassHeading id="index-title" className="lg:col-span-4 !text-[clamp(2.25rem,4.4vw,4rem)]">
-            <Edited text={index.title} edit={index.edit} />
-            {index.draft && <DraftMark />}
-          </PassHeading>
+          <div className="lg:col-span-4">
+            <PassHeading id="index-title" className="!text-[clamp(2.25rem,3.9vw,3.5rem)]">
+              <Edited text={index.title} edit={index.edit} />
+            </PassHeading>
+            {index.draft && (
+              <p className="mt-4">
+                <DraftMark />
+              </p>
+            )}
+          </div>
           <ol className="border-t border-pf-text lg:col-span-8">
             {index.items.map((item, i) => {
               const isOpen = open === item.id

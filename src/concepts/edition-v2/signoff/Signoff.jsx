@@ -26,9 +26,9 @@ export default function Signoff() {
         <p
           ref={slogan}
           data-pass={pass}
-          className="pf-display mt-10 text-[clamp(3.25rem,15.5vw,14.5rem)] !leading-[0.84] transition-[letter-spacing,opacity] duration-[1200ms] ease-pf data-[pass=draft]:tracking-[0.12em] data-[pass=draft]:opacity-40"
+          className="pf-display mt-10 whitespace-nowrap text-[clamp(2.5rem,11.6vw,10.6rem)] transition-[letter-spacing,opacity] duration-[1200ms] ease-pf data-[pass=draft]:tracking-[0.12em] data-[pass=draft]:opacity-40"
         >
-          <span className="pf-hl !bg-[position:0_96%] pb-[0.08em]">{signoff.slogan}</span>
+          <span className="pf-hl inline-block pb-[0.14em] !bg-[position:0_100%]">{signoff.slogan}</span>
         </p>
 
         <Reveal className="mt-14 grid gap-8 lg:grid-cols-12">

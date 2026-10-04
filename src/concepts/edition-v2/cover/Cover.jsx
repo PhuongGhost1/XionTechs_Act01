@@ -77,7 +77,7 @@ export default function Cover() {
                   width={cover.plate.width}
                   height={cover.plate.height}
                   onLoad={() => setLoaded(true)}
-                  fetchPriority="high"
+                  fetchpriority="high"
                   className="absolute inset-0 h-full w-full object-cover object-left-top grayscale"
                 />
                 <span className="absolute inset-0 bg-pf-text/25 mix-blend-multiply" aria-hidden="true" />

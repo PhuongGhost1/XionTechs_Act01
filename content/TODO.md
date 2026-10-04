@@ -116,3 +116,16 @@ Open items before it could replace the main page:
 - Testimonials: the live site's markup is unrendered theme-demo content. Add a section only
   with real, approved client quotes.
 - Team photos: none until real, approved photos exist (plan §13).
+
+## Concept 03 v2 (X / Edition "The Proof", `/concepts/edition-v2/`)
+
+- [ ] **Cover correction**: keep `People → Engineers` as the first thing a visitor sees, or open on the clean headline?
+- [ ] **Struck words** (`STRIKES` in `src/concepts/edition-v2/content.js`): team sign-off on the seven words.
+- [ ] **Outcome and technology** for StaffXP and ESS: shown as dashed "pending confirmation" chips; no metrics yet.
+- [ ] **StaffXP "The problem"** paragraph and the Cloud index descriptor are DRAFT wording.
+- [ ] **Dispatches**: three DRAFT points of view assembled from main-page copy. Replace with real engineering
+      stories (author, date) when they exist, or keep them unsigned.
+- [ ] **Contributors**: no line for Designers (nothing verified to say) and no portraits. Needs real photography
+      and permission before any name or face appears.
+- [ ] **Not checked**: Safari and Firefox (container-query units in the ESS pan, `<dialog>` contents menu), a real
+      phone, a screen-reader pass.

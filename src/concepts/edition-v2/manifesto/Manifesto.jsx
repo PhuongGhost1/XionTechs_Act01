@@ -3,7 +3,7 @@ import { Edited, Folio, PassHeading, Reveal } from '../ui/primitives.jsx'
 
 const meta = SECTIONS[1]
 // Each line starts on a different column of the grid (desktop only).
-const INDENT = ['lg:ml-0', 'lg:ml-[26%]', 'lg:ml-[9%]', 'lg:ml-[34%]']
+const INDENT = ['', 'lg:ml-[26%]', 'lg:ml-[9%]', 'lg:text-right']
 
 export default function Manifesto() {
   return (
