@@ -19,7 +19,7 @@ export default function Finale() {
     <Section id="build" className="overflow-clip pb-24 pt-24 lg:pb-32 lg:pt-32">
       <Container>
         <Mono as="p" className="flex items-center gap-3 text-x-faint">
-          <span className="text-x-text">05</span>
+          <span className="text-x-text">06</span>
           <span aria-hidden="true" className="h-px w-8 bg-x-line" />
           <span>{finale.kicker}</span>
         </Mono>

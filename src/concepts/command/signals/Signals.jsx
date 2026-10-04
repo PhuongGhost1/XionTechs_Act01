@@ -130,7 +130,7 @@ export default function Signals() {
   return (
     <Section id="signals" band="paper" className="py-24 lg:py-32">
       <Container>
-        <SectionHead code="04" label="Signals" title={signals.title} intro={signals.intro} />
+        <SectionHead code="05" label="Signals" title={signals.title} intro={signals.intro} />
         <div className="mt-14 grid gap-14 lg:grid-cols-12 lg:gap-16">
           <Reveal className="lg:col-span-5">
             <StackMatrix />

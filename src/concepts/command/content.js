@@ -20,6 +20,7 @@ export const nav = {
   tag: 'System / 2026', // BRIEF §6
   items: [
     { label: 'Work', href: '#work', id: 'work' },
+    { label: 'Agent', href: '#agent', id: 'agent' },
     { label: 'Services', href: '#deploy', id: 'deploy' },
     { label: 'Process', href: '#pipeline', id: 'pipeline' },
     { label: 'Signals', href: '#signals', id: 'signals' },
@@ -33,8 +34,9 @@ export const sections = [
   { id: 'deploy', code: '01', name: 'What we can deploy' },
   { id: 'pipeline', code: '02', name: 'From request to production' },
   { id: 'work', code: '03', name: 'Selected deployments' },
-  { id: 'signals', code: '04', name: 'Engineering signals' },
-  { id: 'build', code: '05', name: 'Final build' },
+  { id: 'agent', code: '04', name: 'Watch an agent work' },
+  { id: 'signals', code: '05', name: 'Engineering signals' },
+  { id: 'build', code: '06', name: 'Final build' },
 ]
 
 // BRIEF §5. Three lines; the last one carries the yellow sweep.
@@ -294,8 +296,49 @@ export const work = {
       logTitle: 'Illustrative run',
       screens: [],
       assembly: false,
+      link: { href: '#agent', label: 'Watch the agent run' }, // DRAFT: anchors to the live demo section below
     },
   ],
+}
+
+// Section 04, "Watch an agent work". The scenarios, steps and journeys are ILLUSTRATIVE and come from
+// src/content/site.js (workflows, agentJourneys); only the words around them live here. No digits.
+export const agent = {
+  label: 'Agent', // DRAFT
+  title: 'Watch an agent work', // DRAFT
+  intro:
+    'One arm carries one token across a board of stations. Follow a request through, step in when it needs a person, or throw a problem at it and see what it does.', // DRAFT
+  illustrative: 'Illustrative scenario, not a client case study', // ILLUSTRATIVE, same wording as the main page badge
+  legend: 'Dashed means illustrative or pending confirmation.', // DRAFT
+  pendingCapability: 'Capability pending confirmation', // PENDING: capability labels are placeholders until the team confirms the services
+  scenarios: 'Scenario',
+  views: { label: 'View', plan: 'Mission plan', work: 'Agent at work' }, // DRAFT
+  stage: {
+    labelPlan: 'Isometric hex board. One XionTechs agent arm carries a single token between stations, step by step.',
+    labelWork: 'Isometric hex board. One XionTechs agent arm gathers context from resource and skill stations and stacks it on a context tray.',
+    group: 'Board view. Drag, or use the arrow keys, to turn the board.',
+    drag: 'Drag to turn',
+    left: 'Turn left',
+    right: 'Turn right',
+    reset: 'Reset view',
+    noCanvas: 'The board cannot be drawn in this browser. The timeline and the log below tell the same story.',
+    context: 'Context',
+    compaction: 'Compaction',
+  },
+  legendWork: 'Hex: a resource. Notched hex: a skill. Glyph hex: compaction, where the stacked context is pressed into one.', // DRAFT
+  transport: { play: 'Play', pause: 'Pause', replay: 'Replay', otherPath: 'Take the other path' },
+  drills: { label: 'Inject a problem', clear: 'Clear problem' },
+  decision: {
+    group: 'Your decision',
+    holding: (verb) => `The agent is holding the ${verb} for a person.`, // DRAFT
+    approve: (verb) => `Approve ${verb}`,
+    reject: 'Reject',
+    reduced: (log) => `Motion is reduced, so the run stops at the approval. Approve: ${log.approve}. Reject: ${log.reject}.`, // DRAFT
+  },
+  timeline: { label: 'Run timeline', step: 'Step', transportLabel: 'Run' },
+  log: { title: 'Execution log', empty: 'Nothing has run yet.' },
+  states: { done: 'done', current: 'in progress', waiting: 'waiting for a person', future: 'upcoming' },
+  taskDone: 'Task complete',
 }
 
 // Engineering signals: categorical evidence, not invented statistics. Every value shows its source.

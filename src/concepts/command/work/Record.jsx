@@ -15,6 +15,15 @@ function SummaryPanel({ record }) {
         {record.kind}
       </Mono>
       <p className="mt-3 text-lg leading-relaxed text-x-text">{record.summary}</p>
+      {record.link && (
+        <a
+          href={record.link.href}
+          className="x-mono mt-6 inline-flex min-h-11 items-center gap-3 border border-x-faint px-4 text-x-text transition-colors duration-200 ease-x hover:border-x-text"
+        >
+          {record.link.label}
+          <span aria-hidden="true">→</span>
+        </a>
+      )}
       {record.tags.length > 0 && (
         <ul className="mt-6 flex flex-wrap gap-2">
           {record.tags.map((t) => (

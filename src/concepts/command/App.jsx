@@ -4,6 +4,7 @@ import Hero from './hero/Hero.jsx'
 import Deploy from './deploy/Deploy.jsx'
 import Pipeline from './pipeline/Pipeline.jsx'
 import Work from './work/Work.jsx'
+import Agent from './agent/Agent.jsx'
 import Signals from './signals/Signals.jsx'
 import Finale from './finale/Finale.jsx'
 
@@ -24,6 +25,7 @@ export default function App() {
         <Deploy />
         <Pipeline />
         <Work />
+        <Agent />
         <Signals />
         <Finale />
       </main>

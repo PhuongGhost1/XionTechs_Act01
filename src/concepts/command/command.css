@@ -229,3 +229,36 @@ body {
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
 }
+
+/* ------------------------------------------------------------------ agent stage
+   Labels over the canvas are HTML billboards: the render loop writes one transform per label from the
+   board projection (never tilted, never scaled). `--hw` is the half width of a hex in px. */
+.x-bb {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+  will-change: transform;
+}
+.x-bb > div {
+  position: absolute;
+  top: var(--dy, 0px);
+  left: calc(var(--hw, 40px) + 8px);
+  transform: translateY(-50%);
+}
+.x-bb[data-side='l'] > div {
+  left: auto;
+  right: calc(var(--hw, 40px) + 8px);
+}
+@keyframes x-log-in {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: none; }
+}
+.x-log-in {
+  animation: x-log-in 320ms var(--x-ease) 1 both;
+}
+[data-motion='reduced'] .x-log-in {
+  animation: none;
+}
