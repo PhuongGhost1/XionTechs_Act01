@@ -52,8 +52,9 @@ the only conventional sections removed are About, Why Choose Us, Testimonials (n
 | 01 | `deploy` | What we can deploy | master/detail module rack, 4 bays | hover/focus/click a bay: detail panel, local node pulse |
 | 02 | `pipeline` | From request to production | sticky rail, 6 stages, yellow signal marker | scroll-linked; reduced motion shows all stages |
 | 03 | `work` | Selected deployments | ledger of records; record opens in place with tabs SUMMARY / SPEC / LOG / SCREEN | StaffXP assembly sequence on first open |
-| 04 | `signals` | Engineering signals | spec-sheet band (the only light band), every value carries `SOURCE:` | count-up on real numbers only |
-| 05 | `build` | Final build | `GET IT DONE.` + logo convergence + CTA + contact | 2D canvas points converge on the logo |
+| 04 | `agent` | Watch an agent work | the illustrative agent demo: one arm moves a token across a hex board, timeline strip is the scrubber, Approve / Reject outside the canvas | drag to turn the board, scrub, inject a problem |
+| 05 | `signals` | Engineering signals | spec-sheet band (the only light band), every value carries `SOURCE:` | count-up on real numbers only |
+| 06 | `build` | Final build | `GET IT DONE.` + logo convergence + CTA + contact | 2D canvas points converge on the logo |
 
 Navigation (brief §6): `XIONTECHS   WORK  SERVICES  PROCESS  SIGNALS   [ START A PROJECT → ]`, with
 `SYSTEM / 2026` and a hairline yellow progress line under the bar. The brief's `LAB` and `ABOUT` have no
