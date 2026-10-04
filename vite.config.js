@@ -24,6 +24,7 @@ export default defineConfig({
         main: here('index.html'),
         command: here('concepts/command/index.html'),
         architecture: here('concepts/architecture/index.html'),
+        editionV2: here('concepts/edition-v2/index.html'),
       },
     },
   },
