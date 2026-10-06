@@ -136,4 +136,16 @@ content. If you add a new section, follow the same pattern.
 ## Concept pages (`/concepts/<name>/`)
 - Design explorations from `docs/idea/0n-*.md` live as separate Vite pages, so the main page is untouched. Concept 01 (X / Command): spec in `docs/concepts/01-command-implementation.md`, code in `src/concepts/command/`, its own Tailwind config `tailwind.command.config.js` (loaded by `command.css` with `@config`; the main config excludes `src/concepts`). Open items: `content/TODO.md`, "Concept 01".
 - The motion rule above (CSS 3D and SVG only, no WebGL) applies to the main page. A concept page may use `three`, but only in a lazy chunk, with a static fallback for reduced motion and no WebGL, and the same honesty rules (illustrative and pending values are labelled).
+- Concept 01 section 05 is the **smart campus** (`src/concepts/command/campus/`, spec
+  `docs/superpowers/specs/2026-10-06-smart-campus-design.md`); it replaced the flight plan (the agent demo
+  links go to the main page, `/#ai-agents`). Content in `src/concepts/command/campusData.js`: the campus is
+  ILLUSTRATIVE, the service list PLACEHOLDER until the team confirms it, and both badges stay visible. Content
+  text has no digits; every number comes from `campus/simulate.js` (pure, deterministic) and sits under a
+  "Simulated" tag. Classroom engagement analytics is anonymous and class-level only: shares of the class, no
+  per-seat or per-student state, no faces or names, abstract camera-wall feeds (tests in
+  `campus/campusData.test.js` and `campus/simulate.test.js`). Adding a service or room is content only: a device
+  kind in `deviceKinds`, a room that lists it, `slice: true` on the service. `three` is only imported by
+  `campus/campusScene.js` (lazy chunk); the SVG site plan is the fallback.
 - QA: the built-in browser pane scales a 1280 px viewport too small to read; use headless Edge with `puppeteer-core` from PowerShell (Git Bash cannot launch it) and look at the screenshots.
+  Take them with `page.screenshot({ captureBeyondViewport: false })`: an element screenshot, or a clip, resizes
+  the page, SwiftShader then loses the WebGL context and the 3D sections fall back to their flat drawing.

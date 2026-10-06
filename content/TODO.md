@@ -79,6 +79,19 @@ A design exploration from `docs/idea/01-X-Command.md`, built as a separate page.
 - [ ] **Module names**: the brief mixes `AI / Code / Data / Cloud` (scroll sequence) with Software engineering /
       AI systems / Cloud & platform / Product development (modules). The concept uses the second set.
 
+### Smart campus (Concept 01, section 05)
+
+- [ ] **Service list**: the ten services on the model and the nine more in `campusData.js` (`slice: false`) are
+      AI-drafted examples of school IoT. Confirm which XionTechs delivers, then drop the "pending team
+      confirmation" badge (`campus.servicesNote` in `content.js`).
+- [ ] **Device kinds and automations**: AI-drafted; confirm or replace with the real hardware and rules.
+- [ ] **Classroom engagement analytics**: shown as anonymous, class-level shares with no face recognition and
+      processing in the room. Confirm that matches the product and check the legal position before publishing
+      (Vietnam Decree 13/2023 on personal data, the EU AI Act for any EU client).
+- [ ] **Section copy** (`campus` in `content.js`) is DRAFT.
+- [ ] Optional next slice: Sports hall and Canteen buildings, the remaining nine services, a real-data feed
+      behind `simulate.js`.
+
 ## Not on the page (kept out on purpose)
 
 - Testimonials: the live site's markup is unrendered theme-demo content. Add a section only

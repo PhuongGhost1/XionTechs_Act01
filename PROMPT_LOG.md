@@ -309,3 +309,39 @@ just at the end.
 - Decision (v1, mission control): **Flight plan**, a three.js trajectory plot (tilted plane, craft on curves, go/no-go gate, camera dolly, SVG fallback). Set aside: X-network as the agent (the v3 hero is already an X network), telemetry stack, scroll-driven camera rail (pinning behind a decision traps users). Data and logic are imported through the shared hook `src/workflow/useAgentDemo.js`, never copied.
 - Where the AI got it wrong: the research agent claimed the existing scene code could take a second graph without reading it (not relied on; the demo got its own canvas and chunk). The agent also repointed two extra links (modules AI link, finale 'See an Agent Work') to the new section beyond what was asked; kept for consistency, easy to revert. One transient blank screenshot under SwiftShader, not reproduced.
 - Verification: 490 tests, lint and build pass; Flight chunks are lazy (reduced motion requests none); no overflow at 390 and 360 px. Real-GPU performance is untested.
+
+
+## 2026-10-06 - Smart campus replaces the flight plan in Concept 01 (Phuong Hoang + Claude)
+- Prompt: the flight plan (section 05) does not show what XionTechs does with IoT. Build a 3D/4D school campus
+  instead: several buildings, each with rooms that do different jobs (classrooms, security room, ...), each room
+  showing its IoT services (temperature, humidity, a screen per classroom in the security room); visitors hover
+  or click to see details. Later added: a camera per classroom that detects studying, phone use, sleeping.
+- Brainstorm decisions (one question at a time, then a spec in `docs/superpowers/specs/2026-10-06-smart-campus-design.md`):
+  school IoT is a real offering, but the buildings, rooms, devices and services were drafted by the AI, so the
+  campus is labelled illustrative and the service list "pending team confirmation". No approve/reject flow.
+  Everything procedural in three.js (no model files). First slice: four buildings, thirteen rooms and zones, ten
+  of nineteen services; the data model takes the rest as content. "4D" is a school-day scrubber that moves the
+  sun, window light, cars, people and every reading.
+- Where the AI pushed back: the classroom behaviour camera. Watching minors and judging them per student
+  reads as surveillance, touches children's and biometric data rules (Vietnam Decree 13/2023; the EU AI Act
+  bans emotion recognition in schools), and the challenge rules forbid images of real people. Phuong chose the
+  proposed framing: anonymous class-level shares only (focused / talking / on a phone / heads down), no faces,
+  no names, seats in 3D show occupancy only, camera-wall feeds are abstract. Tests pin the wording.
+- Where the AI got it wrong:
+  - **Every room needed attention.** The first build flagged all five teaching rooms: empty labs counted as
+    "warm" (their air conditioning is off on purpose), and the per-room seed hash gave `classroom-a/b/c`
+    almost the same value, so all three classrooms crossed the CO₂ limit together. Fixed with a mixing hash, a
+    warm rule that needs people in the room, and a retuned build-up; a test now requires "some, not all".
+  - A test caught that no room carried the solar inverter, so the solar service existed only on paper.
+  - `const { frame } = model` shadowed the scene's `frame()` loop function (lint and build failed).
+  - Layer tints were invisible from above (roofs covered them); a layer now looks through the roofs.
+  - The flat plan's admin rooms overlapped their names; rooms now carry a `short` name for the plan.
+  - QA tooling: element screenshots flipped the 3D to the fallback plan. Puppeteer resizes the page for them,
+    SwiftShader loses the WebGL context, and the section correctly falls back. It looked like a bug in the scene
+    for three runs. Viewport screenshots with `captureBeyondViewport: false` fixed it (noted in `CLAUDE.md`).
+    This is likely the "transient blank screenshot" in the 2026-10-04 entry.
+- Verification: `npm test` (510 tests), lint and build pass. Campus chunks: `CampusTwin` 14.9 kB gzip, `CampusCanvas`
+  7.9 kB gzip, plus the shared `three` chunk, all lazy. Headless Edge at 1440 and 390 px: campus, open building,
+  classroom panel, air-quality and occupancy layers, security room camera wall, evening, reduced-motion site
+  plan, phone lite 3D; no console errors. Real-GPU performance is untested.
+
