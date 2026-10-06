@@ -148,10 +148,11 @@ content. If you add a new section, follow the same pattern.
   `campus/campusScene.js` (lazy chunk); the SVG site plan is the fallback. Camera "feeds" (room panel, security
   room wall) are renders of the 3D model from each camera pin (`registerFeed`), styled as CCTV and tagged
   "Simulated feed"; never use stock or generated footage of people, children above all.
-- The campus follows the team's IoT platform (ThingsBoard) in shape and vocabulary: assets with codes, devices
-  named `<room code>-<profile code>` with telemetry keys, alarm rules with severities in `campusData.js`
-  `alarmRules`, alarms replayed by `campus/alarms.js` (pure), rule chains in the room panel. Do not put the
-  product name on the page until the team confirms it may be named (content/TODO.md).
+- The campus applies IoT platform best practices taken from the ThingsBoard documentation: assets with codes,
+  devices named `<room code>-<profile code>` with telemetry keys, alarm rules with severities in `campusData.js`
+  `alarmRules`, alarms replayed by `campus/alarms.js` (pure), rule chains in the room panel. ThingsBoard is a
+  reference only: the team decided (2026-10-06) never to name it, or any other platform vendor, on the page
+  (`campusData.test.js` enforces it for the campus copy). Keep the generic vocabulary.
 - QA: the built-in browser pane scales a 1280 px viewport too small to read; use headless Edge with `puppeteer-core` from PowerShell (Git Bash cannot launch it) and look at the screenshots.
   Take them with `page.screenshot({ captureBeyondViewport: false })`: an element screenshot, or a clip, resizes
   the page, SwiftShader then loses the WebGL context and the 3D sections fall back to their flat drawing.

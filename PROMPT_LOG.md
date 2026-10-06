@@ -358,4 +358,7 @@ just at the end.
   simulated Acknowledge, and room tabs Telemetry / Attributes / Devices / Alarms / Rule chain. The product
   name stays off the page until the team confirms it may be used. The first screenshot showed the fifth tab
   pushed out of the panel; the tabs were tightened to fit.
+- Decision (Phuong): ThingsBoard is never named on the page; the team reads its documentation and applies the
+  best practices. The open TODO item is closed, `CLAUDE.md` says so, and a test keeps the name out of the
+  campus copy.
 

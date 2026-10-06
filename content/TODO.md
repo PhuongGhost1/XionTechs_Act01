@@ -89,8 +89,8 @@ A design exploration from `docs/idea/01-X-Command.md`, built as a separate page.
       processing in the room. Confirm that matches the product and check the legal position before publishing
       (Vietnam Decree 13/2023 on personal data, the EU AI Act for any EU client).
 - [ ] **Section copy** (`campus` in `content.js`) is DRAFT.
-- [ ] **Platform name**: the team works with ThingsBoard and the campus panel follows its model (assets,
-      devices, telemetry, attributes, alarms, rule chains). Confirm whether the page may name it.
+- [x] ~~Platform name~~: decided 2026-10-06, the page never names ThingsBoard (or another platform vendor).
+      Its documentation is only the reference for the model's best practices.
 - [ ] **Alarm rules** (`alarmRules` in `campusData.js`): thresholds, severities and actions are AI-drafted.
 - [ ] Optional next slice: Sports hall and Canteen buildings, the remaining nine services, a real-data feed
       behind `simulate.js`.
