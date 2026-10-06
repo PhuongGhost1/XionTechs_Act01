@@ -1,0 +1,91 @@
+/* Engineering capability (MOTION §17, effect H). The section root (.eng) carries data-state: 'idle' before
+   the stack has scrolled into view, 'built' after. The built pose is the default; the idle pose
+   applies only while motion is allowed, so reduced motion always shows the finished stack.
+   --eng-delay (per layer) and --eng-done (frame and equation) are set inline by the components. */
+
+.eng-layer {
+  transform-origin: 50% 100%;
+  transition:
+    opacity var(--dur-section) var(--ease-brand),
+    transform var(--dur-section) var(--ease-spring);
+  transition-delay: var(--eng-delay, 0ms);
+}
+
+/* A slab with a visible edge, so the layers read as a physical stack. */
+.eng-slab {
+  box-shadow:
+    0 3px 0 -1px rgb(var(--line)),
+    0 14px 22px -16px rgb(var(--ink) / 0.35);
+}
+
+/* Status dot: lights gold once its layer has landed (effect B). */
+.eng-dot::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: rgb(var(--accent));
+  box-shadow: 0 0 0 4px rgb(var(--accent) / 0.15);
+  transition: opacity var(--dur-base) var(--ease-brand);
+  transition-delay: calc(var(--eng-delay, 0ms) + 350ms);
+}
+
+.eng-frame,
+.eng-result {
+  transition:
+    opacity var(--dur-base) var(--ease-brand),
+    transform var(--dur-base) var(--ease-brand);
+  transition-delay: var(--eng-done, 0ms);
+}
+
+/* "= Production software" resolves after the team frame closes (effect J). */
+.eng-outcome::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  border: 1px solid rgb(var(--accent) / 0.7);
+  box-shadow: 0 0 0 4px rgb(var(--accent) / 0.12);
+  transition: opacity var(--dur-base) var(--ease-brand);
+  transition-delay: calc(var(--eng-done, 0ms) + 250ms);
+}
+.eng-check {
+  transition:
+    opacity var(--dur-base) var(--ease-brand),
+    transform var(--dur-base) var(--ease-spring);
+  transition-delay: calc(var(--eng-done, 0ms) + 250ms);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .eng[data-state='idle'] .eng-layer {
+    opacity: 0;
+    transform: translate3d(0, 40px, -160px) rotateX(24deg);
+  }
+  .eng[data-state='idle'] .eng-dot::after,
+  .eng[data-state='idle'] .eng-outcome::before {
+    opacity: 0;
+  }
+  .eng[data-state='idle'] .eng-frame {
+    opacity: 0;
+    transform: scale(1.025);
+  }
+  .eng[data-state='idle'] .eng-result {
+    opacity: 0;
+    transform: translate3d(0, 6px, 0);
+  }
+  .eng[data-state='idle'] .eng-check {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .eng-layer,
+  .eng-dot::after,
+  .eng-frame,
+  .eng-result,
+  .eng-outcome::before,
+  .eng-check {
+    transition: none;
+  }
+}

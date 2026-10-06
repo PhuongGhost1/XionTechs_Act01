@@ -2,14 +2,134 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Brand tokens, sampled from the logo: navy #183860 (wordmark) and gold #e5a52a (the "X").
+   Values are space-separated RGB so Tailwind opacity modifiers (text-ink/60) work.
+   The page is light by default. `data-tone="dark"` re-scopes the same tokens for a dark
+   section, so every component inside it turns dark without its own colour classes.
+   --accent on light is a darkened gold (#925e0c, 5.2:1 on --bg) so it passes as text;
+   --primary-fg is the foreground-safe primary (text-primary uses it). */
+:root {
+  --bg: 250 248 244;
+  --surface: 255 255 255;
+  --ink: 16 24 38;
+  --muted: 88 95 110;
+  --line: 228 223 213;
+  --primary: 24 56 96;
+  --primary-hover: 18 44 76;
+  --primary-soft: 232 237 244;
+  --primary-ink: 255 255 255;
+  --primary-fg: 24 56 96;
+  --accent: 146 94 12;
+  --danger: 180 35 24;
+  --success: 6 118 71;
+  color-scheme: light;
+
+  /* Motion tokens (MOTION §22): micro 150–250 ms, normal 300–500 ms, section 600–900 ms.
+     --ease-brand is a smooth ease-out; --ease-spring adds a small settle, never a bounce. */
+  --dur-micro: 200ms;
+  --dur-base: 400ms;
+  --dur-section: 750ms;
+  --ease-brand: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-spring: cubic-bezier(0.34, 1.24, 0.64, 1);
+}
+
+[data-tone='dark'] {
+  --bg: 10 26 46;
+  --surface: 17 37 63;
+  --ink: 232 237 245;
+  --muted: 163 177 198;
+  --line: 34 56 87;
+  --primary: 229 165 42;
+  --primary-hover: 240 184 74;
+  --primary-soft: 46 44 34;
+  --primary-ink: 10 26 46;
+  --primary-fg: 229 165 42;
+  --accent: 229 165 42;
+  --danger: 249 112 102;
+  --success: 71 205 137;
+  color-scheme: dark;
+}
+
 html {
   scroll-behavior: smooth;
+  /* Keeps anchor targets clear of the sticky header. */
+  scroll-padding-top: 5.5rem;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
 }
 
 body {
   @apply bg-paper text-ink font-sans antialiased;
 }
 
-h1, h2, h3 {
+/* Serif is for strategic headlines only; card and UI headings stay sans. */
+h1,
+h2 {
   @apply font-display;
+  text-wrap: balance;
+}
+
+/* The logo PNG is navy on transparent; show it white inside dark sections. */
+[data-tone='dark'] .logo-img {
+  filter: brightness(0) invert(1);
+}
+
+/* Monitoring strip: each newly mounted row slides in */
+@keyframes monitor-in {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: none; }
+}
+.monitor-row {
+  animation: monitor-in 400ms ease both;
+}
+
+/* Drill-only workflow steps fade in when a drill reveals them */
+@keyframes wf-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.wf-fade-in {
+  animation: wf-fade-in 400ms ease both;
+}
+
+/* One-time reveal for content entering the viewport (see Reveal in components/ui.jsx).
+   Content is only hidden once JS has marked it as not yet revealed. */
+.reveal[data-revealed='false'] {
+  opacity: 0;
+  transform: translate3d(0, var(--reveal-y, 16px), 0);
+}
+.reveal {
+  transition:
+    opacity var(--dur-section) var(--ease-brand),
+    transform var(--dur-section) var(--ease-brand);
+  transition-delay: var(--reveal-delay, 0ms);
+}
+
+@layer utilities {
+  /* Shallow 3D (MOTION §5, §9, §23): perspective on the parent, preserve-3d on the stage. */
+  .perspective-near { perspective: 900px; }
+  .perspective-far { perspective: 1600px; }
+  .preserve-3d { transform-style: preserve-3d; }
+  .backface-hidden { backface-visibility: hidden; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  .reveal,
+  .reveal[data-revealed='false'] {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+  .monitor-row { animation: none; }
+  .wf-fade-in { animation: none; }
+}
+
+@layer base {
+  :focus-visible {
+    outline: 2px solid rgb(var(--primary-fg));
+    outline-offset: 3px;
+  }
 }

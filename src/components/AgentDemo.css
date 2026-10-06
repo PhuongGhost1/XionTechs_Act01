@@ -1,0 +1,111 @@
+/* Agent demo scene (MOTION §8, §9, §11, §12). Loaded with the lazy AgentDemo chunk.
+   Layers inside the .perspective-far scene, back to front: the faint grid and system nodes
+   (.wf-back), the connectors (.wf-wires, scaled in JS so they still meet the nodes), the nodes
+   (translateZ per depth), the Approve / Reject pair. Only the back plane tilts or follows the
+   pointer, so node text and click targets stay put. Colours come from the theme tokens. */
+
+.wf-back {
+  transform:
+    translate3d(calc(var(--wf-px, 0) * -14px), calc(var(--wf-py, 0) * -10px), -160px)
+    rotateX(calc(9deg + var(--wf-py, 0) * -1.5deg))
+    rotateY(calc(var(--wf-px, 0) * 2deg))
+    scale(1.14);
+  background-image: radial-gradient(rgb(var(--muted) / 0.3) 1px, transparent 1.6px);
+  background-size: 22px 22px;
+  -webkit-mask-image: radial-gradient(ellipse 72% 68% at 50% 50%, rgb(var(--ink)) 35%, transparent 100%);
+  mask-image: radial-gradient(ellipse 72% 68% at 50% 50%, rgb(var(--ink)) 35%, transparent 100%);
+  transition:
+    transform 700ms var(--ease-brand),
+    opacity var(--dur-base) var(--ease-brand);
+}
+
+.wf-wires {
+  transition: opacity var(--dur-base) var(--ease-brand);
+}
+
+/* Human in the loop: the background and connectors step back while the run waits. */
+.wf-scene[data-phase='approval'] .wf-back { opacity: 0.4; }
+.wf-scene[data-phase='approval'] .wf-wires { opacity: 0.6; }
+
+/* Path tracing: the accent copy of a connector draws behind the travelling signal (same 600 ms,
+   linear, as the dot's paced motion), and disappears while the connector is in error. */
+.wf-trace {
+  stroke-dasharray: 1 1;
+  stroke-dashoffset: 1;
+  opacity: 0;
+}
+.wf-trace[data-on='true'] {
+  stroke-dashoffset: 0;
+  opacity: 1;
+  transition: stroke-dashoffset 600ms linear;
+}
+
+/* Node glow (opacity only). The waiting step gets a firmer ring. */
+.wf-glow {
+  --glow: var(--accent);
+  position: absolute;
+  inset: -5px;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  box-shadow:
+    0 0 0 1px rgb(var(--glow) / 0.55),
+    0 0 22px 2px rgb(var(--glow) / 0.28);
+  transition: opacity var(--dur-base) var(--ease-brand);
+}
+.wf-glow[data-glow] { opacity: 1; }
+.wf-glow[data-glow='danger'] { --glow: var(--danger); }
+.wf-glow[data-glow='success'] { --glow: var(--success); }
+.wf-glow[data-glow='focus'] {
+  box-shadow:
+    0 0 0 2px rgb(var(--accent)),
+    0 0 30px 4px rgb(var(--accent) / 0.35);
+}
+
+/* Approve / Reject: a ring that pulses three times, then stays (no endless loop). */
+.wf-call {
+  position: relative;
+}
+.wf-call::before {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: 9999px;
+  border: 2px solid rgb(var(--accent) / 0.6);
+  pointer-events: none;
+}
+
+/* New log rows, the human-control message and the advanced controls rise in once. */
+@keyframes wf-rise {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .wf-call::before {
+    animation: wf-call 1.4s var(--ease-brand) 3;
+  }
+  .wf-rise {
+    animation: wf-rise var(--dur-base) var(--ease-brand) both;
+  }
+}
+
+/* Expand and fade out, then fade back in at rest. */
+@keyframes wf-call {
+  0% { opacity: 1; transform: none; }
+  60% { opacity: 0; transform: scale(1.06, 1.3); }
+  61% { opacity: 0; transform: none; }
+  100% { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wf-back {
+    transform: translateZ(-160px) rotateX(9deg) scale(1.14);
+  }
+  .wf-back,
+  .wf-wires,
+  .wf-glow,
+  .wf-trace[data-on='true'] {
+    transition: none;
+  }
+}

@@ -4,7 +4,7 @@ import reactHooks from 'eslint-plugin-react-hooks'
 import reactRefresh from 'eslint-plugin-react-refresh'
 
 export default [
-  { ignores: ['dist'] },
+  { ignores: ['dist', '.claude', '.agents'] },
   {
     files: ['**/*.{js,jsx}'],
     languageOptions: {
@@ -24,6 +24,15 @@ export default [
       ...js.configs.recommended.rules,
       ...reactHooks.configs.recommended.rules,
       'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
+      // Without eslint-plugin-react, core ESLint can't see JSX usage, so capitalised component/icon imports are ignored by name.
+      'no-unused-vars': [
+        'error',
+        {
+          argsIgnorePattern: '^_',
+          caughtErrorsIgnorePattern: '^_',
+          varsIgnorePattern: '^[A-Z_]',
+        },
+      ],
     },
   },
 ]

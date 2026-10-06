@@ -1,30 +1,102 @@
-# Content still needed before demo day
+# Content still needed before release
 
-Everything below is currently a placeholder in `src/content/site.js`. The challenge
-rules require real content or a clearly-marked placeholder — nothing here should ship
-to the deployed URL without one of these being resolved.
+The redesign follows `docs/idea/XionTechs_Landing_Page_Redesign_Plan_v3.md` and the 3D / motion
+brief `docs/idea/XionTechs_Landing_Page_3D_Motion_Automation_Plan.md`. Items below
+are either placeholders shown with a visible label, or DRAFT copy that production visitors
+see unmarked (open any build with `?review` to see the Draft markers). Resolve each one in
+`src/content/site.js`, then tick it here.
 
-- [x] ~~Contact email~~ — confirmed real: `contact@xiontechs.com` (from live site
-      screenshots).
-- [x] ~~Social links~~ — confirmed real: facebook.com/xiontechs, linkedin.com/company/xiontechs.
-- [x] ~~Logo~~ — real logo added at `public/XionTechs-Logo_s.png`, wired into Nav/Footer.
-- [ ] **Testimonials** — get 2-4 real client quotes (name, role, company, quote text).
-      Confirmed via full-page screenshots that the live homepage doesn't actually
-      display a testimonials section at all — the markup found during initial HTML
-      extraction is unrendered theme-demo leftover. Do not reuse it.
-- [ ] **Case studies** — for each of the 3 listed (Cloud Security Service, Data
-      Analytics System, IT Solution & Consultancy): real client/project name (or
-      anonymized if under NDA), scope, stack used, outcome/metric. Confirmed these
-      link to `wordpress.themeholy.com/webteck` (the theme vendor's own demo site) on
-      the live page — also unedited placeholder content.
-- [ ] **"Why Choose Us" accordion body copy** — only "Client Centricity Focus" was
-      expanded in the screenshots; "Integrity & Ethical Standards" and "High Quality
-      Delivery" body text wasn't visible. Get the real copy or write new copy the team
-      signs off on.
-- [ ] **FAQ answers** — only the first question ("How can we help your business?") was
-      expanded in the screenshots. The other two answers weren't captured.
-- [ ] **Team/about photos** — if the new design should show real team photos instead
-      of icons, source them.
+## Done
 
-Once resolved, edit the corresponding value in `src/content/site.js` and remove the
-`PLACEHOLDER` marker/comment.
+- [x] Contact email `contact@xiontechs.com` and social links (from the live site).
+- [x] Logo at `public/XionTechs-Logo_s.png`; favicon and OG image now use the logo colours.
+- [x] Old placeholder copy removed by the v3 redesign: the "Why Choose Us" values, the old
+      FAQ answers, the AI/IoT pillars, the roadmap durations, the CTA band and the three
+      theme-demo case studies no longer appear anywhere.
+
+## Evidence: Selected Work (plan §7–9, MOTION §13–15, §30)
+
+- [x] StaffXP dashboard, StaffXP sign-in and ESS portal screenshots added to `public/work/`
+      (2026-10-02), sanitized before commit: browser chrome cropped; teacher, student and
+      employee names, the staff ID, class codes and the client's school and course-brand names
+      replaced with sample values. Originals were never committed.
+- [ ] **Permission to publish**: confirm the project owners allow these sanitized screens, the
+      product names "StaffXP" and "ESS", and the visible product copy on the StaffXP sign-in.
+- [ ] **Test data on the StaffXP dashboard**: calendar items ("Test performance…", "HIDE AND SEEK
+      PART 2") and notices ("Test", "test x") are the dev environment's test records. Consider a
+      screenshot of a seeded demo account instead.
+- [ ] **Story tags**: confirm the four StaffXP tags with the project owner (plan §7).
+
+## Draft copy to sign off
+
+- [ ] AI Agents callouts (Understand / Decide / Act) in `aiAgents.callouts`.
+- [ ] Team section body (`team.body`).
+- [ ] FAQ answers (`faq.items`): questions are from the plan, answers are drafted.
+- [ ] Engineering strip: confirm `.NET and APIs` and `React` are technologies the company
+      wants to market (marked "Confirm" in review mode).
+- [ ] Demo run-log heading (`sections.monitor`).
+- [ ] Hero: node hints for "Request" and "Done", and the pause control labels (`hero.motion`).
+- [ ] Agent demo UI words (`aiAgents.run`: phase chips, status lines, execution-log entries) and
+      the drill fault words "Timeout" / "Offline" (`workflows[].drills[].fault`).
+- [ ] Selected Work list headings: "On this screen", "Modules on this screen", and the hint
+      "Scroll sideways to see the whole screen." (`selectedWork.staffxp` / `.ess`).
+- [ ] Final CTA: accessible name of the completion steps (`finalCta.completionLabel`).
+
+## Release checklist (plan §21)
+
+- [ ] Company legal name: live site says "XionTech Joint Stock Company" (no "s").
+- [ ] Office locations: the stat says Dallas, Ho Chi Minh City and Da Nang, but both street
+      addresses are in Ho Chi Minh City. Confirm the offices and add the missing addresses.
+- [ ] Leadership claim "25+ years of leadership experience" (live-site stat).
+- [ ] Contact phone numbers.
+- [ ] Production URL: `index.html` (canonical, OG, JSON-LD), `public/robots.txt` and
+      `public/sitemap.xml` assume `https://xiontechs.com/`.
+- [ ] Booking flow: "Talk to Us" opens an email. Add a booking URL only if one exists.
+- [ ] Workflow capability labels in the demo ("AI model", "Integration", …) stay generic
+      until the team confirms the real services per step.
+
+## Concept 01: X / Command (`/concepts/command/`)
+
+A design exploration from `docs/idea/01-X-Command.md`, built as a separate page. Spec:
+`docs/concepts/01-command-implementation.md`. Open items before it could replace the main page:
+
+- [ ] **Official logo**: only a 250 × 46 px navy PNG exists so far; a larger one is coming from the team. The
+      concept uses a generated white-wordmark copy (`public/concepts/command/logo-reversed.png`, set in
+      `content.js` `brand.logo`) at natural size. When the large logo arrives: regenerate the reversed copy
+      and update the size.
+- [x] ~~Brand yellow~~: team said to pick whatever looks good. The concept uses the brief's `#F5C400`
+      (`--c-signal` in `command.css`).
+- [x] ~~Stack decision~~: the `CLAUDE.md` rules on `feat/motion-3d` belong to the earlier concept, not this one.
+      This concept follows the docs: `three` for the data core (lazy chunk; off for reduced motion, no WebGL,
+      data saver).
+- [ ] **StaffXP status and stack**: the brief's example says "Production" and ".NET / React / AI / Cloud".
+      Neither is confirmed. The concept reuses the real screenshots already in `public/work/` (team said to
+      use them for now) and shows stack and status as "Pending confirmation".
+- [ ] **Engineering signals**: only `25+` years of leadership and `3` offices (see the offices item above)
+      are stated on the live site. Real counts for projects delivered and engineers are placeholders.
+- [ ] **Status panel**: the hero panel (98 %, build `#4821`, Online) is an illustrative interface and is labelled.
+- [x] ~~Lab page~~: skipped for now (no such page exists); the link is left out of the navigation.
+- [ ] **Module names**: the brief mixes `AI / Code / Data / Cloud` (scroll sequence) with Software engineering /
+      AI systems / Cloud & platform / Product development (modules). The concept uses the second set.
+
+### Smart campus (Concept 01, section 05)
+
+- [ ] **Service list**: the ten services on the model and the nine more in `campusData.js` (`slice: false`) are
+      AI-drafted examples of school IoT. Confirm which XionTechs delivers, then drop the "pending team
+      confirmation" badge (`campus.servicesNote` in `content.js`).
+- [ ] **Device kinds and automations**: AI-drafted; confirm or replace with the real hardware and rules.
+- [ ] **Classroom engagement analytics**: shown as anonymous, class-level shares with no face recognition and
+      processing in the room. Confirm that matches the product and check the legal position before publishing
+      (Vietnam Decree 13/2023 on personal data, the EU AI Act for any EU client).
+- [ ] **Section copy** (`campus` in `content.js`) is DRAFT.
+- [x] ~~Platform name~~: decided 2026-10-06, the page never names ThingsBoard (or another platform vendor).
+      Its documentation is only the reference for the model's best practices.
+- [ ] **Alarm rules** (`alarmRules` in `campusData.js`): thresholds, severities and actions are AI-drafted.
+- [ ] Optional next slice: Sports hall and Canteen buildings, the remaining nine services, a real-data feed
+      behind `simulate.js`.
+
+## Not on the page (kept out on purpose)
+
+- Testimonials: the live site's markup is unrendered theme-demo content. Add a section only
+  with real, approved client quotes.
+- Team photos: none until real, approved photos exist (plan §13).

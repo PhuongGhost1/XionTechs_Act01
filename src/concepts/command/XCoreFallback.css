@@ -1,0 +1,160 @@
+/* Static X data core (XCoreFallback.jsx). Colours come from the --c-* tokens in command.css. */
+
+.xc {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+/* Reticle and orbits: the instrument frame around the graph. */
+.xc-reticle,
+.xc-orbit {
+  fill: none;
+  stroke-width: 1;
+}
+.xc-reticle {
+  stroke: rgb(var(--c-faint) / 0.22);
+  stroke-dasharray: 1 6;
+}
+.xc-orbit {
+  stroke: rgb(var(--c-faint) / 0.32);
+  stroke-dasharray: 2 7;
+}
+.xc-orbit--inner {
+  stroke: rgb(var(--c-faint) / 0.2);
+  stroke-dasharray: none;
+}
+
+/* Edges: hairlines. Their opacity is set per edge in the markup (fading toward the tips). */
+.xc-edge {
+  stroke: rgb(var(--c-faint));
+  stroke-width: 1.2;
+  stroke-linecap: round;
+}
+.xc-edge--ring {
+  stroke-width: 1;
+}
+
+/* Nodes: small round points, rings where the network joins, larger tips with a target ring. */
+.xc-node {
+  fill: rgb(var(--c-muted));
+}
+.xc-node--joint {
+  fill: rgb(var(--c-bg));
+  stroke: rgb(var(--c-muted) / 0.85);
+  stroke-width: 1;
+}
+.xc-node--tip {
+  fill: rgb(var(--c-bg));
+  stroke: rgb(var(--c-text));
+  stroke-width: 1.4;
+}
+.xc-tip-ring {
+  fill: none;
+  stroke: rgb(var(--c-faint) / 0.55);
+  stroke-width: 1;
+}
+.xc-particle {
+  fill: rgb(var(--c-muted));
+}
+
+/* The one yellow thing in the graph: the energy core at the hub, and the packets. */
+.xc-hub {
+  fill: rgb(var(--c-signal));
+}
+.xc-hub-ring,
+.xc-hub-pulse {
+  fill: none;
+  stroke: rgb(var(--c-signal));
+  stroke-width: 1;
+}
+.xc-hub-ring {
+  stroke-opacity: 0.6;
+}
+.xc-hub-pulse {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: xc-breathe 4.2s ease-out infinite;
+}
+
+/* A packet is a short dash on an arm path (pathLength is 100): it enters at the path start, runs
+   to the end, fades, then the arm rests until the next one. Parked at --rest when motion is off. */
+.xc-packet {
+  fill: none;
+  stroke: rgb(var(--c-signal));
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 5 200;
+  stroke-dashoffset: var(--rest, -40);
+  animation: xc-packet var(--dur, 7s) linear var(--delay, 0s) infinite backwards;
+}
+
+.xc-orbiter {
+  transform-box: view-box;
+  transform-origin: 50% 50%;
+  transform: rotate(var(--angle, 0deg));
+  animation: xc-orbit var(--dur, 120s) linear infinite;
+}
+.xc-orbiter--reverse {
+  animation-direction: reverse;
+}
+
+@keyframes xc-packet {
+  0% {
+    stroke-dashoffset: 5;
+    opacity: 0;
+  }
+  6% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 1;
+  }
+  58%,
+  100% {
+    stroke-dashoffset: -100;
+    opacity: 0;
+  }
+}
+
+@keyframes xc-orbit {
+  from {
+    transform: rotate(var(--angle, 0deg));
+  }
+  to {
+    transform: rotate(calc(var(--angle, 0deg) + 360deg));
+  }
+}
+
+@keyframes xc-breathe {
+  0% {
+    transform: scale(1);
+    opacity: 0.55;
+  }
+  100% {
+    transform: scale(2.6);
+    opacity: 0;
+  }
+}
+
+/* Loops stop off screen, while the canvas is drawing the core instead (this SVG is invisible
+   then), and under Pause Motion (BuildHud sets data-motion on <html>). */
+.xcore-fallback[data-live='false'] *,
+[data-xcore='on'] .xcore-fallback *,
+[data-motion='paused'] .xcore-fallback * {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .xc-packet,
+  .xc-orbiter,
+  .xc-hub-pulse {
+    animation: none;
+  }
+  /* The breathing ring is decoration only; the packets stay parked on their arms. */
+  .xc-hub-pulse {
+    display: none;
+  }
+}
