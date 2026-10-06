@@ -42,7 +42,7 @@ export default function CampusSvg({ model, live, sel, hover, layer, onSelect, on
         const z = planZ(model, r)
         const on = sel.roomId === r.id || hover?.roomId === r.id || (hover?.buildingId === r.buildingId && !hover.roomId)
         return (
-          <g key={r.id} className="cp-svg-room" data-on={on ? 'true' : 'false'} data-status={st.status} data-outdoor={r.outdoor ? 'true' : 'false'}>
+          <g key={r.id} className="cp-svg-room" data-on={on ? 'true' : 'false'} data-status={st.status} data-severity={st.severity ?? undefined} data-outdoor={r.outdoor ? 'true' : 'false'}>
             <rect
               {...rect(r, z)}
               style={fillFor(layer, st)}

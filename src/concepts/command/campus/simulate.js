@@ -3,7 +3,7 @@
 // midnight). Deterministic: no randomness, so a moment of the day always reads the same, and node tests pin
 // the behaviour (simulate.test.js). Nothing here claims a real measurement.
 
-import { DAY, deviceKinds as KINDS, dayPhases } from '../campusData'
+import { DAY, SEVERITIES, alarmRules, deviceKinds as KINDS, dayPhases } from '../campusData'
 
 const clamp01 = (v) => Math.min(1, Math.max(0, v))
 const smooth = (a, b, t) => {
@@ -163,17 +163,68 @@ export function toPercents(shares) {
   return Object.fromEntries(keys.map((k, i) => [k, floor[i]]))
 }
 
-// Status of a room and why. `attention` is the gold state on the model and in the list.
+// The time-series a room's devices would report at `t`, by telemetry key (campusData.js deviceKinds). Keys
+// whose device the room does not have are left out.
+export function telemetry(room, t, state = roomState(room, t)) {
+  const kinds = new Set(room.kinds ?? [])
+  const e = kinds.has('edge-ai') ? engagement(room, t) : null
+  const all = {
+    temperature: state.temp,
+    humidity: state.humidity,
+    acMode: state.acOn ? 'cooling' : 'off',
+    setPoint: room.usage === 'server' ? 21 : 24,
+    co2: state.co2,
+    pm25: state.pm,
+    people: state.people,
+    lights: state.lights,
+    dimLevel: state.dim,
+    power: state.power,
+    solarPower: state.solar,
+    online: true,
+    vehiclesPerHour: occupancy('gate', t) * 60,
+    freeSpaces: (room.capacity ?? 0) - state.people,
+    lamps: lampsOn(t),
+    focused: e ? e.focused * 100 : null,
+    onPhone: e ? e.phone * 100 : null,
+    headsDown: e ? e.headsDown * 100 : null,
+    talking: e ? e.talking * 100 : null,
+  }
+  const out = {}
+  for (const k of kinds) for (const key of KINDS[k].telemetry) out[key] = all[key]
+  return out
+}
+
+export const ruleApplies = (rule, room) => (room.kinds ?? []).includes(rule.device) && (!rule.usage || rule.usage === room.usage)
+
+const holds = (op, v, limit) => (op === '>' ? v > limit : v < limit)
+
+// The alarm rules that fire for a room at `t`, each with the severity of its first level that holds.
+export function evaluateRules(room, t, state = roomState(room, t)) {
+  const tele = telemetry(room, t, state)
+  const out = []
+  for (const rule of alarmRules) {
+    if (!ruleApplies(rule, room)) continue
+    if (rule.occupied && state.occ <= 0.05) continue // an empty room has its air conditioning off on purpose
+    if (rule.after != null && t < rule.after) continue
+    const v = tele[rule.key]
+    if (v == null) continue
+    const level = rule.levels.find((l) => holds(l.op, v, l.value))
+    if (level) out.push({ rule, severity: level.severity, value: v })
+  }
+  return out
+}
+
+export const severityRank = (s) => (s ? SEVERITIES.indexOf(s) : SEVERITIES.length)
+export const topSeverity = (list) => list.reduce((best, s) => (severityRank(s) < severityRank(best) ? s : best), null)
+
+// Status of a room and why: `attention` while any alarm rule fires, with the most severe level.
 export function roomStatus(room, t, state = roomState(room, t)) {
-  const reasons = []
-  const kinds = room.kinds ?? []
-  if (kinds.includes('co2-sensor') && state.co2 > CO2_LIMIT) reasons.push('CO₂ above the comfort limit')
-  // Warm only matters while people are in the room (an empty room has its air conditioning off on purpose).
-  if (kinds.includes('climate-sensor') && state.indoor && state.occ > 0.05 && state.temp > TEMP_LIMIT) reasons.push('Room running warm')
-  if (room.usage === 'carpark' && state.people >= room.capacity) reasons.push('Car park full')
-  const e = engagement(room, t)
-  if (e && e.focused < 0.7) reasons.push('Class engagement dipping')
-  return { status: reasons.length ? 'attention' : 'ok', reasons }
+  const fired = evaluateRules(room, t, state)
+  return {
+    status: fired.length ? 'attention' : 'ok',
+    severity: topSeverity(fired.map((f) => f.severity)),
+    reasons: fired.map((f) => f.rule.type),
+  }
 }
 
 const fmt = (v, digits = 0) => v.toFixed(digits)

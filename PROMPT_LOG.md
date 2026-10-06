@@ -351,4 +351,11 @@ just at the end.
   CCTV (monochrome, green night vision after dusk, scanlines, `CAM 04 · CLASSROOM B · REC`, "Simulated feed").
   Rooms with a camera get a Camera view; the security room wall became eleven live feeds. On the flat site plan
   the tiles show occupancy only. Verified in headless Edge (classroom, security wall by day and night, car park).
+- Follow-up: the team follows ThingsBoard. Options offered: align the model with its entity model (chosen),
+  a "how it's wired" data-path layer, an importable ThingsBoard package, live telemetry later. Built: asset
+  codes, device names (`CLC-AQ`) with telemetry keys and transport, six alarm rules with ThingsBoard-style
+  severities, a pure replay of the day's alarms (active and cleared, with times), campus alarm list with a
+  simulated Acknowledge, and room tabs Telemetry / Attributes / Devices / Alarms / Rule chain. The product
+  name stays off the page until the team confirms it may be used. The first screenshot showed the fifth tab
+  pushed out of the panel; the tabs were tightened to fit.
 

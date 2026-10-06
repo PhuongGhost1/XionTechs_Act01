@@ -636,7 +636,8 @@ export function createCampusScene({ container, tier, model, getLive, getLabels, 
       v.mat.depthWrite = v.mat.opacity > 0.95
       v.vol.castShadow = shadows && ghost < 0.5
       const attention = st?.status === 'attention' && L.layer === 'none'
-      v.mat.emissive.copy(C.signal).multiplyScalar(attention ? 0.22 + 0.18 * glow : 0)
+      const severe = st?.severity === 'CRITICAL' || st?.severity === 'MAJOR'
+      v.mat.emissive.copy(severe ? C.danger : C.signal).multiplyScalar(attention ? 0.22 + 0.18 * glow : 0)
       if (attention) active = true
       v.edgeMat.color.copy(isSel || isHover ? C.signal : inOpen ? C.faint : C.line)
       v.edgeMat.opacity = bv.fade > 0.5 ? 0.35 : 0.9

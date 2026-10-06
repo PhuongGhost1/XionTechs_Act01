@@ -51,26 +51,29 @@ export const services = [
   { id: 'cold-chain', layer: 'climate', slice: false, name: 'Cold chain monitoring', desc: 'Fridge and freezer temperatures in the canteen kitchen.' },
 ]
 
-// PLACEHOLDER: device kinds. `shape` picks the pin drawn in 3D (campus/campusScene.js).
+// PLACEHOLDER: device kinds, one device profile each. `code` builds the device name with the room's code
+// (`CLA-AQ`), `telemetry` lists the time-series keys the device reports, `transport` how it connects.
+// `shape` picks the pin drawn in 3D (campus/campusScene.js).
 export const deviceKinds = {
-  'climate-sensor': { label: 'Climate sensor', measures: 'Temperature and humidity', service: 'temp-humidity', shape: 'puck' },
-  'ac-unit': { label: 'AC controller', measures: 'Cooling state and set point', service: 'smart-ac', shape: 'bar' },
-  'co2-sensor': { label: 'Air quality sensor', measures: 'CO₂ and fine dust', service: 'air-quality', shape: 'puck' },
-  'presence-sensor': { label: 'Presence sensor', measures: 'People in the room, no images', service: 'occupancy', shape: 'dome' },
-  'light-controller': { label: 'Lighting controller', measures: 'Light level and switching', service: 'lighting', shape: 'dome' },
-  'power-meter': { label: 'Smart power meter', measures: 'Electrical load', service: 'energy-meter', shape: 'box' },
-  'solar-inverter': { label: 'Solar inverter', measures: 'Power from the roof panels', service: 'solar', shape: 'box' },
-  camera: { label: 'IP camera', measures: 'Video to the security room', service: 'cctv', shape: 'cone' },
-  'gate-barrier': { label: 'Gate barrier and plate reader', measures: 'Vehicles in and out', service: 'gate-parking', shape: 'bar' },
-  'parking-sensor': { label: 'Parking bay sensors', measures: 'Which spaces are free', service: 'gate-parking', shape: 'puck' },
-  'edge-ai': { label: 'Edge AI box', measures: 'Anonymous class-level engagement', service: 'engagement', shape: 'gem' },
-  'street-lamp': { label: 'Smart street lamps', measures: 'Dusk switching and dimming', service: 'lighting', shape: 'dome' },
+  'climate-sensor': { label: 'Climate sensor', code: 'TH', measures: 'Temperature and humidity', service: 'temp-humidity', shape: 'puck', telemetry: ['temperature', 'humidity'], transport: 'MQTT' },
+  'ac-unit': { label: 'AC controller', code: 'AC', measures: 'Cooling state and set point', service: 'smart-ac', shape: 'bar', telemetry: ['acMode', 'setPoint'], transport: 'MQTT' },
+  'co2-sensor': { label: 'Air quality sensor', code: 'AQ', measures: 'CO₂ and fine dust', service: 'air-quality', shape: 'puck', telemetry: ['co2', 'pm25'], transport: 'MQTT' },
+  'presence-sensor': { label: 'Presence sensor', code: 'PIR', measures: 'People in the room, no images', service: 'occupancy', shape: 'dome', telemetry: ['people'], transport: 'MQTT' },
+  'light-controller': { label: 'Lighting controller', code: 'LGT', measures: 'Light level and switching', service: 'lighting', shape: 'dome', telemetry: ['lights', 'dimLevel'], transport: 'MQTT' },
+  'power-meter': { label: 'Smart power meter', code: 'PM', measures: 'Electrical load', service: 'energy-meter', shape: 'box', telemetry: ['power'], transport: 'MQTT' },
+  'solar-inverter': { label: 'Solar inverter', code: 'INV', measures: 'Power from the roof panels', service: 'solar', shape: 'box', telemetry: ['solarPower'], transport: 'MQTT' },
+  camera: { label: 'IP camera', code: 'CAM', measures: 'Video to the security room', service: 'cctv', shape: 'cone', telemetry: ['online'], transport: 'RTSP' },
+  'gate-barrier': { label: 'Gate barrier and plate reader', code: 'GTE', measures: 'Vehicles in and out', service: 'gate-parking', shape: 'bar', telemetry: ['vehiclesPerHour'], transport: 'MQTT' },
+  'parking-sensor': { label: 'Parking bay sensors', code: 'PRK', measures: 'Which spaces are free', service: 'gate-parking', shape: 'puck', telemetry: ['freeSpaces'], transport: 'MQTT' },
+  'edge-ai': { label: 'Edge AI box', code: 'EAI', measures: 'Anonymous class-level engagement', service: 'engagement', shape: 'gem', telemetry: ['focused', 'onPhone', 'headsDown', 'talking'], transport: 'MQTT' },
+  'street-lamp': { label: 'Smart street lamps', code: 'LMP', measures: 'Dusk switching and dimming', service: 'lighting', shape: 'dome', telemetry: ['lamps'], transport: 'MQTT' },
 }
 
 const CLASSROOM = ['climate-sensor', 'ac-unit', 'co2-sensor', 'presence-sensor', 'light-controller', 'camera', 'edge-ai']
 
 // ILLUSTRATIVE: an example campus. A room's `x` (and optional `z`) is its span inside the building; rooms on
-// one floor must not overlap. `capacity` is the number of seats the simulation fills. `short` is the name the
+// one floor must not overlap. `code` is the room's asset code (device names start with it). `capacity` is the
+// number of seats the simulation fills. `short` is the name the
 // flat site plan uses where the full name does not fit.
 export const buildings = [
   {
@@ -85,6 +88,7 @@ export const buildings = [
     rooms: [
       {
         id: 'science-lab',
+        code: 'LSC',
         name: 'Science lab',
         usage: 'lab',
         floor: 0,
@@ -95,6 +99,7 @@ export const buildings = [
       },
       {
         id: 'computer-lab',
+        code: 'LCM',
         name: 'Computer lab',
         usage: 'computer',
         floor: 0,
@@ -105,6 +110,7 @@ export const buildings = [
       },
       {
         id: 'classroom-a',
+        code: 'CLA',
         name: 'Classroom A',
         usage: 'classroom',
         floor: 1,
@@ -115,6 +121,7 @@ export const buildings = [
       },
       {
         id: 'classroom-b',
+        code: 'CLB',
         name: 'Classroom B',
         usage: 'classroom',
         floor: 1,
@@ -125,6 +132,7 @@ export const buildings = [
       },
       {
         id: 'classroom-c',
+        code: 'CLC',
         name: 'Classroom C',
         usage: 'classroom',
         floor: 1,
@@ -147,6 +155,7 @@ export const buildings = [
     rooms: [
       {
         id: 'reading-hall',
+        code: 'LIB',
         name: 'Reading hall',
         usage: 'library',
         floor: 0,
@@ -169,6 +178,7 @@ export const buildings = [
     rooms: [
       {
         id: 'security-room',
+        code: 'SEC',
         name: 'Security control room',
         short: 'Security',
         usage: 'security',
@@ -181,6 +191,7 @@ export const buildings = [
       },
       {
         id: 'server-room',
+        code: 'SRV',
         name: 'Server room',
         short: 'Server',
         usage: 'server',
@@ -192,6 +203,7 @@ export const buildings = [
       },
       {
         id: 'office',
+        code: 'OFC',
         name: 'Principal’s office',
         short: 'Office',
         usage: 'office',
@@ -215,6 +227,7 @@ export const buildings = [
     rooms: [
       {
         id: 'gate',
+        code: 'GTW',
         name: 'Main gate',
         usage: 'gate',
         floor: 0,
@@ -226,6 +239,7 @@ export const buildings = [
       },
       {
         id: 'car-park',
+        code: 'PRK',
         name: 'Car park',
         usage: 'carpark',
         floor: 0,
@@ -237,6 +251,7 @@ export const buildings = [
       },
       {
         id: 'park',
+        code: 'PLY',
         name: 'Park and playground',
         usage: 'park',
         floor: 0,
@@ -248,6 +263,7 @@ export const buildings = [
       },
       {
         id: 'field',
+        code: 'FLD',
         name: 'Sports field',
         usage: 'field',
         floor: 0,
@@ -258,6 +274,79 @@ export const buildings = [
         automations: ['Evening training → floodlights on'],
       },
     ],
+  },
+]
+
+// PLACEHOLDER: alarm rules, in the shape of a device profile's alarm rules. A rule watches one telemetry key of
+// one device kind (optionally only in rooms of one `usage`); the first level whose condition holds sets the
+// severity, and the alarm clears once none does. `occupied` only checks while people are in the room, `after`
+// only from that time of day (minutes). `action` is what the rule chain does next. Thresholds are numbers, so
+// they stay out of the text fields.
+export const SEVERITIES = ['CRITICAL', 'MAJOR', 'MINOR', 'WARNING'] // most severe first
+export const alarmRules = [
+  {
+    id: 'high-co2',
+    type: 'High CO₂',
+    device: 'co2-sensor',
+    key: 'co2',
+    unit: 'ppm',
+    levels: [
+      { severity: 'MAJOR', op: '>', value: 1200 },
+      { severity: 'WARNING', op: '>', value: 1000 },
+    ],
+    action: 'Boost ventilation and tell the teacher’s tablet',
+  },
+  {
+    id: 'room-hot',
+    type: 'Room running warm',
+    device: 'climate-sensor',
+    key: 'temperature',
+    unit: '°C',
+    occupied: true,
+    levels: [
+      { severity: 'MAJOR', op: '>', value: 29 },
+      { severity: 'MINOR', op: '>', value: 28 },
+    ],
+    action: 'Step up cooling',
+  },
+  {
+    id: 'server-hot',
+    type: 'Server room hot',
+    device: 'climate-sensor',
+    usage: 'server',
+    key: 'temperature',
+    unit: '°C',
+    levels: [{ severity: 'CRITICAL', op: '>', value: 27 }],
+    action: 'Page IT on call',
+  },
+  {
+    id: 'engagement-dip',
+    type: 'Class engagement dipping',
+    device: 'edge-ai',
+    key: 'focused',
+    unit: '%',
+    levels: [{ severity: 'MINOR', op: '<', value: 70 }],
+    action: 'Nudge the teacher’s tablet',
+  },
+  {
+    id: 'equipment-on',
+    type: 'Equipment left on',
+    device: 'power-meter',
+    usage: 'computer',
+    key: 'power',
+    unit: 'kW',
+    after: 18 * 60,
+    levels: [{ severity: 'MINOR', op: '>', value: 2 }],
+    action: 'Ticket to IT to shut the lab down',
+  },
+  {
+    id: 'car-park-full',
+    type: 'Car park full',
+    device: 'parking-sensor',
+    key: 'freeSpaces',
+    unit: '',
+    levels: [{ severity: 'WARNING', op: '<', value: 1 }],
+    action: 'Gate display shows the car park is full',
   },
 ]
 

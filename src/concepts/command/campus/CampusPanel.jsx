@@ -1,11 +1,14 @@
+import { useRef } from 'react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
-import { deviceKinds, services } from '../campusData'
+import { alarmRules, deviceKinds, services } from '../campusData'
 import { campus } from '../content'
 import CampusFeed from './CampusFeed'
+import { originatorOf } from './alarms'
 import { buildingAttention, cameraList } from './live'
 import { buildingServices, roomServices, roomsByFloor } from './model'
 import { up } from './navigation'
-import { engagement, readings, toPercents } from './simulate'
+import { stepIndex } from './keys'
+import { clock, engagement, readings, ruleApplies, toPercents } from './simulate'
 
 // The side panel. It doubles as the accessible room list: every building and room the model shows can be
 // reached here with the keyboard, and hovering an entry marks it in the model. Readings are simulated and
@@ -19,8 +22,82 @@ function SimTag({ children = campus.simulated }) {
   return <span className="cmd-label border border-dashed border-cmd-faint px-1.5 py-0.5 text-cmd-faint">{children}</span>
 }
 
-function StatusDot({ status }) {
-  return <span aria-hidden="true" data-status={status} className="cp-dot" />
+function StatusDot({ status, severity }) {
+  return <span aria-hidden="true" data-status={status} data-severity={severity ?? undefined} className="cp-dot" />
+}
+
+function SeverityChip({ severity }) {
+  return (
+    <span data-severity={severity} className="cp-sev cmd-label">
+      {panel.severity[severity]}
+    </span>
+  )
+}
+
+// One alarm row. `showRoom` on the campus list, where the room is the link.
+function AlarmRow({ model, alarm, acked, onAck, onOpen }) {
+  const r = model.byId[alarm.roomId]
+  const isAcked = acked.has(alarm.id)
+  const state = `${alarm.status === 'ACTIVE' ? panel.alarm.active : panel.alarm.cleared}${isAcked ? ` · ${panel.alarm.acked}` : ''}`
+  return (
+    <li data-status={alarm.status} className="cp-alarm border-b border-cmd-line px-4 py-3">
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className="flex flex-wrap items-center gap-2">
+            <SeverityChip severity={alarm.severity} />
+            <span className="text-sm text-cmd-text">{alarm.type}</span>
+          </p>
+          <p className="cmd-label mt-1.5 text-cmd-faint">
+            {onOpen ? (
+              <button type="button" onClick={onOpen} className="text-cmd-muted underline decoration-cmd-line underline-offset-2 hover:text-cmd-text">
+                {r.name}
+              </button>
+            ) : null}
+            {onOpen ? ' · ' : ''}
+            <span className="font-cmd-mono">{alarm.originator}</span> · {clock(alarm.start)}
+            {alarm.end != null ? `–${clock(alarm.end)}` : ''}
+          </p>
+          <p className="cmd-label mt-1 text-cmd-faint">{state}</p>
+        </div>
+        {alarm.status === 'ACTIVE' && !isAcked && (
+          <button type="button" onClick={() => onAck(alarm.id)} className="cmd-label min-h-[32px] shrink-0 border border-cmd-line px-2 text-cmd-muted hover:border-cmd-faint hover:text-cmd-text">
+            {panel.alarm.ack}
+          </button>
+        )}
+      </div>
+    </li>
+  )
+}
+
+function CampusAlarms({ model, live, acked, onAck, onSelect }) {
+  const active = live.alarms.filter((a) => a.status === 'ACTIVE')
+  const shown = [...active, ...live.alarms.filter((a) => a.status === 'CLEARED').slice(0, Math.max(0, 6 - active.length))]
+  return (
+    <section aria-label={panel.alarm.title} className="border-t border-cmd-line">
+      <div className="flex items-center justify-between gap-3 px-4 pb-2 pt-4">
+        <h4 className="cmd-label text-cmd-faint">
+          {panel.alarm.title} · {active.length} {panel.alarm.active.toLowerCase()}
+        </h4>
+        <SimTag />
+      </div>
+      {shown.length ? (
+        <ul className="border-t border-cmd-line">
+          {shown.map((a) => (
+            <AlarmRow
+              key={a.id}
+              model={model}
+              alarm={a}
+              acked={acked}
+              onAck={onAck}
+              onOpen={() => onSelect({ buildingId: model.byId[a.roomId].buildingId, roomId: a.roomId }, 'alarms')}
+            />
+          ))}
+        </ul>
+      ) : (
+        <p className="px-4 pb-4 text-sm text-cmd-muted">{panel.alarm.none}</p>
+      )}
+    </section>
+  )
 }
 
 function ServiceChips({ ids }) {
@@ -38,7 +115,7 @@ function ServiceChips({ ids }) {
 const rowButton =
   'group flex w-full min-h-[44px] items-center justify-between gap-3 border-b border-cmd-line px-4 py-3 text-left transition-colors duration-micro ease-cmd hover:bg-cmd-surface focus-visible:[outline-offset:-3px] data-[hover=true]:bg-cmd-surface'
 
-function CampusList({ model, live, hover, onSelect, onHover }) {
+function CampusList({ model, live, hover, acked, onAck, onSelect, onHover }) {
   return (
     <>
       <PanelHead title={panel.campusTitle} intro={panel.campusIntro} />
@@ -74,6 +151,7 @@ function CampusList({ model, live, hover, onSelect, onHover }) {
           )
         })}
       </ul>
+      <CampusAlarms model={model} live={live} acked={acked} onAck={onAck} onSelect={onSelect} />
     </>
   )
 }
@@ -126,12 +204,18 @@ function BuildingView({ model, live, sel, hover, onSelect, onHover }) {
                   >
                     <span className="min-w-0">
                       <span className="flex items-center gap-2 text-cmd-text">
-                        <StatusDot status={st.status} />
+                        <StatusDot status={st.status} severity={st.severity} />
                         {r.name}
                       </span>
-                      <span className="cmd-label mt-1 block text-cmd-faint">
-                        {count(r.kinds.length, 'device')}
-                        {st.status === 'attention' ? <span className="text-cmd-signal-fg"> · {st.reasons[0]}</span> : null}
+                      <span className="cmd-label mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-cmd-faint">
+                        <span className="font-cmd-mono">{r.code}</span>
+                        <span>{count(r.kinds.length, 'device')}</span>
+                        {st.severity ? (
+                          <>
+                            <SeverityChip severity={st.severity} />
+                            <span className="normal-case tracking-normal">{st.reasons[0]}</span>
+                          </>
+                        ) : null}
                       </span>
                     </span>
                     <ChevronRight aria-hidden="true" className="h-4 w-4 shrink-0 text-cmd-faint group-hover:text-cmd-signal-fg" />
@@ -239,23 +323,47 @@ function CameraView({ model, live, room, time, feeds }) {
   )
 }
 
-function RoomView({ model, live, sel, time, feeds, onSelect }) {
-  const r = model.byId[sel.roomId]
-  const b = model.byId[r.buildingId]
-  const st = live.states[r.id]
+const TABS = ['telemetry', 'attributes', 'devices', 'alarms', 'rules']
+
+function Tabs({ tab, onTab }) {
+  const refs = useRef([])
+  const current = Math.max(0, TABS.indexOf(tab))
+  const onKeyDown = (e) => {
+    const next = stepIndex(e.key, current, TABS.length)
+    if (next == null) return
+    e.preventDefault()
+    onTab(TABS[next])
+    refs.current[next]?.focus()
+  }
+  return (
+    <div role="tablist" aria-label={panel.readings} onKeyDown={onKeyDown} className="cp-scroll flex overflow-x-auto border-b border-cmd-line">
+      {TABS.map((id, i) => (
+        <button
+          key={id}
+          ref={(el) => {
+            refs.current[i] = el
+          }}
+          type="button"
+          role="tab"
+          id={`cp-tab-${id}`}
+          aria-selected={i === current}
+          aria-controls="cp-tabpanel"
+          tabIndex={i === current ? 0 : -1}
+          data-on={i === current ? 'true' : 'false'}
+          onClick={() => onTab(id)}
+          className="cmd-label min-h-[44px] flex-1 shrink-0 whitespace-nowrap border-b-2 border-transparent px-2 !text-[10px] !tracking-[0.06em] text-cmd-muted transition-colors duration-micro ease-cmd hover:text-cmd-text focus-visible:[outline-offset:-3px] data-[on=true]:border-cmd-signal data-[on=true]:text-cmd-signal-fg"
+        >
+          {panel.tabs[id]}
+        </button>
+      ))}
+    </div>
+  )
+}
+
+function TelemetryTab({ model, live, r, time, feeds, onSelect }) {
   const rows = readings(r, time, { cameraCount: live.cameraCount })
-  const kinds = [...new Set(r.kinds)]
-  const kicker = b.outdoor ? b.name : `${b.name} · ${campus.floorNames[r.floor] ?? ''}`
   return (
     <>
-      <PanelHead title={r.name} kicker={kicker} onBack={() => onSelect(up(sel))} />
-      <div className="flex items-center gap-2 border-b border-cmd-line px-4 py-3 text-sm">
-        <StatusDot status={st.status} />
-        <span className={st.status === 'attention' ? 'text-cmd-signal-fg' : 'text-cmd-muted'}>
-          {panel.status[st.status]}
-          {st.reasons.length ? `: ${st.reasons.join(', ')}` : ''}
-        </span>
-      </div>
       <CameraView model={model} live={live} room={r} time={time} feeds={feeds} />
       <section className="border-b border-cmd-line px-4 py-4" aria-label={panel.readings}>
         <div className="flex items-center justify-between gap-3">
@@ -275,29 +383,173 @@ function RoomView({ model, live, sel, time, feeds, onSelect }) {
       </section>
       {r.kinds.includes('edge-ai') && <Engagement room={r} time={time} />}
       {r.cameraWall && <CameraWall model={model} live={live} time={time} feeds={feeds} onSelect={onSelect} />}
-      <section className="border-b border-cmd-line px-4 py-4" aria-label={panel.devices}>
-        <p className="cmd-label text-cmd-faint">{panel.devices}</p>
-        <ul className="mt-2 space-y-2">
-          {kinds.map((k) => (
-            <li key={k} className="text-sm">
-              <span className="text-cmd-text">{deviceKinds[k].label}</span>
-              <span className="block text-cmd-muted">{deviceKinds[k].measures}</span>
-            </li>
+      <section className="px-4 py-4" aria-label={panel.services}>
+        <p className="cmd-label mb-2 text-cmd-faint">{panel.services}</p>
+        <ServiceChips ids={roomServices(r)} />
+      </section>
+    </>
+  )
+}
+
+function AttributesTab({ model, r }) {
+  const b = model.byId[r.buildingId]
+  const rows = [
+    [panel.attr.type, r.outdoor ? panel.attr.zone : panel.attr.room],
+    [panel.attr.code, r.code, true],
+    [panel.attr.parent, b.name],
+    [panel.attr.relation, `${b.name} ${panel.attr.contains.toLowerCase()} ${r.name}`],
+    [panel.attr.floor, r.outdoor ? panel.attr.open : campus.floorNames[r.floor]],
+    [panel.attr.usage, r.usage, true],
+    [panel.attr.capacity, r.capacity ? String(r.capacity) : '—', true],
+    [panel.attr.devices, String(r.kinds.length), true],
+  ]
+  return (
+    <section className="px-4 py-4" aria-label={panel.tabs.attributes}>
+      <dl className="divide-y divide-cmd-line border-y border-cmd-line">
+        {rows.map(([k, v, mono]) => (
+          <div key={k} className="flex items-baseline justify-between gap-4 py-2">
+            <dt className="cmd-label text-cmd-faint">{k}</dt>
+            <dd className={`text-right text-sm text-cmd-text ${mono ? 'font-cmd-mono' : ''}`}>{v}</dd>
+          </div>
+        ))}
+      </dl>
+    </section>
+  )
+}
+
+function DevicesTab({ r }) {
+  return (
+    <ul aria-label={panel.tabs.devices}>
+      {r.devices.map((d) => {
+        const k = deviceKinds[d.kind]
+        return (
+          <li key={d.id} className="border-b border-cmd-line px-4 py-3">
+            <p className="flex items-baseline justify-between gap-3">
+              <span className="font-cmd-mono text-sm text-cmd-text">{d.name}</span>
+              <span className="cmd-label text-cmd-faint">{k.transport}</span>
+            </p>
+            <p className="mt-0.5 text-sm text-cmd-muted">
+              {k.label} · {k.measures}
+            </p>
+            <ul className="mt-2 flex flex-wrap gap-1" aria-label={panel.device.keys}>
+              {k.telemetry.map((key) => (
+                <li key={key} className="border border-cmd-line px-1.5 py-0.5 font-cmd-mono text-[11px] text-cmd-muted">
+                  {key}
+                </li>
+              ))}
+            </ul>
+          </li>
+        )
+      })}
+    </ul>
+  )
+}
+
+function AlarmsTab({ model, live, r, acked, onAck }) {
+  const list = live.alarms.filter((a) => a.roomId === r.id)
+  return (
+    <section aria-label={panel.tabs.alarms}>
+      {list.length ? (
+        <ul>
+          {list.map((a) => (
+            <AlarmRow key={a.id} model={model} alarm={a} acked={acked} onAck={onAck} />
           ))}
         </ul>
-      </section>
-      <section className="border-b border-cmd-line px-4 py-4" aria-label={panel.automations}>
-        <p className="cmd-label text-cmd-faint">{panel.automations}</p>
+      ) : (
+        <p className="border-b border-cmd-line px-4 py-4 text-sm text-cmd-muted">{panel.alarm.none}</p>
+      )}
+      <p className="px-4 py-3 text-xs text-cmd-faint">{panel.alarm.note}</p>
+    </section>
+  )
+}
+
+function ChainNode({ kind, children }) {
+  return (
+    <li className="cp-node" data-kind={kind}>
+      <span className="cmd-label block text-cmd-faint">{panel.chain[kind]}</span>
+      <span className="block text-sm text-cmd-text">{children}</span>
+    </li>
+  )
+}
+
+function RulesTab({ r }) {
+  const rules = alarmRules.filter((rule) => ruleApplies(rule, r))
+  return (
+    <section aria-label={panel.tabs.rules} className="px-4 py-4">
+      {rules.length ? (
+        <div className="space-y-5">
+          {rules.map((rule) => (
+            <div key={rule.id}>
+              <p className="text-sm text-cmd-text">{rule.type}</p>
+              <ol className="cp-chain mt-2">
+                <ChainNode kind="input">
+                  <span className="font-cmd-mono">{originatorOf(r, rule)}</span> · <span className="font-cmd-mono">{rule.key}</span>
+                </ChainNode>
+                <ChainNode kind="save">{panel.chain.save}</ChainNode>
+                <ChainNode kind="filter">
+                  <span className="font-cmd-mono">
+                    {rule.levels
+                      .map((l) => `${rule.key} ${l.op} ${l.value}${rule.unit ? ` ${rule.unit}` : ''}`)
+                      .join('  |  ')}
+                  </span>
+                  {rule.occupied ? ' · occupied' : ''}
+                  {rule.after != null ? ` · after ${clock(rule.after)}` : ''}
+                </ChainNode>
+                <ChainNode kind="alarm">
+                  {rule.levels.map((l) => (
+                    <SeverityChip key={l.severity} severity={l.severity} />
+                  ))}
+                </ChainNode>
+                <ChainNode kind="action">{rule.action}</ChainNode>
+              </ol>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <p className="text-sm text-cmd-muted">{panel.chain.none}</p>
+      )}
+      <div className="mt-5 border-t border-cmd-line pt-4">
+        <p className="cmd-label text-cmd-faint">{panel.chain.other}</p>
         <ul className="mt-2 space-y-1.5 text-sm text-cmd-muted">
           {r.automations.map((a) => (
             <li key={a}>{a}</li>
           ))}
         </ul>
-      </section>
-      <section className="px-4 py-4" aria-label={panel.services}>
-        <p className="cmd-label mb-2 text-cmd-faint">{panel.services}</p>
-        <ServiceChips ids={roomServices(r)} />
-      </section>
+      </div>
+    </section>
+  )
+}
+
+function RoomView({ model, live, sel, time, feeds, tab, onTab, acked, onAck, onSelect }) {
+  const r = model.byId[sel.roomId]
+  const b = model.byId[r.buildingId]
+  const st = live.states[r.id]
+  const kicker = b.outdoor ? b.name : `${b.name} · ${campus.floorNames[r.floor] ?? ''}`
+  const props = { model, live, r, time, feeds, acked, onAck, onSelect }
+  return (
+    <>
+      <PanelHead title={r.name} kicker={kicker} onBack={() => onSelect(up(sel))} />
+      <div className="flex flex-wrap items-center gap-2 border-b border-cmd-line px-4 py-3 text-sm">
+        <StatusDot status={st.status} severity={st.severity} />
+        {st.severity && <SeverityChip severity={st.severity} />}
+        <span className={st.status === 'attention' ? 'text-cmd-signal-fg' : 'text-cmd-muted'}>
+          {st.reasons.length ? st.reasons.join(', ') : panel.status.ok}
+        </span>
+      </div>
+      <Tabs tab={tab} onTab={onTab} />
+      <div role="tabpanel" id="cp-tabpanel" aria-labelledby={`cp-tab-${tab}`}>
+        {tab === 'attributes' ? (
+          <AttributesTab {...props} />
+        ) : tab === 'devices' ? (
+          <DevicesTab {...props} />
+        ) : tab === 'alarms' ? (
+          <AlarmsTab {...props} />
+        ) : tab === 'rules' ? (
+          <RulesTab {...props} />
+        ) : (
+          <TelemetryTab {...props} />
+        )}
+      </div>
     </>
   )
 }

@@ -63,7 +63,7 @@ describe('room state and status', () => {
   })
   it('flags some classrooms late in a block, not all of them, and none at its start', () => {
     const ids = ['classroom-a', 'classroom-b', 'classroom-c']
-    const late = ids.filter((id) => roomStatus(room(id), h(11, 15)).reasons.includes('CO₂ above the comfort limit'))
+    const late = ids.filter((id) => roomStatus(room(id), h(11, 15)).reasons.includes('High CO₂'))
     expect(late.length).toBeGreaterThan(0)
     expect(late.length).toBeLessThan(ids.length)
     for (const id of ids) expect(roomState(room(id), h(7, 45)).co2).toBeLessThan(CO2_LIMIT)

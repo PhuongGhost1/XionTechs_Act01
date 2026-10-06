@@ -63,6 +63,9 @@ export default function CampusTwin() {
   const [layer, setLayer] = useState('none')
   const [time, setTime] = useState(START)
   const [playing, setPlaying] = useState(true)
+  const [tab, setTab] = useState('telemetry') // the room panel's tab
+  const [acked, setAcked] = useState(() => new Set()) // alarms the visitor acknowledged (this page only)
+  const onAck = useCallback((id) => setAcked((s) => new Set(s).add(id)), [])
 
   // Autoplay the day while the model is on screen, unless the visitor paused it, paused motion, or prefers
   // reduced motion (then the scrubber still works, it just does not move by itself).
@@ -103,11 +106,15 @@ export default function CampusTwin() {
     return fn
   }, [])
 
-  const select = useCallback((next) => {
+  const select = useCallback((next, nextTab = 'telemetry') => {
     setSel(next)
     setHover(null)
+    setTab(nextTab)
   }, [])
-  const onPick = useCallback((hit) => setSel((s) => pick(model, s, hit)), [])
+  const onPick = useCallback((hit) => {
+    setSel((s) => pick(model, s, hit))
+    setTab('telemetry')
+  }, [])
   const onSceneHover = useCallback((hit) => setHover(hit), [])
   const onTime = (t) => {
     setPlaying(false)
@@ -197,7 +204,20 @@ export default function CampusTwin() {
           {/* On wide screens the panel scrolls inside the height the stage and the day bar set. */}
           <aside aria-label={campus.label} className="relative border-t border-cmd-line lg:border-t-0">
             <div className="max-h-[720px] overflow-y-auto lg:absolute lg:inset-0 lg:max-h-none">
-              <CampusPanel model={model} live={live} sel={sel} hover={hover} time={minute} feeds={feeds} onSelect={select} onHover={setHover} />
+              <CampusPanel
+                model={model}
+                live={live}
+                sel={sel}
+                hover={hover}
+                time={minute}
+                feeds={feeds}
+                tab={tab}
+                onTab={setTab}
+                acked={acked}
+                onAck={onAck}
+                onSelect={select}
+                onHover={setHover}
+              />
             </div>
           </aside>
         </div>

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { CAMPUS_FRAME, DAY, buildings, dayPhases, deviceKinds, layers, services } from '../campusData'
+import { CAMPUS_FRAME, DAY, alarmRules, buildings, dayPhases, deviceKinds, layers, services } from '../campusData'
 import { campus } from '../content'
 
 const rooms = buildings.flatMap((b) => b.rooms.map((r) => ({ ...r, building: b })))
@@ -17,6 +17,7 @@ function texts() {
   for (const k of Object.values(deviceKinds)) out.push(k.label, k.measures)
   for (const l of layers) out.push(l.label)
   for (const p of dayPhases) out.push(p.label)
+  for (const r of alarmRules) out.push(r.type, r.action)
   return out
 }
 

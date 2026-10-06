@@ -40,7 +40,7 @@ function placeDevices(room, outdoor) {
     const x = room.x[0] + span(room.x) * fx
     const z = outdoor ? mid(room.z) + (i % 2 ? 0.8 : -0.8) : room.z[0] + span(room.z) * (i % 2 ? 0.3 : 0.18)
     const y = outdoor ? 2.4 : room.y[0] + span(room.y) * 0.72
-    return { id: `${room.id}:${i}`, kind, roomId: room.id, pos: [x, y, z], shape: KINDS[kind].shape }
+    return { id: `${room.id}:${i}`, name: `${room.code}-${KINDS[kind].code}`, kind, roomId: room.id, pos: [x, y, z], shape: KINDS[kind].shape }
   })
 }
 

@@ -54,6 +54,10 @@
   stroke: rgb(var(--c-signal));
   stroke-width: 0.2;
 }
+.cp-svg-room[data-severity='CRITICAL'] rect,
+.cp-svg-room[data-severity='MAJOR'] rect {
+  stroke: rgb(var(--c-danger));
+}
 .cp-svg-room[data-on='true'] rect {
   stroke: rgb(var(--c-signal));
   stroke-width: 0.3;
@@ -117,6 +121,10 @@
   width: 7px;
   height: 7px;
   background: rgb(var(--c-signal));
+}
+.cp-label[data-severity='CRITICAL'] .cp-label__flag,
+.cp-label[data-severity='MAJOR'] .cp-label__flag {
+  background: rgb(var(--c-danger));
 }
 .cp-label--tip .cp-label__box {
   flex-direction: column;
@@ -183,6 +191,81 @@
 }
 .cp-feed[data-night='true'] .cp-feed__fill {
   background: rgb(var(--c-ok) / 0.25);
+}
+
+/* Alarm severities. Critical and major in the danger colour, minor and warning in the signal colour; the
+   filled chip is the more severe of each pair. */
+.cp-sev {
+  display: inline-block;
+  padding: 1px 6px;
+  border: 1px solid currentColor;
+  font-size: 10px;
+  line-height: 1.5;
+}
+.cp-sev[data-severity='CRITICAL'] {
+  color: rgb(var(--c-bg));
+  background: rgb(var(--c-danger));
+  border-color: rgb(var(--c-danger));
+}
+.cp-sev[data-severity='MAJOR'] {
+  color: rgb(var(--c-danger));
+}
+.cp-sev[data-severity='MINOR'] {
+  color: rgb(var(--c-signal-ink));
+  background: rgb(var(--c-signal));
+  border-color: rgb(var(--c-signal));
+}
+.cp-sev[data-severity='WARNING'] {
+  color: rgb(var(--c-signal-fg));
+}
+.cp-alarm[data-status='CLEARED'] {
+  opacity: 0.7;
+}
+.cp-dot[data-status='attention'][data-severity='CRITICAL'],
+.cp-dot[data-status='attention'][data-severity='MAJOR'] {
+  background: rgb(var(--c-danger));
+}
+
+/* A rule chain: nodes in a column, joined by a line with an arrow head. */
+.cp-chain {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.cp-node {
+  position: relative;
+  margin-left: 10px;
+  padding: 6px 10px;
+  border: 1px solid rgb(var(--c-line));
+  background: rgb(var(--c-surface));
+}
+.cp-node + .cp-node {
+  margin-top: 14px;
+}
+.cp-node + .cp-node::before {
+  content: '';
+  position: absolute;
+  left: 14px;
+  top: -14px;
+  width: 1px;
+  height: 14px;
+  background: rgb(var(--c-faint));
+}
+.cp-node + .cp-node::after {
+  content: '';
+  position: absolute;
+  left: 11px;
+  top: -6px;
+  border: 3.5px solid transparent;
+  border-top-color: rgb(var(--c-faint));
+}
+.cp-node[data-kind='alarm'] {
+  border-color: rgb(var(--c-signal) / 0.6);
+}
+.cp-node[data-kind='alarm'] span:last-child {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
 }
 
 /* Simulated CCTV: the scene's render in monochrome (green after dusk), scanlines, a vignette and a HUD.

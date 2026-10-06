@@ -28,7 +28,7 @@ export default function CampusLabels({ model, sel, hover, live, labelRef }) {
           const st = live.states[id]
           const on = hover?.roomId === id || sel.roomId === id
           return (
-            <li key={id} ref={labelRef(`r:${id}`)} className="cp-label" data-on={on ? 'true' : 'false'} data-status={st.status}>
+            <li key={id} ref={labelRef(`r:${id}`)} className="cp-label" data-on={on ? 'true' : 'false'} data-status={st.status} data-severity={st.severity ?? undefined}>
               <span className="cp-label__box">
                 <span className="cmd-label cp-label__title">{r.name}</span>
                 {st.status === 'attention' && <span className="cp-label__flag" />}
