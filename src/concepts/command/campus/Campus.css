@@ -1,0 +1,235 @@
+/* Section 05, Smart campus. Plain CSS on the --c-* tokens. Only transform, opacity and colour move. */
+
+/* The stage: touch keeps scrolling the page; a mouse can drag the model. */
+.cp-stage {
+  touch-action: pan-y;
+}
+.cp-stage[data-render='3d'] {
+  cursor: grab;
+}
+.cp-stage[data-render='3d'] .cp-canvas[data-drag='on'] {
+  cursor: grabbing;
+}
+.cp-stage:focus-visible {
+  outline-offset: -3px;
+}
+
+/* The site plan is the image the 3D model fades in over. */
+.cp-svg {
+  transition: opacity 500ms var(--cmd-ease);
+}
+.cp-stage[data-render='3d'] .cp-svg {
+  opacity: 0;
+  pointer-events: none;
+}
+.cp-svg-lawn {
+  fill: rgb(var(--c-ok) / 0.1);
+}
+.cp-svg-paved {
+  fill: rgb(var(--c-line) / 0.55);
+}
+.cp-svg-road {
+  fill: rgb(var(--c-surface));
+  stroke: rgb(var(--c-line));
+  stroke-width: 0.08;
+}
+.cp-svg-tree {
+  fill: rgb(var(--c-ok) / 0.35);
+}
+.cp-svg-car {
+  fill: rgb(var(--c-muted) / 0.7);
+}
+.cp-svg-room rect {
+  fill: rgb(var(--c-raise));
+  stroke: rgb(var(--c-line));
+  stroke-width: 0.12;
+  cursor: pointer;
+  transition: fill 300ms var(--cmd-ease), stroke 160ms var(--cmd-ease);
+}
+.cp-svg-room[data-outdoor='true'] rect {
+  fill: rgb(var(--c-ok) / 0.16);
+  stroke-dasharray: 0.5 0.35;
+}
+.cp-svg-room[data-status='attention'] rect {
+  stroke: rgb(var(--c-signal));
+  stroke-width: 0.2;
+}
+.cp-svg-room[data-on='true'] rect {
+  stroke: rgb(var(--c-signal));
+  stroke-width: 0.3;
+}
+.cp-svg-text {
+  fill: rgb(var(--c-muted));
+  font: 500 0.78px 'JetBrains Mono', ui-monospace, monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.06px;
+  pointer-events: none;
+}
+.cp-svg-title {
+  fill: rgb(var(--c-text));
+  font: 700 1px 'JetBrains Mono', ui-monospace, monospace;
+  text-transform: uppercase;
+}
+.cp-svg-floor {
+  fill: rgb(var(--c-faint));
+  font: 500 0.7px 'JetBrains Mono', ui-monospace, monospace;
+  text-transform: uppercase;
+}
+.cp-svg-outline {
+  fill: none;
+  stroke: rgb(var(--c-faint));
+  stroke-width: 0.14;
+  pointer-events: none;
+}
+
+/* Labels: the scene places .cp-label with a transform; the box sits centred above that point. */
+.cp-labels > li {
+  list-style: none;
+}
+.cp-label {
+  position: absolute;
+  left: 0;
+  top: 0;
+  will-change: transform;
+}
+.cp-label__box {
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: max-content;
+  max-width: 13rem;
+  padding: 3px 8px 4px;
+  background: rgb(var(--c-bg) / 0.84);
+  border: 1px solid rgb(var(--c-line));
+  transform: translate(-50%, calc(-100% - 8px));
+  transition: border-color 160ms var(--cmd-ease);
+}
+.cp-label__title {
+  color: rgb(var(--c-text));
+}
+.cp-label[data-on='true'] .cp-label__box {
+  border-color: rgb(var(--c-signal));
+}
+.cp-label__flag {
+  width: 7px;
+  height: 7px;
+  background: rgb(var(--c-signal));
+}
+.cp-label--tip .cp-label__box {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1px;
+  border-color: rgb(var(--c-signal));
+}
+.cp-label--tip[data-on='false'] {
+  display: none;
+}
+.cp-label__sub {
+  font-size: 12px;
+  color: rgb(var(--c-muted));
+}
+
+/* Panel. */
+.cp-dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  flex: none;
+  background: rgb(var(--c-ok));
+}
+.cp-dot[data-status='attention'] {
+  background: rgb(var(--c-signal));
+}
+.cp-share[data-tone='ok'] {
+  background: rgb(var(--c-ok));
+}
+.cp-share[data-tone='muted'] {
+  background: rgb(var(--c-muted));
+}
+.cp-share[data-tone='signal'] {
+  background: rgb(var(--c-signal));
+}
+.cp-share[data-tone='danger'] {
+  background: rgb(var(--c-danger));
+}
+.cp-share {
+  transition: width 400ms var(--cmd-ease);
+}
+
+/* Camera wall: an abstract feed per room, its fill the room's occupancy. Never video of people. */
+.cp-feed {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgb(var(--c-line));
+  background: rgb(var(--c-surface));
+}
+.cp-feed:hover {
+  border-color: rgb(var(--c-faint));
+}
+.cp-feed[data-status='attention'] {
+  border-color: rgb(var(--c-signal));
+}
+.cp-feed__fill {
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 100%;
+  transform-origin: bottom;
+  transform: scaleY(calc(var(--occ, 0) * 0.9 + 0.05));
+  background: rgb(var(--c-line) / 0.9);
+  transition: transform 400ms var(--cmd-ease);
+}
+.cp-feed[data-night='true'] .cp-feed__fill {
+  background: rgb(var(--c-ok) / 0.25);
+}
+
+/* The layer bar scrolls sideways on phones instead of wrapping into rows. */
+.cp-scroll {
+  scrollbar-width: none;
+}
+.cp-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+/* The day scrubber. */
+.cp-range {
+  appearance: none;
+  height: 28px;
+  background: transparent;
+  cursor: pointer;
+}
+.cp-range::-webkit-slider-runnable-track {
+  height: 2px;
+  background: rgb(var(--c-line));
+}
+.cp-range::-moz-range-track {
+  height: 2px;
+  background: rgb(var(--c-line));
+}
+.cp-range::-webkit-slider-thumb {
+  appearance: none;
+  width: 14px;
+  height: 22px;
+  margin-top: -10px;
+  background: rgb(var(--c-signal));
+  border: 0;
+}
+.cp-range::-moz-range-thumb {
+  width: 14px;
+  height: 22px;
+  background: rgb(var(--c-signal));
+  border: 0;
+  border-radius: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cp-svg,
+  .cp-svg-room rect,
+  .cp-share,
+  .cp-feed__fill,
+  .cp-label__box {
+    transition: none;
+  }
+}

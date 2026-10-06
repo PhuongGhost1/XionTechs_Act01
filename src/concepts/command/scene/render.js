@@ -44,7 +44,7 @@ export const QUALITY_SETTINGS = {
 const FOV = 35 // degrees; a mild perspective so the depth of the X shows when it turns
 const TAN_HALF_FOV = Math.tan((FOV * Math.PI) / 360)
 const SIGNALS_INDEX = SECTION_IDS.indexOf('signals')
-const COVER_ID = 'agent' // the opaque flight plan section (not one of the six scene phases)
+const COVER_ID = 'campus' // the opaque smart campus section (not one of the six scene phases)
 
 const PHASE_RATE = 7 // how quickly the phase follows the scroll position (about 1 / seconds to settle)
 const PACKET_SPEED = 80 // px per second at idle flow
@@ -263,7 +263,7 @@ export function createXCore({ container, quality = 'high', onFirstFrame, onConte
   const sectionRects = SECTION_IDS.map(() => ({ top: 0, bottom: 0 }))
   const sectionRectArr = SECTION_IDS.map(() => null) // the rect, or null while the section is not in the page
   let logo = null
-  let coverEl = null // the flight plan band: opaque like the paper band, so the core need not draw behind it
+  let coverEl = null // the smart campus band: opaque like the paper band, so the core need not draw behind it
   const coverRect = { top: 0, bottom: 0 }
 
   function queryElements() {

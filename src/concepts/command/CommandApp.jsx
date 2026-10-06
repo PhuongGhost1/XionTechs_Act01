@@ -6,7 +6,7 @@ import Hero from './Hero'
 import Modules from './Modules'
 import Process from './Process'
 import Deployments from './Deployments'
-import FlightSection from './flight/FlightSection'
+import CampusSection from './campus/CampusSection'
 import Signals from './Signals'
 import FinalCta from './FinalCta'
 import Footer from './Footer'
@@ -69,14 +69,14 @@ export default function CommandApp() {
         </Suspense>
       )}
       <BuildHud />
-      {/* Sections are transparent (the fixed canvas shows through) except `agent` (the flight plan, with
+      {/* Sections are transparent (the fixed canvas shows through) except `campus` (the smart campus, with
           its own canvas) and `signals`, the opaque bands that cover it. */}
       <main id="main" className="relative z-10">
         <Hero />
         <Modules />
         <Process />
         <Deployments />
-        <FlightSection />
+        <CampusSection />
         <Signals />
         <FinalCta />
       </main>
