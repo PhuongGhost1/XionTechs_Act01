@@ -1,9 +1,22 @@
 import { describe, expect, it } from 'vitest'
 import { buildCampusModel } from './model'
-import { buildingAttention, campusAt } from './live'
+import { buildingAttention, cameraList, campusAt } from './live'
 
 const model = buildCampusModel()
 const h = (hours, minutes = 0) => hours * 60 + minutes
+
+describe('cameraList', () => {
+  it('numbers every camera once, in order, and points it at its room', () => {
+    const cams = cameraList(model)
+    expect(cams.length).toBe(campusAt(model, 600, 'none').cameraCount)
+    expect(cams.map((c) => c.no)).toEqual(cams.map((_, i) => String(i + 1).padStart(2, '0')))
+    expect(new Set(cams.map((c) => c.deviceId)).size).toBe(cams.length)
+    for (const c of cams) expect(model.byId[c.roomId].kinds).toContain('camera')
+  })
+  it('has no camera in the security room itself: it is where the feeds end', () => {
+    expect(cameraList(model).some((c) => c.roomId === 'security-room')).toBe(false)
+  })
+})
 
 describe('campusAt', () => {
   it('has a state for every room', () => {

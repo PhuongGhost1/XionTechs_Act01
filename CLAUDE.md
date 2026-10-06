@@ -145,7 +145,9 @@ content. If you add a new section, follow the same pattern.
   per-seat or per-student state, no faces or names, abstract camera-wall feeds (tests in
   `campus/campusData.test.js` and `campus/simulate.test.js`). Adding a service or room is content only: a device
   kind in `deviceKinds`, a room that lists it, `slice: true` on the service. `three` is only imported by
-  `campus/campusScene.js` (lazy chunk); the SVG site plan is the fallback.
+  `campus/campusScene.js` (lazy chunk); the SVG site plan is the fallback. Camera "feeds" (room panel, security
+  room wall) are renders of the 3D model from each camera pin (`registerFeed`), styled as CCTV and tagged
+  "Simulated feed"; never use stock or generated footage of people, children above all.
 - QA: the built-in browser pane scales a 1280 px viewport too small to read; use headless Edge with `puppeteer-core` from PowerShell (Git Bash cannot launch it) and look at the screenshots.
   Take them with `page.screenshot({ captureBeyondViewport: false })`: an element screenshot, or a clip, resizes
   the page, SwiftShader then loses the WebGL context and the 3D sections fall back to their flat drawing.

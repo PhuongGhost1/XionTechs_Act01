@@ -27,6 +27,14 @@ export function campusAt(model, t, layer) {
   }
 }
 
+// Every campus camera with its number on the wall ("01", "02", ...), in model order. The numbers are interface
+// labels, not measurements.
+export function cameraList(model) {
+  return model.devices
+    .filter((d) => d.kind === 'camera')
+    .map((d, i) => ({ deviceId: d.id, roomId: d.roomId, no: String(i + 1).padStart(2, '0') }))
+}
+
 // Attention rooms of a building, for the list and the labels.
 export function buildingAttention(model, live, buildingId) {
   return model.byId[buildingId].roomIds.filter((id) => live.states[id]?.status === 'attention').length

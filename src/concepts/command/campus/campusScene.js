@@ -11,12 +11,17 @@
 // React computed with simulate.js), read from a plain object, never from React state. Labels are HTML; their
 // positions are projected here (camera.js) and written as CSS transforms. The loop stops off screen and while
 // the tab is hidden; it sleeps when nothing moves.
+//
+// Camera feeds: every camera pin is also a virtual camera. The panel registers a 2D canvas per feed; after the
+// main frame the scene renders one feed at a time from that pin into a small offscreen target and copies it
+// into its canvas (round robin, a few frames a second each, like CCTV). What a feed shows is this model:
+// rooms, desks, plain figures and cars, never footage of people.
 
 import {
-  AmbientLight, BoxGeometry, BufferGeometry, Color, ConeGeometry, CylinderGeometry, DirectionalLight, EdgesGeometry, Float32BufferAttribute,
+  AmbientLight, BackSide, BoxGeometry, BufferGeometry, Color, ConeGeometry, CylinderGeometry, DirectionalLight, EdgesGeometry, Float32BufferAttribute,
   Group, HemisphereLight, IcosahedronGeometry, InstancedMesh, LineBasicMaterial, LineSegments, Mesh, MeshBasicMaterial, MeshLambertMaterial,
   Object3D, OctahedronGeometry, PCFShadowMap, PerspectiveCamera, PlaneGeometry, Raycaster, SRGBColorSpace, Scene, SphereGeometry, Vector2,
-  WebGLRenderer,
+  WebGLRenderTarget, WebGLRenderer,
 } from 'three'
 import { sceneState, subscribe } from '../scene/store'
 import { FOV, cameraEye, cameraGoal, clamp, ndcToPx, orbitBy, parallaxOffset, projectPoint, toRad, tweenCamera, zoomBy } from './camera'
@@ -28,6 +33,10 @@ const OPEN_RATE = 5 // 1 / seconds: how fast a building opens and the others fad
 const AUTO_YAW_DEG_S = 2.2 // the campus turns slowly while nobody is looking at anything
 const CAR_SPEED = 5.5 // plot units per second
 const DRAG_PX = 5
+const FEED_W = 320
+const FEED_H = 180
+const FEED_GAP_MS = 45 // one feed render per this much time, shared by every feed on screen
+const FEED_MIN_MS = 120 // and no single feed more often than this
 
 function readColors(el) {
   const cs = getComputedStyle(el)
@@ -77,6 +86,7 @@ export function createCampusScene({ container, tier, model, getLive, getLabels, 
     solar: mix(C.bg, C.line, 0.7),
     desk: mix(C.raise, C.faint, 0.45),
     person: mix(C.muted, C.text, 0.3),
+    inside: mix(C.raise, C.muted, 0.3),
   }
   const scene = new Scene()
   const camera = new PerspectiveCamera(FOV, 1, 0.5, 500)
@@ -271,6 +281,11 @@ export function createCampusScene({ container, tier, model, getLive, getLabels, 
       fl.position.set(cx, r.y[0] + 0.25, cz)
       fl.visible = false
       g.add(fl)
+      // The room seen from inside, for its camera feed only: walls and ceiling facing in.
+      const inner = new Mesh(box(w - 0.1, h - 0.04, d - 0.1), lambert(P.inside, { side: BackSide, emissive: mix(P.inside, C.bg, 0.6) }))
+      inner.position.copy(vol.position)
+      inner.visible = false
+      g.add(inner)
       const edgeMat = lineMat(C.line, { transparent: true, opacity: 0.9 })
       const edges = new LineSegments(track(new EdgesGeometry(vol.geometry)), edgeMat)
       edges.position.copy(vol.position)
@@ -294,7 +309,7 @@ export function createCampusScene({ container, tier, model, getLive, getLabels, 
         wall.userData.screens = screens
         g.add(wall)
       }
-      rooms.set(r.id, { r, b, vol, mat, band, bandMat, plate: fl, plateMat, edges, edgeMat, pins, seats, wall, kind: 'room', baseColor: P.wall })
+      rooms.set(r.id, { r, b, vol, inner, mat, band, bandMat, plate: fl, plateMat, edges, edgeMat, pins, seats, wall, kind: 'room', baseColor: P.wall })
     }
     // Roof: a slab with a parapet; solar rows on the teaching block.
     const roof = new Group()
@@ -413,6 +428,73 @@ export function createCampusScene({ container, tier, model, getLive, getLabels, 
     m.visible = false
     scene.add(m)
     moving.push({ m, lane: i % 2, offset: (i * 58) / Math.max(1, cfg.cars) + (i % 2) * 7 })
+  }
+
+  // ---- camera feeds ----
+  const deviceById = new Map(model.devices.map((d) => [d.id, d]))
+  const feedRT = track(new WebGLRenderTarget(FEED_W, FEED_H))
+  feedRT.texture.colorSpace = SRGBColorSpace
+  const feedCam = new PerspectiveCamera(64, FEED_W / FEED_H, 0.1, 200)
+  const feedBuf = new Uint8Array(FEED_W * FEED_H * 4)
+  const feeds = [] // { deviceId, canvas, ctx, img, at, fresh }
+  let feedTurn = 0
+  let feedAt = 0
+
+  function renderFeed(f) {
+    const d = deviceById.get(f.deviceId)
+    const v = rooms.get(d.roomId)
+    const r = v.r
+    let pos
+    let target
+    const restore = []
+    const set = (o, key, value) => {
+      restore.push([o, key, o[key]])
+      o[key] = value
+    }
+    if (r.outdoor) {
+      // A pole at the zone's south-west corner, looking across it.
+      pos = [r.x[0] + 0.4, 4.6, r.z[1] + 0.4]
+      target = [(r.x[0] + r.x[1]) / 2, 0, (r.z[0] + r.z[1]) / 2]
+      set(v.pins.group, 'visible', false)
+    } else {
+      // High on the north wall, looking down the room toward the door side.
+      const lift = floorLift(r.floor, blds.get(v.b.id).open, v.b.floors)
+      pos = [d.pos[0], r.y[1] - 0.4 + lift, r.z[0] + 0.3]
+      target = [(r.x[0] + r.x[1]) / 2, r.y[0] + 0.4 + lift, r.z[1] - 0.6]
+      set(v.inner, 'visible', true)
+      set(v.vol, 'visible', false)
+      set(v.edges, 'visible', false)
+      set(v.band, 'visible', false)
+      set(v.plate, 'visible', true)
+      set(v.pins.group, 'visible', false)
+      if (v.seats) set(v.seats.group, 'visible', true)
+    }
+    feedCam.position.set(pos[0], pos[1], pos[2])
+    feedCam.lookAt(target[0], target[1], target[2])
+    renderer.setRenderTarget(feedRT)
+    renderer.render(scene, feedCam)
+    renderer.readRenderTargetPixels(feedRT, 0, 0, FEED_W, FEED_H, feedBuf)
+    renderer.setRenderTarget(null)
+    for (let i = restore.length - 1; i >= 0; i--) restore[i][0][restore[i][1]] = restore[i][2]
+    // WebGL rows run bottom to top; the canvas runs top to bottom.
+    const row = FEED_W * 4
+    for (let y = 0; y < FEED_H; y++) f.img.data.set(feedBuf.subarray((FEED_H - 1 - y) * row, (FEED_H - y) * row), y * row)
+    f.ctx.putImageData(f.img, 0, 0)
+  }
+
+  // A fresh feed first (so a new tile never stays blank, even while paused), then the stalest one.
+  function nextFeed(now, paused) {
+    const fresh = feeds.find((f) => f.fresh)
+    if (fresh) return fresh
+    if (paused || !feeds.length || now - feedAt < FEED_GAP_MS) return null
+    for (let i = 0; i < feeds.length; i++) {
+      const f = feeds[(feedTurn + i) % feeds.length]
+      if (now - f.at >= FEED_MIN_MS) {
+        feedTurn = (feedTurn + i + 1) % feeds.length
+        return f
+      }
+    }
+    return null
   }
 
   // ---- camera rig ----
@@ -677,6 +759,14 @@ export function createCampusScene({ container, tier, model, getLive, getLabels, 
     }
 
     renderer.render(scene, camera)
+    const f = nextFeed(now, paused)
+    if (f) {
+      renderFeed(f)
+      f.fresh = false
+      f.at = now
+      feedAt = now
+    }
+    if (feeds.length && (!paused || feeds.some((x) => x.fresh))) active = true
     if (firstFrame) {
       firstFrame = false
       onFirstFrame?.()
@@ -830,6 +920,20 @@ export function createCampusScene({ container, tier, model, getLive, getLabels, 
       zoom = zoomBy(zoom, factor)
       wake()
     },
+    // A 2D canvas that shows what the camera `deviceId` sees. Returns the function that stops it.
+    registerFeed(deviceId, canvas) {
+      if (!deviceById.has(deviceId)) return () => {}
+      canvas.width = FEED_W
+      canvas.height = FEED_H
+      const ctx = canvas.getContext('2d')
+      const feed = { deviceId, canvas, ctx, img: ctx.createImageData(FEED_W, FEED_H), at: 0, fresh: true }
+      feeds.push(feed)
+      wake()
+      return () => {
+        const i = feeds.indexOf(feed)
+        if (i >= 0) feeds.splice(i, 1)
+      }
+    },
     resetView() {
       orbit = { yaw: 0, pitch: 0 }
       zoom = 1
@@ -851,6 +955,7 @@ export function createCampusScene({ container, tier, model, getLive, getLabels, 
       container.removeEventListener('pointercancel', onCancel)
       container.removeEventListener('pointerleave', onLeave)
       unsubscribe()
+      feeds.length = 0
       releaseLabels()
       for (const d of disposables) d.dispose()
       renderer.dispose()

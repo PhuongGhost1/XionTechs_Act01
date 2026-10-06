@@ -133,6 +133,10 @@ export default function CampusTwin() {
     else apiRef.current?.nudge(k.dyaw, k.dpitch)
   }
 
+  // Camera feeds in the panel draw from the 3D scene while it runs (CampusFeed.jsx).
+  const registerFeed = useCallback((deviceId, canvas) => apiRef.current?.registerFeed(deviceId, canvas) ?? (() => {}), [])
+  const feeds = useMemo(() => ({ three, register: registerFeed }), [three, registerFeed])
+
   const crumbs = breadcrumb(model, sel, campus.campusCrumb)
 
   return (
@@ -193,7 +197,7 @@ export default function CampusTwin() {
           {/* On wide screens the panel scrolls inside the height the stage and the day bar set. */}
           <aside aria-label={campus.label} className="relative border-t border-cmd-line lg:border-t-0">
             <div className="max-h-[720px] overflow-y-auto lg:absolute lg:inset-0 lg:max-h-none">
-              <CampusPanel model={model} live={live} sel={sel} hover={hover} time={minute} onSelect={select} onHover={setHover} />
+              <CampusPanel model={model} live={live} sel={sel} hover={hover} time={minute} feeds={feeds} onSelect={select} onHover={setHover} />
             </div>
           </aside>
         </div>

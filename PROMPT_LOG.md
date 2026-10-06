@@ -344,4 +344,11 @@ just at the end.
   7.9 kB gzip, plus the shared `three` chunk, all lazy. Headless Edge at 1440 and 390 px: campus, open building,
   classroom panel, air-quality and occupancy layers, security room camera wall, evening, reduced-motion site
   plan, phone lite 3D; no console errors. Real-GPU performance is untested.
+- Follow-up prompt: "Where can I see the actual camera, like an image or video? Now we only have numbers." Stock
+  or AI-generated classroom footage was ruled out (it shows children, and generated CCTV would pass for real).
+  Agreed instead: every camera pin is a virtual camera; the scene renders what it sees (rooms, desks, plain
+  figures, cars) into a small offscreen target, round robin at a few frames a second, and the panel shows it as
+  CCTV (monochrome, green night vision after dusk, scanlines, `CAM 04 · CLASSROOM B · REC`, "Simulated feed").
+  Rooms with a camera get a Camera view; the security room wall became eleven live feeds. On the flat site plan
+  the tiles show occupancy only. Verified in headless Edge (classroom, security wall by day and night, car park).
 

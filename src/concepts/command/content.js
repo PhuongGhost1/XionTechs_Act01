@@ -247,7 +247,12 @@ export const campus = {
     back: 'Back',
     open: 'Open',
     cameraWall: 'Camera wall',
-    cameraWallNote: 'Abstract feeds: occupancy outlines, never video of people.',
+    cameraWallNote: 'Feeds are rendered from the 3D model: plain figures and cars, never video of people.',
+    cameraView: 'Camera view',
+    cam: 'Cam',
+    rec: 'Rec',
+    feedTag: 'Simulated feed', // on every feed, for every visitor
+    feedFallback: 'Shows occupancy only. The rendered feed needs the 3D model.',
   },
   day: { label: 'School day', play: 'Play Day', pause: 'Pause Day', scrubber: 'Time of day' },
   pauseMotion: { pause: 'Pause Motion', play: 'Play Motion' },

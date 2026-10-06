@@ -1,7 +1,8 @@
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { deviceKinds, services } from '../campusData'
 import { campus } from '../content'
-import { buildingAttention } from './live'
+import CampusFeed from './CampusFeed'
+import { buildingAttention, cameraList } from './live'
 import { buildingServices, roomServices, roomsByFloor } from './model'
 import { up } from './navigation'
 import { engagement, readings, toPercents } from './simulate'
@@ -14,8 +15,8 @@ const serviceById = Object.fromEntries(services.map((s) => [s.id, s]))
 const { panel } = campus
 const count = (n, word) => `${n} ${word}${n === 1 ? '' : 's'}`
 
-function SimTag() {
-  return <span className="cmd-label border border-dashed border-cmd-faint px-1.5 py-0.5 text-cmd-faint">{campus.simulated}</span>
+function SimTag({ children = campus.simulated }) {
+  return <span className="cmd-label border border-dashed border-cmd-faint px-1.5 py-0.5 text-cmd-faint">{children}</span>
 }
 
 function StatusDot({ status }) {
@@ -188,39 +189,57 @@ function Engagement({ room, time }) {
   )
 }
 
-function CameraWall({ model, live, onSelect }) {
+function CameraWall({ model, live, time, feeds, onSelect }) {
   return (
     <section className="border-b border-cmd-line px-4 py-4" aria-label={panel.cameraWall}>
       <div className="flex items-center justify-between gap-3">
         <p className="cmd-label text-cmd-faint">{panel.cameraWall}</p>
-        <SimTag />
+        <SimTag>{panel.feedTag}</SimTag>
       </div>
-      <ul className="mt-3 grid grid-cols-3 gap-1.5">
-        {live.cameraRooms.map((id) => {
-          const r = model.byId[id]
-          const st = live.states[id]
+      <ul className="mt-3 grid grid-cols-2 gap-1.5">
+        {cameraList(model).map((cam) => {
+          const r = model.byId[cam.roomId]
           return (
-            <li key={id}>
-              <button
-                type="button"
-                data-status={st.status}
-                data-night={live.lamps ? 'true' : 'false'}
-                onClick={() => onSelect({ buildingId: r.buildingId, roomId: id })}
-                className="cp-feed flex aspect-video w-full flex-col justify-end p-1.5 text-left"
-              >
-                <span aria-hidden="true" className="cp-feed__fill" style={{ '--occ': st.occ }} />
-                <span className="cmd-label relative truncate text-[9px] text-cmd-muted">{r.name}</span>
-              </button>
+            <li key={cam.deviceId}>
+              <CampusFeed
+                cam={cam}
+                room={r}
+                state={live.states[r.id]}
+                night={live.lamps}
+                time={time}
+                feeds={feeds}
+                compact
+                onOpen={() => onSelect({ buildingId: r.buildingId, roomId: r.id })}
+              />
             </li>
           )
         })}
       </ul>
-      <p className="mt-3 text-xs text-cmd-faint">{panel.cameraWallNote}</p>
+      <p className="mt-3 text-xs text-cmd-faint">{feeds.three ? panel.cameraWallNote : panel.feedFallback}</p>
     </section>
   )
 }
 
-function RoomView({ model, live, sel, time, onSelect }) {
+function CameraView({ model, live, room, time, feeds }) {
+  const cams = cameraList(model).filter((c) => c.roomId === room.id)
+  if (!cams.length) return null
+  return (
+    <section className="border-b border-cmd-line px-4 py-4" aria-label={panel.cameraView}>
+      <div className="flex items-center justify-between gap-3">
+        <p className="cmd-label text-cmd-faint">{panel.cameraView}</p>
+        <SimTag>{panel.feedTag}</SimTag>
+      </div>
+      <div className="mt-3 space-y-1.5">
+        {cams.map((cam) => (
+          <CampusFeed key={cam.deviceId} cam={cam} room={room} state={live.states[room.id]} night={live.lamps} time={time} feeds={feeds} />
+        ))}
+      </div>
+      {!feeds.three && <p className="mt-2 text-xs text-cmd-faint">{panel.feedFallback}</p>}
+    </section>
+  )
+}
+
+function RoomView({ model, live, sel, time, feeds, onSelect }) {
   const r = model.byId[sel.roomId]
   const b = model.byId[r.buildingId]
   const st = live.states[r.id]
@@ -237,6 +256,7 @@ function RoomView({ model, live, sel, time, onSelect }) {
           {st.reasons.length ? `: ${st.reasons.join(', ')}` : ''}
         </span>
       </div>
+      <CameraView model={model} live={live} room={r} time={time} feeds={feeds} />
       <section className="border-b border-cmd-line px-4 py-4" aria-label={panel.readings}>
         <div className="flex items-center justify-between gap-3">
           <p className="cmd-label text-cmd-faint">{panel.readings}</p>
@@ -254,7 +274,7 @@ function RoomView({ model, live, sel, time, onSelect }) {
         </dl>
       </section>
       {r.kinds.includes('edge-ai') && <Engagement room={r} time={time} />}
-      {r.cameraWall && <CameraWall model={model} live={live} onSelect={onSelect} />}
+      {r.cameraWall && <CameraWall model={model} live={live} time={time} feeds={feeds} onSelect={onSelect} />}
       <section className="border-b border-cmd-line px-4 py-4" aria-label={panel.devices}>
         <p className="cmd-label text-cmd-faint">{panel.devices}</p>
         <ul className="mt-2 space-y-2">

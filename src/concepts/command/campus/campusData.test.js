@@ -77,7 +77,8 @@ describe('campus wording rules', () => {
     // Recognition is only ever mentioned as something the system does not do.
     for (const t of texts()) if (/recogni[sz]/i.test(t)) expect(t).toMatch(/no faces are recognised/i)
   })
-  it('keeps people out of the camera wall', () => {
+  it('keeps people out of the camera wall and labels every feed simulated', () => {
     expect(campus.panel.cameraWallNote).toMatch(/never video of people/i)
+    expect(campus.panel.feedTag).toMatch(/simulated/i)
   })
 })
