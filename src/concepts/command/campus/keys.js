@@ -17,11 +17,3 @@ export function stepIndex(key, current, count) {
       return null
   }
 }
-
-// One word for the context ring, no number (the demo shows none).
-export function contextWord(fill, compacting) {
-  if (compacting) return 'compacting'
-  if (fill < 0.3) return 'fresh'
-  if (fill >= 0.8) return 'full'
-  return 'filling'
-}
