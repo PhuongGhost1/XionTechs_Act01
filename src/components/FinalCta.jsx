@@ -22,7 +22,7 @@ export default function FinalCta() {
       data-cmd-section
       aria-labelledby="final-title"
       data-in={playing ? 'true' : 'false'}
-      className="cmd-final relative flex min-h-[100svh] items-center py-24 lg:py-28"
+      className="cmd-final relative flex min-h-[100svh] items-center border-t border-cmd-line py-24 lg:py-28"
     >
       <div className="mx-auto w-full max-w-[1280px] px-5 sm:px-8 lg:px-12">
         <div className="flex items-center gap-4">

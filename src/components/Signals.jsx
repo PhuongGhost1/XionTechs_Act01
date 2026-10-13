@@ -95,17 +95,21 @@ function Layer({ layer, index, total }) {
   )
 }
 
-// Section 05, the one paper band. Opaque, so it covers the fixed WebGL canvas. A data sheet of the
-// figures we can stand behind, with gaps shown as gaps, then the stack as a map. No testimonials,
-// no invented numbers, and nothing drawn to a length that implies a value.
+// Section 06. Opaque (bg-cmd-bg, not transparent like most sections), so it covers the fixed
+// WebGL canvas — this used to also force the light "paper" band regardless of the active theme
+// (back when the page had one dark theme and one light accent band for contrast); now that there
+// are four selectable themes, that forced override just meant this section stopped matching
+// whichever one the visitor picked, so it's gone — bg-cmd-bg/text-cmd-text already track the
+// active theme correctly like every other section. A data sheet of the figures we can stand
+// behind, with gaps shown as gaps, then the stack as a map. No testimonials, no invented numbers,
+// and nothing drawn to a length that implies a value.
 export default function Signals() {
   return (
     <section
       id="signals"
       data-cmd-section
-      data-band="paper"
       aria-labelledby="signals-title"
-      className="relative bg-cmd-bg py-24 text-cmd-text lg:py-32"
+      className="relative border-t border-cmd-line bg-cmd-bg py-24 text-cmd-text lg:py-32"
     >
       <div className="mx-auto max-w-[1280px] px-5 sm:px-8 lg:px-12">
         <Reveal>

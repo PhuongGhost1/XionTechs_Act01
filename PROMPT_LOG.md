@@ -650,3 +650,34 @@ just at the end.
   the href *looks* right), screenshotting both the card and the scroll destination. Zero console
   errors.
 
+## 2026-10-13 — Signals section's stale fixed-theme band + section-break lines (Bang Do + Claude)
+- Prompt (screenshot): the Engineering Signals section still doesn't match the current theme
+  (Linen in the screenshot — the section was visibly a cooler gray than the warm cream above it),
+  and asked for the page to generally make section boundaries more visually distinguishable,
+  suggesting a break line.
+- Root cause, found by grepping for the mechanism rather than guessing at colors: Signals.jsx
+  still carried `data-band="paper"`, a leftover from before the 4-theme feature existed, when the
+  page had exactly one dark theme and this was "the one light section for contrast" (its own old
+  comment said so). It unconditionally force-applies the *original* fixed light palette — not
+  today's "Paper" theme, a separate, coincidentally similar-looking block — regardless of which of
+  the four themes the visitor actually has selected. Confirmed via grep that Signals.jsx was its
+  *only* consumer anywhere in the codebase before removing it, so this wasn't a case of breaking
+  something else that still needed it.
+- Removed `data-band="paper"` from Signals.jsx (it now just uses `bg-cmd-bg`/`text-cmd-text` like
+  every other section, correctly theme-aware) and deleted the now-fully-dead `[data-band='paper']`
+  CSS block and its `:focus-visible` override in `index.css`, rather than leaving unreferenced
+  code that would confuse the next person into thinking it still does something.
+- Section-break lines: surveyed every major section's root element first to find the existing
+  convention rather than inventing a new one — `Footer.jsx` already used `border-t
+  border-cmd-line`, just never applied anywhere else. Added the same `border-t border-cmd-line` to
+  Modules, Process, Deployments, CampusSection, Signals and FinalCta (Hero excluded: it's the
+  first section, nothing sits above it to divide from). Checked how it reads over a *transparent*
+  section (most of the page shows the fixed X-Core WebGL canvas through it, not a flat color) by
+  screenshotting the Modules→Process seam specifically, not just the opaque Signals/Campus ones —
+  it draws as a clean hairline across the canvas, reading as an intentional blueprint cross-section
+  mark rather than a rendering artifact.
+- Verified: `npm test` (526/526), `npm run lint` (clean), `npm run build`. Then Playwright across
+  all four themes at the Campus→Signals seam specifically (the exact boundary in the bug report)
+  confirming continuous background color with a visible divider in each, plus the two
+  transparent-section seams as a separate check. Zero console errors.
+

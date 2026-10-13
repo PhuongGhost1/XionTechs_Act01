@@ -106,7 +106,7 @@ export default function Deployments() {
   }
 
   return (
-    <section id="deployments" data-cmd-section aria-labelledby="deployments-title" className="relative py-24 lg:py-32">
+    <section id="deployments" data-cmd-section aria-labelledby="deployments-title" className="relative border-t border-cmd-line py-24 lg:py-32">
       <div className="mx-auto max-w-[1280px] px-5 sm:px-8 lg:px-12">
         <div className="flex flex-col gap-10 lg:flex-row lg:items-end lg:justify-between">
           <Reveal className="min-w-0">

@@ -6,8 +6,7 @@
 /* Concept 01, X / Command. Palette from docs/idea/01-X-Command.md §2:
      Deep Navy #071B34 · Navy #0B2342 · White · Muted #B8C4D4 · Yellow #F5C400.
    Yellow is a signal (active state, CTA, measurement, transition), never a background flood.
-   Values are space-separated RGB so Tailwind opacity modifiers (text-cmd-muted/60) work.
-   `data-band="paper"` re-scopes the same names for the single light section. */
+   Values are space-separated RGB so Tailwind opacity modifiers (text-cmd-muted/60) work. */
 :root {
   --c-bg: 7 27 52;
   --c-surface: 11 35 66;
@@ -30,21 +29,6 @@
   --dur-section: 800ms;
   --cmd-ease: cubic-bezier(0.16, 1, 0.3, 1);
   --cmd-scroll: 0; /* page scroll in px, written by BuildHud; drives the slow grid drift */
-}
-
-[data-band='paper'] {
-  --c-bg: 243 245 248;
-  --c-surface: 255 255 255;
-  --c-raise: 232 236 242;
-  --c-line: 205 213 224;
-  --c-text: 7 27 52;
-  --c-muted: 74 90 112; /* 6.4:1 on --c-bg */
-  --c-faint: 94 110 132; /* 4.7:1 on --c-bg */
-  --c-signal-fg: 122 92 0; /* 5.3:1 on --c-bg */
-  --c-signal-ink: 7 27 52;
-  --c-ok: 6 118 71;
-  --c-danger: 180 35 24;
-  color-scheme: light;
 }
 
 /* Theme selector (src/components/theme.js sets <html data-theme="...">; "navy" is the default
@@ -131,7 +115,6 @@ h3 {
     outline: 2px solid rgb(var(--c-signal-fg));
     outline-offset: 3px;
   }
-  [data-band='paper'] :focus-visible,
   [data-theme='paper'] :focus-visible,
   [data-theme='linen'] :focus-visible {
     outline-color: rgb(7 27 52);

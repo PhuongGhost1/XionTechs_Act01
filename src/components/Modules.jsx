@@ -27,7 +27,7 @@ export default function Modules() {
       id="modules"
       data-cmd-section
       aria-labelledby="modules-title"
-      className="relative overflow-x-clip py-24 lg:py-32"
+      className="relative overflow-x-clip border-t border-cmd-line py-24 lg:py-32"
     >
       <div className="mx-auto max-w-[1280px] px-5 sm:px-8 lg:px-12">
         <Reveal>
