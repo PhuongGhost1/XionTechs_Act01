@@ -1,0 +1,408 @@
+/* Section 05, Smart campus. Plain CSS on the --c-* tokens. Only transform, opacity and colour move. */
+
+/* The stage: touch keeps scrolling the page; a mouse can drag the model. */
+.cp-stage {
+  touch-action: pan-y;
+  /* The 3D ground plane is deliberately close to --c-bg (it's the backdrop, not the subject) —
+     without this, the model's footprint has no visible edge against the page at all. --c-surface
+     frames the whole viewport as a distinct panel regardless of how the WebGL canvas clears. */
+  background: rgb(var(--c-surface));
+}
+.cp-stage[data-render='3d'] {
+  cursor: grab;
+}
+.cp-stage[data-render='3d'] .cp-canvas[data-drag='on'] {
+  cursor: grabbing;
+}
+.cp-stage:focus-visible {
+  outline-offset: -3px;
+}
+
+/* The site plan is the image the 3D model fades in over. */
+.cp-svg {
+  transition: opacity 500ms var(--cmd-ease);
+}
+.cp-stage[data-render='3d'] .cp-svg {
+  opacity: 0;
+  pointer-events: none;
+}
+.cp-svg-lawn {
+  fill: rgb(var(--c-ok) / 0.1);
+}
+.cp-svg-paved {
+  fill: rgb(var(--c-line) / 0.55);
+}
+.cp-svg-road {
+  fill: rgb(var(--c-surface));
+  stroke: rgb(var(--c-line));
+  stroke-width: 0.08;
+}
+.cp-svg-tree {
+  fill: rgb(var(--c-ok) / 0.35);
+}
+.cp-svg-car {
+  fill: rgb(var(--c-muted) / 0.7);
+}
+.cp-svg-room rect {
+  fill: rgb(var(--c-raise));
+  stroke: rgb(var(--c-line));
+  stroke-width: 0.12;
+  cursor: pointer;
+  transition: fill 300ms var(--cmd-ease), stroke 160ms var(--cmd-ease);
+}
+.cp-svg-room[data-outdoor='true'] rect {
+  fill: rgb(var(--c-ok) / 0.16);
+  stroke-dasharray: 0.5 0.35;
+}
+.cp-svg-room[data-status='attention'] rect {
+  stroke: rgb(var(--c-signal));
+  stroke-width: 0.2;
+}
+.cp-svg-room[data-severity='CRITICAL'] rect,
+.cp-svg-room[data-severity='MAJOR'] rect {
+  stroke: rgb(var(--c-danger));
+}
+.cp-svg-room[data-on='true'] rect {
+  stroke: rgb(var(--c-signal));
+  stroke-width: 0.3;
+}
+.cp-svg-text {
+  fill: rgb(var(--c-muted));
+  font: 500 0.78px 'JetBrains Mono', ui-monospace, monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.06px;
+  pointer-events: none;
+}
+.cp-svg-title {
+  fill: rgb(var(--c-text));
+  font: 700 1px 'JetBrains Mono', ui-monospace, monospace;
+  text-transform: uppercase;
+}
+.cp-svg-floor {
+  fill: rgb(var(--c-faint));
+  font: 500 0.7px 'JetBrains Mono', ui-monospace, monospace;
+  text-transform: uppercase;
+}
+.cp-svg-outline {
+  fill: none;
+  stroke: rgb(var(--c-faint));
+  stroke-width: 0.14;
+  pointer-events: none;
+}
+
+/* Labels: the scene places .cp-label with a transform; the box sits centred above that point. */
+.cp-labels > li {
+  list-style: none;
+}
+.cp-label {
+  position: absolute;
+  left: 0;
+  top: 0;
+  will-change: transform;
+}
+.cp-label__box {
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: max-content;
+  max-width: 13rem;
+  padding: 3px 8px 4px;
+  background: rgb(var(--c-surface) / 0.92);
+  border: 1px solid rgb(var(--c-muted));
+  box-shadow: 0 2px 8px rgb(0 0 0 / 0.22);
+  transform: translate(-50%, calc(-100% - 8px));
+  transition: border-color 160ms var(--cmd-ease);
+}
+.cp-label__title {
+  color: rgb(var(--c-text));
+}
+.cp-label[data-on='true'] .cp-label__box {
+  border-color: rgb(var(--c-signal));
+}
+.cp-label__flag {
+  width: 7px;
+  height: 7px;
+  background: rgb(var(--c-signal));
+}
+.cp-label[data-severity='CRITICAL'] .cp-label__flag,
+.cp-label[data-severity='MAJOR'] .cp-label__flag {
+  background: rgb(var(--c-danger));
+}
+.cp-label--tip .cp-label__box {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1px;
+  border-color: rgb(var(--c-signal));
+}
+.cp-label--tip[data-on='false'] {
+  display: none;
+}
+.cp-label__sub {
+  font-size: 12px;
+  color: rgb(var(--c-muted));
+}
+
+/* Panel. */
+.cp-dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  flex: none;
+  background: rgb(var(--c-ok));
+}
+.cp-dot[data-status='attention'] {
+  background: rgb(var(--c-signal));
+}
+.cp-share[data-tone='ok'] {
+  background: rgb(var(--c-ok));
+}
+.cp-share[data-tone='muted'] {
+  background: rgb(var(--c-muted));
+}
+.cp-share[data-tone='signal'] {
+  background: rgb(var(--c-signal));
+}
+.cp-share[data-tone='danger'] {
+  background: rgb(var(--c-danger));
+}
+.cp-share {
+  transition: width 400ms var(--cmd-ease);
+}
+
+/* Camera wall: an abstract feed per room, its fill the room's occupancy. Never video of people. */
+.cp-feed {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgb(var(--c-line));
+  background: rgb(var(--c-surface));
+}
+.cp-feed:hover {
+  border-color: rgb(var(--c-faint));
+}
+.cp-feed[data-status='attention'] {
+  border-color: rgb(var(--c-signal));
+}
+.cp-feed__fill {
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 100%;
+  transform-origin: bottom;
+  transform: scaleY(calc(var(--occ, 0) * 0.9 + 0.05));
+  background: rgb(var(--c-line) / 0.9);
+  transition: transform 400ms var(--cmd-ease);
+}
+.cp-feed[data-night='true'] .cp-feed__fill {
+  background: rgb(var(--c-ok) / 0.25);
+}
+
+/* Alarm severities. Critical and major in the danger colour, minor and warning in the signal colour; the
+   filled chip is the more severe of each pair. */
+.cp-sev {
+  display: inline-block;
+  padding: 1px 6px;
+  border: 1px solid currentColor;
+  font-size: 10px;
+  line-height: 1.5;
+}
+.cp-sev[data-severity='CRITICAL'] {
+  color: rgb(var(--c-bg));
+  background: rgb(var(--c-danger));
+  border-color: rgb(var(--c-danger));
+}
+.cp-sev[data-severity='MAJOR'] {
+  color: rgb(var(--c-danger));
+}
+.cp-sev[data-severity='MINOR'] {
+  color: rgb(var(--c-signal-ink));
+  background: rgb(var(--c-signal));
+  border-color: rgb(var(--c-signal));
+}
+.cp-sev[data-severity='WARNING'] {
+  color: rgb(var(--c-signal-fg));
+}
+.cp-alarm[data-status='CLEARED'] {
+  opacity: 0.7;
+}
+.cp-dot[data-status='attention'][data-severity='CRITICAL'],
+.cp-dot[data-status='attention'][data-severity='MAJOR'] {
+  background: rgb(var(--c-danger));
+}
+
+/* A rule chain: nodes in a column, joined by a line with an arrow head. */
+.cp-chain {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.cp-node {
+  position: relative;
+  margin-left: 10px;
+  padding: 6px 10px;
+  border: 1px solid rgb(var(--c-line));
+  background: rgb(var(--c-surface));
+}
+.cp-node + .cp-node {
+  margin-top: 14px;
+}
+.cp-node + .cp-node::before {
+  content: '';
+  position: absolute;
+  left: 14px;
+  top: -14px;
+  width: 1px;
+  height: 14px;
+  background: rgb(var(--c-faint));
+}
+.cp-node + .cp-node::after {
+  content: '';
+  position: absolute;
+  left: 11px;
+  top: -6px;
+  border: 3.5px solid transparent;
+  border-top-color: rgb(var(--c-faint));
+}
+.cp-node[data-kind='alarm'] {
+  border-color: rgb(var(--c-signal) / 0.6);
+}
+.cp-node[data-kind='alarm'] span:last-child {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+/* Simulated CCTV: the scene's render in monochrome (green after dusk), scanlines, a vignette and a HUD.
+   The picture is the 3D model, never footage of people. */
+.cp-cctv {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 16 / 9;
+  border: 1px solid rgb(var(--c-line));
+  background: rgb(var(--c-surface));
+}
+button.cp-cctv:hover {
+  border-color: rgb(var(--c-faint));
+}
+.cp-cctv[data-status='attention'] {
+  border-color: rgb(var(--c-signal));
+}
+.cp-cctv__img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: grayscale(1) contrast(1.25) brightness(1.2);
+}
+.cp-cctv[data-night='true'] .cp-cctv__img {
+  filter: grayscale(1) sepia(1) hue-rotate(65deg) saturate(2.4) brightness(1.7) contrast(1.15);
+}
+.cp-cctv__grain {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    repeating-linear-gradient(0deg, rgb(var(--c-bg) / 0.22) 0 1px, transparent 1px 3px),
+    radial-gradient(ellipse at center, transparent 55%, rgb(var(--c-bg) / 0.55) 100%);
+}
+.cp-cctv__hud {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 6px 8px;
+  font: 500 10px/1.3 'JetBrains Mono', ui-monospace, monospace;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgb(var(--c-text));
+  text-shadow: 0 0 3px rgb(var(--c-bg));
+}
+.cp-cctv[data-compact='true'] .cp-cctv__hud {
+  padding: 4px 5px;
+  font-size: 9px;
+}
+.cp-cctv__row {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  min-width: 0;
+}
+.cp-cctv__rec {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.cp-cctv__rec::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgb(var(--c-danger));
+  animation: cp-rec 1.2s steps(2, jump-none) infinite;
+}
+@keyframes cp-rec {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0.15;
+  }
+}
+[data-motion='paused'] .cp-cctv__rec::before {
+  animation-play-state: paused;
+}
+
+/* The layer bar scrolls sideways on phones instead of wrapping into rows. */
+.cp-scroll {
+  scrollbar-width: none;
+}
+.cp-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+/* The day scrubber. */
+.cp-range {
+  appearance: none;
+  height: 28px;
+  background: transparent;
+  cursor: pointer;
+}
+.cp-range::-webkit-slider-runnable-track {
+  height: 2px;
+  background: rgb(var(--c-line));
+}
+.cp-range::-moz-range-track {
+  height: 2px;
+  background: rgb(var(--c-line));
+}
+.cp-range::-webkit-slider-thumb {
+  appearance: none;
+  width: 14px;
+  height: 22px;
+  margin-top: -10px;
+  background: rgb(var(--c-signal));
+  border: 0;
+}
+.cp-range::-moz-range-thumb {
+  width: 14px;
+  height: 22px;
+  background: rgb(var(--c-signal));
+  border: 0;
+  border-radius: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cp-svg,
+  .cp-svg-room rect,
+  .cp-share,
+  .cp-feed__fill,
+  .cp-label__box {
+    transition: none;
+  }
+  .cp-cctv__rec::before {
+    animation: none;
+  }
+}

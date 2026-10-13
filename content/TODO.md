@@ -55,10 +55,16 @@ see unmarked (open any build with `?review` to see the Draft markers). Resolve e
 - [ ] Workflow capability labels in the demo ("AI model", "Integration", …) stay generic
       until the team confirms the real services per step.
 
-## Concept 01: X / Command (`/concepts/command/`)
+## X / Command — now the homepage (`feat/promote-command-to-homepage`, 2026-10-13)
 
-A design exploration from `docs/idea/01-X-Command.md`, built as a separate page. Spec:
-`docs/concepts/01-command-implementation.md`. Open items before it could replace the main page:
+Originally a design exploration from `docs/idea/01-X-Command.md` (spec:
+`docs/concepts/01-command-implementation.md`), built as a separate page at
+`/concepts/command/`. The team decided to ship it as the real homepage; the previous
+design (plan v3, the light navy/gold page) is now archived at `/concepts/command/`
+instead — same URL slug, swapped content, see `PROMPT_LOG.md` for how and why.
+`index.html` (root) now serves Command; `concepts/command/index.html` serves the
+archived previous design, `noindex`'d. Items below are release-readiness open items
+for the homepage, carried over from when this was still a concept:
 
 - [ ] **Official logo**: only a 250 × 46 px navy PNG exists so far; a larger one is coming from the team. The
       concept uses a generated white-wordmark copy (`public/concepts/command/logo-reversed.png`, set in

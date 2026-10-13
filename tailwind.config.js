@@ -2,7 +2,9 @@
 const token = (name) => `rgb(var(--${name}) / <alpha-value>)`
 
 export default {
-  content: ['./index.html', './src/**/*.{js,jsx}', '!./src/concepts/**'],
+  // Previous-design concept, now at /concepts/command/ (feat/promote-command-to-homepage):
+  // scoped to its own files only, same pattern tailwind.command.config.js used to use.
+  content: ['./concepts/command/index.html', './src/concepts/command/**/*.{js,jsx}'],
   theme: {
     extend: {
       colors: {

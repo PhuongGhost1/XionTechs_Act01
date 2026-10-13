@@ -71,7 +71,9 @@ describe('wireScale', () => {
   })
 
   it('matches the perspective-far utility in index.css', () => {
-    const css = readFileSync('src/index.css', 'utf8')
+    // src/workflow/ is shared; the consumer of this utility (AgentDemo) lives at this path
+    // since feat/promote-command-to-homepage made Command the homepage.
+    const css = readFileSync('src/concepts/command/index.css', 'utf8')
     expect(css).toMatch(new RegExp(`\\.perspective-far\\s*\\{\\s*perspective:\\s*${PERSPECTIVE}px`))
   })
 })

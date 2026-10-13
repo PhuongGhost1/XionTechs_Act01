@@ -362,3 +362,291 @@ just at the end.
   best practices. The open TODO item is closed, `CLAUDE.md` says so, and a test keeps the name out of the
   campus copy.
 
+## 2026-10-13 — promote X / Command to the homepage (Bang Do + Claude)
+- Prompt: swap what's at `/` and `/concepts/command/` — ship the Command concept as the
+  real homepage, keep the previous design (plan v3) archived at the same `/concepts/command/`
+  URL it used to view Command at. Also asked for a branch name since more changes are coming.
+  Branch: `feat/promote-command-to-homepage`.
+- This wasn't a simple file swap: both designs share `src/hooks/`, `src/content/site.js` and
+  `src/workflow/` (confirmed by grep before touching anything — Command depends on both;
+  nothing in `src/hooks`/`src/content`/`src/workflow` depends on either design), and each has
+  its own Tailwind config with a different `content` glob and a different CSS token namespace
+  (`paper/ink/primary` vs `cmd-*`). Plan: relocate `src/App.jsx` + `src/main.jsx` + `src/index.css`
+  + `src/components/` ↔ `src/concepts/command/{App,main,command}.{jsx,css}` + its flat file list,
+  preserving each file's *distance from `src/`* so relative imports to the shared folders keep
+  resolving — wherever that wasn't possible, fix the import depth by hand. Swapped the two
+  `tailwind.*.config.js` `content` arrays (not their token/theme definitions) to match. Rewrote
+  both `index.html`s rather than swapping their content verbatim: `noindex`, canonical URL,
+  theme-color and fonts all needed to move with *the path*, not *the file content*, since a
+  concept page should never be indexed regardless of which design currently lives there.
+- **Mistake caught before it shipped**: miscounted directory depth once. Old main's
+  `src/components/*.jsx` (1 level under `src/`) moved to `src/concepts/command/components/*.jsx`
+  (3 levels under `src/`) — a depth increase of 2 — but the first sed pass only added one `../`
+  to the shared-folder imports (`../content` → `../../content` instead of `../../../content`).
+  `npm test` still passed (526/526) because nothing exercises those import paths at the unit
+  level, but `npm run build` would have shipped a page where the Agent Demo silently failed to
+  resolve `content/site`. Caught it by computing the relative path programmatically
+  (`path.relative`) instead of trusting manual arithmetic a second time, for every case before
+  moving on. **Lesson: when relocating files across an import-depth change, verify the relative
+  path computation with code, not by counting `../` in my head — and verify it for every
+  distinct depth change in the batch, not just the first one that happened to work.**
+- **Second thing caught by running `npm run build`, not just `npm test`**: a dynamic
+  `import('./scene/XCoreCanvas')` inside `App.jsx` (a lazy-loaded chunk, not a static `import`
+  statement) was missed by the grep used to find static imports needing a path fix — the build
+  failed to resolve it. `npm test` doesn't touch Vite's bundler at all, so this only surfaces at
+  build time. **Lesson: when auditing imports after a move, grep for `import(` (dynamic) as a
+  separate pass from `^import` (static) — they're easy to miss as a category, not just
+  individually.**
+- Also fixed in passing: `src/workflow/phase.test.js` had a hardcoded `readFileSync('src/index.css', ...)`
+  checking for a CSS utility (`.perspective-far`) that only ever existed in the previous design's
+  stylesheet. `src/workflow/` is shared, but this specific test is really exercising the previous
+  design's `AgentDemo` component, so it now reads `src/concepts/command/index.css` — the file that
+  actually has that utility post-swap.
+- Verified end-to-end before calling it done: `npm test` (526/526), `npm run lint` (clean),
+  `npm run build` (succeeds, main entry 20.66 kB gzip, well under the 71 kB budget), and a
+  Playwright screenshot of both `/` and `/concepts/command/` on a fresh dev server, confirming
+  each renders the intended design with its correct fonts/colors and zero console errors.
+  Left everything staged but uncommitted for review.
+
+## 2026-10-13 — 4-theme selector on the homepage (Bang Do + Claude)
+- Prompt: add a dark/light theme selector (2 dark, 2 light) to the homepage only, sharing the
+  current style as a reference, and specifically keep the chart/graph components visible after a
+  switch. No colors specified — asked Claude to pick.
+- Found the token architecture already supported this well: every color in `src/index.css` is a
+  `--c-*` CSS custom property, consumed through Tailwind's `cmd-*` names, and there was already a
+  precedent (`[data-band='paper']`) for overriding the whole token set on a nested element. Added
+  three more full token sets as `[data-theme='...']` blocks (`graphite`, `paper`, `linen`; `navy`
+  stays the unscoped `:root` default) rather than inventing a new mechanism.
+- Colors chosen: kept the brand signal yellow (`#F5C400`, from the logo) constant across all four
+  — only the neutrals vary (navy-tinted dark → neutral graphite dark; cool paper light → warm
+  linen light), so the brand mark never changes regardless of theme, only the surrounding palette.
+  Text stays the same brand navy/white in every theme for the same reason. Computed real WCAG
+  contrast ratios for every new muted/faint/signal-fg value (wrote a one-off script, same ratio
+  rigor the existing navy/paper tokens already had in their comments) rather than eyeballing hex
+  values: graphite muted 10.9:1, faint 6.2:1; linen muted 7.3:1, faint 5.3:1, signal-fg 5.8:1 —
+  all comfortably over WCAG AA for their role.
+- Reused the exact "paper" palette that `[data-band='paper']` already had, tuned and shipped, as
+  the "Paper" theme rather than inventing new light values from scratch — one less thing to get
+  wrong, and it's already proven in production.
+- **The chart/graph risk the prompt called out was real**: `scene/render.js` (the hero's X-Core
+  WebGL data core) and `campus/campusScene.js` (the smart-campus 3D twin) both read `--c-*`
+  tokens via `getComputedStyle` **once, at scene creation**, and bake the resulting RGB into
+  materials/geometry — found this by reading the code before writing any theme CSS, not after.
+  Switching the CSS variables alone would have left both WebGL scenes frozen at whatever colors
+  were active when they first mounted. Fixed by keying `<XCoreCanvas>` (App.jsx) and
+  `<CampusCanvas>` (CampusTwin.jsx) with `key={theme}`, forcing React to unmount/remount them —
+  and re-read fresh colors — on every theme change, the same recovery pattern already used
+  elsewhere in this codebase for a lost WebGL context. Confirmed everything else (the SVG campus
+  fallback, all Tailwind-class-driven UI) updates for free: it already referenced `rgb(var(--c-*))`
+  live rather than caching a value.
+- New files: `src/components/theme.js` (plain mutable store + subscribe, mirroring
+  `scene/store.js`'s existing pattern — module state, not React state, so canvases and UI agree
+  on the current theme without prop drilling) and `src/components/ThemeSwitcher.jsx` (a header
+  disclosure button, same footprint/keyboard pattern as the existing `PauseMotion` control: Esc
+  and outside-click close it, `role="menu"`/`menuitemradio`, verified keyboard-only operable with
+  no mouse). Added a tiny inline script to `index.html` (next to the existing pre-paint
+  background hack) so a returning visitor's chosen theme applies before first paint instead of
+  flashing navy first.
+- Verified before calling it done, not just claimed: `npm test` (526/526), `npm run lint`
+  (clean), `npm run build` (main chunk 21.64 kB gzip, still well under the 71 kB budget — the
+  feature added about 1 kB), then a Playwright pass that actually switched through all four
+  themes, screenshotted each, reloaded to confirm `localStorage` persistence, and — specifically
+  because the prompt flagged chart/graph visibility — scrolled into the smart-campus section and
+  switched theme while its WebGL canvas was mounted. The before/after screenshots show the
+  campus model visibly repainting (flat warm-toned render → bright navy-toned render with visible
+  grass/building detail), confirming the remount fix actually re-reads color, not just that
+  nothing crashed. Also checked keyboard-only operation and a 390px mobile viewport. Zero console
+  errors throughout.
+
+## 2026-10-13 — smart campus model restyled as a construction blueprint (Bang Do + Claude)
+- Prompt: the 3D campus model (screenshot showing solid-shaded buildings, green grass, colorful
+  parked cars, trees, a yellow playground slide) looks too detailed and distracting; wants it
+  simplified into a construction-blueprint look instead.
+- Read the whole renderer (`campusScene.js`, ~970 lines) and its per-frame loop before touching
+  anything, specifically to find every place a to-be-removed element (trees, cars) was referenced
+  later — not just where it's created. Found the per-frame "Cars" block (drove `parked`/`moving`
+  mesh updates) and the config-tier `trees`/`cars` counts (`tier.js`), both of which would have
+  left dead/dangling code or misleading config if only the creation code were deleted.
+- Direction: monochrome, line-forward, grid-ground, same restraint `CampusSvg.jsx`'s flat site
+  plan already uses (it was already blueprint-like: `rgb(var(--c-ok) / 0.1)` for lawn, line-color
+  outlines) — extended that same philosophy into the 3D tier instead of inventing a new palette.
+  Dropped trees, benches, the playground and car meshes entirely from this tier (CampusSvg.jsx is
+  untouched and still draws its own flat tree/car marks from the same `model.decor` data, so nothing
+  in the data model or its tests needed to change). Replaced the car park with static stall-outline
+  rectangles (a parking *layout*, not parked cars) instead of just deleting the concept outright.
+  Added a drawn grid across the ground plane and hairline outlines on every paved/road rectangle.
+  Walls/roofs/slabs moved from solid realistic fills to near-background pale tints so the
+  `EdgesGeometry` outlines (already in the code) carry the shape, the way a blueprint's lines do.
+  Kept the brand's restraint: signal yellow stays reserved for selection/alerts, never decoration —
+  also removed the last decorative use of `--c-ok` (the green grass tint), so it stays a true status
+  colour. Kept desks/people and their legibility (`P.desk`/`P.person` deliberately brighter than
+  the structural tones) since occupancy is real information, not realism to prune.
+- Cleaned up what the removal actually orphaned rather than leaving it half-done: deleted the
+  per-frame car-position/traffic code, the now-dead `CAR_SPEED` constant and `carClock` state, the
+  unused `IcosahedronGeometry` import, and — since nothing reads them any more — the `trees`/`cars`
+  counts from every tier in `tier.js`, updating its doc comment and the two `tier.test.js`
+  assertions that covered those fields (replaced with assertions on what still actually varies
+  by tier: `dpr`, `antialias`, `seats`, `flat`).
+- **Bug found and fixed along the way, not left for later**: screenshotting the result in the
+  Paper theme (to confirm the blueprint style holds up in a light theme too, not just navy) showed
+  the ground rendering navy-dark on an otherwise correctly light-themed page. Debugged by checking
+  the actual computed `--c-bg` value first rather than guessing — confirmed `readColors()` *was*
+  reading paper's correct light tokens, so the bug wasn't there. The real cause: `HemisphereLight`
+  and `DirectionalLight` (the scene's sky/sun) were colored from `C.text` — ink (dark navy on a
+  light theme, white on a dark theme) — so on a light theme the "sun" was nearly black, leaving
+  every upward-facing surface under-lit regardless of its own (correctly-read) material color.
+  This predates this session's work but was masked before by darker original materials; the new
+  paler blueprint palette made it obvious. Fixed by making sky/sun a fixed bright white (light
+  sources shouldn't track ink color, which inverts meaning across themes) while leaving the
+  hemisphere's ground-bounce half on `C.bg` (correctly theme-appropriate already). Verified
+  specifically that navy didn't regress (it already used white ink, so the fix is a no-op there)
+  before trusting the paper/linen fix.
+- Verified before calling it done: `npm test` (526/526), `npm run lint` (clean), `npm run build`
+  (CampusCanvas chunk actually shrank, 19.64 kB gzip vs 20.93 kB before — less geometry/material
+  code, not more). Then four separate Playwright passes, one per theme (navy, graphite's screenshot
+  skipped as redundant with navy's already-correct lighting, paper, linen), screenshotting the
+  overview and — for navy — a building opened to confirm the glass-box interior (desks, people,
+  device pins, the "needs attention" alert color) stayed legible and fully interactive through the
+  redesign. Zero console errors throughout.
+
+## 2026-10-13 — campus model contrast fix + found the labels already existed (Bang Do + Claude)
+- Prompt (3 screenshots: navy, graphite, paper): the building model is too dark in dark themes and
+  too bright in the light one — not visible when it's a similar color to the background. Also
+  asked for floating name labels on the model.
+- The blueprint pass earlier today had overcorrected: it mixed building fills and edge lines from
+  `--c-line`, a token that's deliberately *low*-contrast (a subtle UI divider, by design — not
+  something with a contrast guarantee). Fine for secondary elements like the ground grid; wrong
+  for the buildings, which are the primary subject and need to read clearly in every theme.
+- Before touching the "floating label" request, checked whether it already existed rather than
+  assuming it didn't: grepped `CampusTwin.jsx` for where label refs get attached, found nothing,
+  almost concluded the feature was unbuilt — then found `CampusLabels.jsx`, a whole component
+  already wired up (`anchorOf`, `setLabelsEnabled`, `labelRef`) and already rendered from
+  `CampusTwin.jsx`. Verified empirically with a Playwright DOM inspection (not just reading code)
+  that the labels genuinely exist with correct text, position and `visibility: visible` — so the
+  "missing" labels were the same underlying bug: their CSS box used `--c-bg` for background and
+  `--c-line` for border, so they were just as low-contrast as the buildings they float over.
+  **Lesson: before implementing a requested feature, check whether it's already built and just
+  broken — "it's not visible" and "it doesn't exist" look identical in a screenshot, and grepping
+  only the file you expect the answer to be in isn't enough to conclude it's absent.**
+- Fix, computed not eyeballed: wrote a contrast-ratio script and swept mix fractions of `--c-bg`
+  toward `--c-muted` (a token with a *verified* 5.5-10:1+ contrast guarantee against `--c-bg` in
+  every theme, from the original theme work) to find one fraction that cleared two constraints at
+  once in all four themes: the building fill visible against the page background (WCAG's 3:1
+  non-text minimum), and `--c-text` edge lines still visible against that now-brighter fill (also
+  3:1+). 0.7 was the only fraction in the range tested where both held simultaneously everywhere;
+  paper's fill-vs-bg (3.27:1) and graphite's edge-vs-fill (3.10:1) were the tightest margins.
+  Bumped building edge lines from `--c-line`/`--c-faint` to `--c-text` (maximum, theme-guaranteed
+  ink contrast) throughout, and path/road/parking outlines one step up from `--c-line` to
+  `--c-faint` (secondary elements, deliberately kept subordinate to the buildings). Applied the
+  identical fix to the label box CSS: `--c-bg`→`--c-surface` background, `--c-line`→`--c-muted`
+  border, plus a drop shadow so a label is never fully dependent on the scene behind it for
+  separation.
+- Verified: `npm test` (526/526), `npm run lint` (clean), `npm run build`. Then four Playwright
+  passes — navy, graphite, paper, and a fourth that actually clicked the zoom-in control four
+  times on navy (not just the default framing) to confirm labels and edge contrast hold up at a
+  closer view too, not only the one distance already screenshotted. Zero console errors.
+
+## 2026-10-13 — ground still blended into the page, on all 4 themes (Bang Do + Claude)
+- Prompt (screenshot): even after the contrast fix above, the model's *ground* still reads as
+  basically the same colour as the page around it, on every theme.
+- This was a real gap in the previous fix's reasoning, not a new regression: that pass explicitly
+  decided "ground/paths stay closer to --c-bg on purpose: they're the backdrop, not the subject" —
+  reasonable for keeping the ground visually subordinate to the buildings, wrong for the actual
+  requirement, which is that the model's footprint has to read as separate from the page at all,
+  independent of how it relates to the buildings sitting on it.
+- Tried the same lever that worked for buildings first (mixing more --c-muted into the ground
+  fill) and checked the ratios before committing to it: it tops out around 2.1-2.9:1 against the
+  background in the light themes no matter how far the mix is pushed, because sRGB's gamma curve
+  compresses luminance differences near white — mixing toward a moderate-contrast colour can't
+  manufacture real separation once you're close enough to white to begin with. Fixing it by mixing
+  harder in that direction alone would have meant the ground has to become nearly as bright as the
+  walls to hit 3:1, which would have reintroduced the "ground competes with buildings" problem the
+  original (wrong) decision was trying to avoid.
+- Landed on three independent fixes stacked, so no single one has to carry the whole job:
+  (1) `.cp-stage`'s own CSS background is now `--c-surface` instead of inheriting the page's
+  `--c-bg` — the 3D viewport reads as a distinct panel before the WebGL scene draws anything;
+  (2) the ground/field fill still moved from `--c-line` to a moderate `--c-muted` mix (enough to
+  read as a surface, deliberately short of the buildings' weight); (3) a strong `--c-text`
+  boundary line now runs around the whole plot — the one cue that doesn't depend on any fill
+  colour clearing a contrast ratio at all, so it holds even where (1) and (2) are weakest (light
+  themes).
+- Verified across all four themes again (not just navy, since the original bug report was
+  specifically "on all 4 themes" and the earlier fix had already shown overfitting to the dark
+  themes is an easy trap here): `npm test` (526/526), `npm run lint` (clean), `npm run build`, then
+  four fresh Playwright screenshots confirming the model's footprint is now clearly bounded and
+  separated from the page in every theme. Zero console errors.
+
+## 2026-10-13 — logo invisible on both light themes, everywhere it appears (Bang Do + Claude)
+- Prompt (screenshot, three places circled: nav, the final-CTA data-core logo reveal, footer): the
+  logo isn't visible anywhere on Linen (or, it turned out, Paper).
+- Root cause, found by grepping every `brand.logo` usage rather than guessing from one spot:
+  `content.js` only ever had one logo file, `logo-reversed.png` — a white recolour of the wordmark,
+  made (per its own code comment) back when this page had a single dark theme, "so the navy
+  letters read on a navy page." White on the two light themes' off-white backgrounds is invisible
+  by the same logic in reverse. Used identically by `<img>` tags in Nav, Footer and FinalCta.
+- `XCoreCanvas.jsx` also references `brand.logo.src`, but checked `logoPoints.js` before touching
+  it: the sampler reads the image's *alpha channel* only (for particle shape), and the particles
+  it places are coloured by the scene's own theme tokens, not the source file's colour — so that
+  usage needed no change, and adding a second variant there would have been pointless churn.
+  **Lesson: "this file is referenced in 4 places" doesn't mean all 4 need the same fix — check
+  what each caller actually uses the asset *for* before assuming they share the same bug.**
+- Fix: the original navy artwork was already sitting in `public/XionTechs-Logo_s.png` (the
+  archived previous design's logo, unused by Command) — reused it as `brand.logoLight` rather than
+  generating a new asset. Added `useThemeMode()` to `theme.js` (derives 'dark'/'light' from the
+  current theme id, re-rendering only on an actual light/dark crossing, not on every theme
+  switch — navy→graphite doesn't need to touch the logo) and had Nav/Footer/FinalCta pick between
+  `brand.logo` and `brand.logoLight` with it, rather than duplicating the theme-read logic three
+  times inline.
+- **False alarm caught before being reported as a bug**: after the fix, the final-CTA logo still
+  looked faint in an early screenshot. Before assuming the fix was wrong, inspected the actual DOM
+  (`img.src`, computed opacity) rather than trusting the screenshot alone — the `src` was already
+  correct, fully opaque, no transform offset. The real cause was the test script's own wait time:
+  that logo's reveal is a `1600ms` delay plus a `900ms` settle animation (`FinalCta.css`), and the
+  screenshot had been taken at 600ms — mid-animation, not broken. Re-ran with a 3.5s wait and it
+  was correct. Didn't change any product code for this one, only the test.
+- Verified: `npm test` (526/526), `npm run lint` (clean), `npm run build`. Then confirmed all
+  three spots (nav, footer, final-CTA) on Paper, Linen and Navy (checking Navy too, to make sure
+  fixing the light themes didn't regress the dark-theme white logo) with real DOM inspection, not
+  just a glance at a screenshot. Zero console errors.
+
+## 2026-10-13 — Selected Work's "Agent demo" card repointed to the campus demo (Bang Do + Claude)
+- Prompt (screenshot): the "Agent Demo" card in Selected Work is outdated; it should describe and
+  link to the smart-campus demo instead (the one whose colours/contrast we've been fixing today).
+- Checked why it was actually broken before rewriting it, rather than assuming the prompt's
+  framing: the card's button linked to `/#ai-agents`, commented "the demo lives on the main page."
+  That was correct back when this card's page (Command) was still *at* `/concepts/command/` and
+  "the main page" was the other, archived design — which had (and still has) a real `#ai-agents`
+  section. `feat/promote-command-to-homepage` earlier today swapped which page is "the main page"
+  without touching this one cross-page link, so it silently started pointing at a hash that
+  doesn't exist on Command's own page any more. The prompt's "outdated" was right, and for a
+  reason one layer deeper than just stale copy.
+- Rewrote the card's `id`, `name`, `summary` and `link` in `src/components/content.js` (the
+  `deployments.records` entry) to describe the campus demo and link to `#campus` — a same-page
+  anchor now, since the campus section lives on Command's own page (it moved there in the same
+  reorg that caused the bug above). Reused the campus section's own established facts (climate,
+  occupancy, energy, security, simulated/illustrative) rather than inventing new claims, and kept
+  the same "what it is → disclaimer" sentence shape the original card used.
+  - **Mild care in the edit itself**: `content.js` declares the `campus` export *after*
+    `deployments` in the same file; writing `name: campus.label` directly would have thrown
+    ("Cannot access 'campus' before initialization," a module-level temporal-dead-zone error) —
+    caught by checking declaration order before using it, not by running the dev server and
+    finding out. Used a literal string with a comment pointing at `campus.label` instead.
+- The visual fallback for this card (an abstract X-graph diagram, since it has no real
+  screenshot) was named and commented as if it only ever served the agent demo (`AgentX`,
+  `AgentPanel`, "The Agent demo has no screenshot..."). It's a generic "no screenshot" fallback —
+  checked the render logic (`screen ? <img> : <AgentPanel>`) to confirm that before renaming —
+  so renamed it to `FallbackX`/`FallbackPanel` and rewrote the comment, rather than leaving
+  code that would mislead the next person into thinking it's agent-specific.
+- `signals.test.js` had a test pinned to the old id/href (`r.id === 'agents'`,
+  `link.href === '/#ai-agents'`); updated it alongside the content change, not left to fail or
+  quietly stop testing anything real.
+- Also found and fixed the same stale cross-page assumption in `CLAUDE.md` itself (written during
+  the original promote-to-homepage reorg): it still described the smart campus as living at
+  `src/concepts/command/campus/` and the agent-demo link as pointing "to the main page" — both
+  wrong post-reorg. Fixed in the same pass since it's the same underlying fact changing.
+- Verified: `npm test` (526/526), `npm run lint` (clean), `npm run build`, then a Playwright check
+  that did more than look at the card — it clicked the actual "See the campus model" link and
+  confirmed via `getBoundingClientRect()` that `#campus` lands correctly in view (not just that
+  the href *looks* right), screenshotting both the card and the scroll destination. Zero console
+  errors.
+

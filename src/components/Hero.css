@@ -1,49 +1,100 @@
-/* Hero slogan (MOTION §6): GET → IT → DONE plays once as the page opens. Each word steps in,
-   the connector to the next word draws, and DONE is checked off. --i is the word's position. */
-.hero-slogan-word,
-.hero-slogan-link,
-.hero-slogan-check {
-  animation-duration: 380ms;
-  animation-timing-function: var(--ease-brand);
-  animation-fill-mode: backwards;
+/* Hero (Hero.jsx). Layout lives in the component as utilities; this file holds what utilities
+   cannot say: the backdrop mask, the X box sizing and the one grid-line pulse. */
+
+/* The telemetry grid fades away from the X core: toward its side on wide screens, toward the
+   middle of the page on phones. One mask on the wrapper covers the grid and the pulse together. */
+.hero-bg {
+  --hero-mask: radial-gradient(ellipse 95% 70% at 50% 64%, rgb(var(--c-bg)) 18%, transparent 80%);
+  -webkit-mask-image: var(--hero-mask);
+  mask-image: var(--hero-mask);
 }
-.hero-slogan-word {
-  animation-name: hero-slogan-word;
-  animation-delay: calc(200ms + var(--i) * 340ms);
+.hero-bg .cmd-grid {
+  -webkit-mask-image: none;
+  mask-image: none;
 }
-.hero-slogan-link {
-  transform-origin: left center;
-  animation-name: hero-slogan-link;
-  animation-duration: 240ms;
-  animation-delay: calc(200ms + var(--i) * 340ms - 200ms);
+@media (min-width: 1024px) {
+  .hero-bg {
+    --hero-mask: radial-gradient(ellipse 80% 78% at 72% 46%, rgb(var(--c-bg)) 18%, transparent 80%);
+  }
 }
-.hero-slogan-check {
-  animation-name: hero-slogan-check;
-  animation-duration: 450ms;
-  animation-timing-function: var(--ease-spring);
-  animation-delay: calc(200ms + var(--i) * 340ms - 120ms);
+
+/* The box the X core lives in (and the canvas is anchored to). Square. On phones it is capped
+   and centred; on tablets it fills its grid cell; on desktop it fits the viewport height so the
+   status panel overlapping its lower edge is still on the first screen. */
+.hero-core {
+  width: 100%;
+  max-width: 26rem;
+  margin-inline: auto;
+  aspect-ratio: 1;
 }
-@keyframes hero-slogan-word {
-  from {
+@media (min-width: 768px) {
+  .hero-core {
+    max-width: none;
+  }
+}
+@media (min-width: 1024px) {
+  .hero-core {
+    width: min(100%, calc(100svh - 25rem));
+    min-width: 22rem;
+    margin-inline: auto 0;
+  }
+}
+
+/* One slow yellow pulse travelling down a single grid line (M7, ambient). The SVG is a 1 px wide
+   column positioned on a 64 px grid line, so the pulse rides the line the grid draws. Most of
+   the cycle is rest. */
+.hero-pulse {
+  position: absolute;
+  top: 0;
+  left: calc(64px * 4);
+  width: 1px;
+  height: 100%;
+}
+@media (min-width: 768px) {
+  .hero-pulse {
+    left: calc(64px * 8);
+  }
+}
+@media (min-width: 1024px) {
+  .hero-pulse {
+    left: calc(64px * 12);
+  }
+}
+.hero-pulse line {
+  stroke: rgb(var(--c-signal));
+  stroke-width: 1;
+  stroke-dasharray: 7 400;
+  stroke-dashoffset: 7;
+  animation: hero-pulse 18s linear 2.4s infinite backwards;
+}
+
+@keyframes hero-pulse {
+  0% {
+    stroke-dashoffset: 7;
     opacity: 0;
-    transform: translateY(6px);
   }
-}
-@keyframes hero-slogan-link {
-  from {
-    transform: scaleX(0);
+  8% {
+    opacity: 0.9;
   }
-}
-@keyframes hero-slogan-check {
-  from {
+  44% {
+    opacity: 0.9;
+  }
+  52%,
+  100% {
+    stroke-dashoffset: -100;
     opacity: 0;
-    transform: scale(0.4);
   }
 }
+
+/* Loops stop off screen and under Pause Motion (data-motion on <html>, set by BuildHud). */
+[data-live='false'] .hero-pulse line,
+[data-motion='paused'] .hero-pulse line {
+  animation-play-state: paused;
+}
+
+/* The pulse is decoration: with reduced motion there is nothing to show. */
 @media (prefers-reduced-motion: reduce) {
-  .hero-slogan-word,
-  .hero-slogan-link,
-  .hero-slogan-check {
-    animation: none;
+  .hero-pulse {
+    display: none;
   }
 }
