@@ -43,6 +43,20 @@ const FEED_H = 180
 const FEED_GAP_MS = 45 // one feed render per this much time, shared by every feed on screen
 const FEED_MIN_MS = 120 // and no single feed more often than this
 
+// The simulated CCTV feed (Campus.css .cp-cctv__img) always renders this fixed, theme-independent
+// palette instead of the room's actual (theme-tinted) materials — a physical security camera
+// doesn't recolour itself to match a website's UI theme. It also has to resolve the same
+// light-on-dark direction in every theme: the day filter is a flat grayscale, but the night one
+// (sepia + hue-rotate, simulating IR night vision) only reads as a coherent glow when the subject
+// is brighter than its surroundings — on a light theme's actual dark-on-light room materials it
+// inverted into a harsh black silhouette instead. Chosen so desk/person stays clearly brighter
+// than wall/floor regardless of theme. Restored after every capture (renderFeed's `set`/`restore`).
+const FEED_WALL = new Color(0.07, 0.08, 0.1)
+const FEED_WALL_EMISSIVE = new Color(0.04, 0.045, 0.055)
+const FEED_FLOOR = new Color(0.14, 0.15, 0.17)
+const FEED_DESK = new Color(0.52, 0.54, 0.58)
+const FEED_PERSON = new Color(0.74, 0.75, 0.78)
+
 function readColors(el) {
   const cs = getComputedStyle(el)
   const get = (name, fallback) => {
@@ -266,7 +280,7 @@ export function createCampusScene({ container, tier, model, getLive, getLabels, 
     const group = new Group()
     group.add(desks, people)
     parent.add(group)
-    return { group, people, n }
+    return { group, desks, people, n }
   }
 
   for (const b of model.buildings) {
@@ -451,6 +465,13 @@ export function createCampusScene({ container, tier, model, getLive, getLabels, 
       pos = [r.x[0] + 0.4, 4.6, r.z[1] + 0.4]
       target = [(r.x[0] + r.x[1]) / 2, 0, (r.z[0] + r.z[1]) / 2]
       set(v.pins.group, 'visible', false)
+      // Same fixed feed palette as the indoor branch below, for the same reason: the blueprint
+      // ground fill is deliberately close to --c-bg (it's the backdrop, not the subject, for the
+      // exterior view) — through the feed's grayscale/contrast/brightness filter that reads as a
+      // nearly blank, washed-out frame on a light theme instead of a legible surface. v.edges (the
+      // zone's outline) already uses --c-text, which is far enough from mid-gray in every theme to
+      // stay visible on its own; only the flat fill needs the override.
+      set(v.mat, 'color', FEED_FLOOR)
     } else {
       // High on the north wall, looking down the room toward the door side.
       const lift = floorLift(r.floor, blds.get(v.b.id).open, v.b.floors)
@@ -462,7 +483,15 @@ export function createCampusScene({ container, tier, model, getLive, getLabels, 
       set(v.band, 'visible', false)
       set(v.plate, 'visible', true)
       set(v.pins.group, 'visible', false)
-      if (v.seats) set(v.seats.group, 'visible', true)
+      // Fixed feed palette (not the room's real, theme-tinted materials) — see FEED_* above.
+      set(v.inner.material, 'color', FEED_WALL)
+      set(v.inner.material, 'emissive', FEED_WALL_EMISSIVE)
+      set(v.plateMat, 'color', FEED_FLOOR)
+      if (v.seats) {
+        set(v.seats.group, 'visible', true)
+        set(v.seats.desks.material, 'color', FEED_DESK)
+        set(v.seats.people.material, 'color', FEED_PERSON)
+      }
     }
     feedCam.position.set(pos[0], pos[1], pos[2])
     feedCam.lookAt(target[0], target[1], target[2])

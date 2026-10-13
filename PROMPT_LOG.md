@@ -681,3 +681,99 @@ just at the end.
   confirming continuous background color with a visible divider in each, plus the two
   transparent-section seams as a separate check. Zero console errors.
 
+## 2026-10-13 — simulated CCTV feed looked wrong across themes (Bang Do + Claude)
+- Prompt (4 screenshots, one per theme): the camera-view color inside a selected classroom "looks
+  weird across themes."
+- First diagnostic attempt was wrong, and worth recording why: sampled the feed canvas's raw
+  pixels with `getImageData()` and found a theme-tinted color cast (Navy's feed reading distinctly
+  blue). That's a real measurement but answers the wrong question — `getImageData()` reads the
+  canvas's pixel *buffer*, which is what the 3D scene rendered *before* CSS runs; the feed canvas
+  has a `grayscale`/`sepia`/`hue-rotate` CSS filter chain applied at *display* time
+  (`.cp-cctv__img` in Campus.css) that was built to make the feed look like real CCTV footage
+  regardless of what's under it. Caught the mistake by actually screenshotting the rendered
+  element (what a visitor sees) instead of trusting the raw-pixel number, and found the filtered
+  output looked fine in isolation. **Lesson: a CSS filter sits between "what's rendered" and
+  "what's displayed" — test the thing a person actually looks at, not an earlier stage of the
+  pipeline that a filter downstream will change.**
+- The real issue only showed up by reproducing the *night* state specifically (the day filter is a
+  flat grayscale; the night one simulates IR night-vision — green, sepia + hue-rotate — and only
+  reads as a coherent glow when the subject is brighter than its surroundings, like real
+  night-vision footage). Dark themes (Navy, Graphite) have light desks on a dark room — correct
+  direction, looks like real night-vision. Light themes (Paper, Linen) have the same desks
+  rendered dark-on-light underneath (matching their own UI, correctly) — so the *same* filter
+  chain inverted them into a harsh black-silhouette cutout instead of a glow. Confirmed by
+  screenshotting all four themes at the same simulated time side by side, not guessing from the
+  code.
+- Root framing: a simulated security camera represents a physical device and shouldn't re-skin
+  itself to the website's UI theme at all — a real CCTV camera doesn't go light-mode. Fixed by
+  giving `renderFeed()` (campusScene.js) its own small fixed, theme-independent palette (new
+  `FEED_WALL`/`FEED_FLOOR`/`FEED_DESK`/`FEED_PERSON` constants: dark room, bright desks/people in
+  every theme) applied only for the instant the feed is captured, through the function's existing
+  `set`/`restore` mechanism (already used to toggle mesh visibility for the same capture, so this
+  reuses an established pattern rather than inventing a new one) — the room's real, theme-matched
+  colors are restored immediately after and the normal 3D view is untouched. Had to add `desks` to
+  `addSeats()`'s return value (it only exposed `people` before) to reach that material.
+- Verified: `npm test` (526/526), `npm run lint` (clean), `npm run build`. Then actually
+  reproduced both lighting states per theme with Playwright (moved the day scrubber, not just the
+  default snapshot) — eight screenshots, day and night for all four themes — confirming Paper and
+  Linen's night feed now matches Navy/Graphite's glow instead of the black-cutout look, and all
+  four day feeds now render visually identical neutral grayscale. Zero console errors.
+
+## 2026-10-13 — outdoor zone camera feeds still washed out/inconsistent (Bang Do + Claude)
+- Prompt (screenshot, Car Park zone selected): on the two light themes, the camera view sometimes
+  goes very blurry, sometimes green, "changes from time to time" after reselecting a part of the
+  model.
+- Checked the screenshot's own content before assuming anything: it's an *outdoor* zone (Car
+  Park), not a classroom. The previous fix only applied the fixed feed palette inside
+  `renderFeed()`'s indoor branch — outdoor zones (`r.outdoor`) were never touched, so they still
+  used the real, theme-tinted, deliberately-subtle blueprint ground colour. Reproduced it directly
+  rather than guessing: Playwright, Grounds -> Car Park, Paper theme — the feed was close to a
+  blank white frame with barely-visible outlines, exactly matching "blurry."
+- The "sometimes green" half isn't actually random: the night filter is tied to simulated lamps
+  state (`live.lamps`), so reselecting a zone at a different point in the day scrubber correctly
+  shows day (grayscale) vs. night (green) — expected behaviour, not a bug. But combined with the
+  washed-out day rendering, the two states together read as "inconsistent" rather than as two
+  legible, intentional modes — fixing the day case makes the night/day distinction read as
+  designed instead of confusing.
+- Fix: extended the same fixed feed palette to the outdoor branch — `set(v.mat, 'color',
+  FEED_FLOOR)` on the zone's own flat fill, reusing the constant from the indoor fix rather than
+  inventing a second one (CCTV footage of pavement and of an indoor floor read as a similar
+  mid-grey tone regardless). Left `v.edges` (the zone's outline) alone — it already uses
+  `--c-text`, which sits far enough from mid-grey in every theme to stay visible through the
+  filter on its own, so only the flat fill needed the override.
+- Verified: `npm test` (526/526), `npm run lint` (clean), `npm run build`. Then reproduced the
+  exact scenario from the report with Playwright — Car Park, Paper and Linen, day and night —
+  confirming the day feed is now a legible mid-grey surface (not blank) and the night feed is a
+  readable two-tone green frame (not a flat green blow-out), while the exterior 3D view (a
+  separate screenshot of the same state) stays untouched, confirming the fix is scoped to the
+  feed capture only. Zero console errors.
+
+## 2026-10-13 — camera feed "flickering" wasn't a rendering bug at all (Bang Do + Claude)
+- Prompt (2 screenshots, ~5 seconds apart): the feed is green ("night mode", lamps on, 19:31),
+  then a few seconds later shows as the grayscale day version at a completely different time
+  (08:04, lamps off) — "still green here, but for only like 5 seconds."
+- Didn't touch any rendering code this time until confirming what was actually happening: checked
+  `CampusTwin.jsx` and found the simulated school day autoplays by default
+  (`useState(true)`) and completes a full day in 60 real seconds (`DAY_SECONDS = 60`). Dragging
+  the time scrubber manually already calls `setPlaying(false)` to stop it — but clicking a
+  building or room (`select`/`onPick`, used by every "open this room" interaction in the model)
+  did not. So the night-vision filter genuinely was correct both times — lamps really were on at
+  19:31 and really were off at 08:04 — the simulated clock had just kept running in the
+  background the whole time the user was looking at one room, advancing roughly 8% of a full day
+  every 5 real seconds. Verified this diagnosis empirically before changing anything: Playwright
+  confirmed the displayed time advances on its own pre-selection (09:57 -> 10:25 in 2s) exactly as
+  expected from a 60-second autoplay loop.
+  **Lesson: "the colour looks wrong" and "the colour is reading a value that's changing out from
+  under you" produce identical screenshots. Check whether the underlying data is actually stable
+  before assuming the renderer is at fault.**
+- Fix: `select()` and `onPick()` (CampusTwin.jsx) now call `setPlaying(false)`, the same pause
+  `onTime` already does for a manual scrub — opening a building or room freezes the simulated
+  clock at whichever moment the visitor clicked in, so a camera feed (and the lamps/temperature/
+  occupancy readings beside it) holds still while being read instead of drifting through the day
+  behind their back. Nothing auto-resumes it, matching the existing scrubber precedent; the
+  visible "Play Day" control is still there if someone wants to watch it run.
+- Verified: `npm test` (526/526), `npm run lint` (clean), `npm run build`. Then confirmed the fix
+  directly rather than trusting the code read alone: Playwright selected a classroom and watched
+  the displayed time over 3 real seconds — perfectly stable (10:27 -> 10:27) where it had been
+  advancing before selection. Zero console errors.
+

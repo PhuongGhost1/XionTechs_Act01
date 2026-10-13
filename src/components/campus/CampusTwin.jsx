@@ -110,14 +110,21 @@ export default function CampusTwin() {
     return fn
   }, [])
 
+  // Picking a building or room pauses the day, the same as dragging the scrubber (onTime) already
+  // does: autoplay is 60 seconds for a whole school day, so leaving it running while someone is
+  // reading one room's telemetry/camera feed means the lamps/readings — and the feed's day/night
+  // filter — visibly change out from under them every few seconds. Freeze on whatever moment they
+  // clicked in, same precedent as a manual scrub; nothing auto-resumes it.
   const select = useCallback((next, nextTab = 'telemetry') => {
     setSel(next)
     setHover(null)
     setTab(nextTab)
+    setPlaying(false)
   }, [])
   const onPick = useCallback((hit) => {
     setSel((s) => pick(model, s, hit))
     setTab('telemetry')
+    setPlaying(false)
   }, [])
   const onSceneHover = useCallback((hit) => setHover(hit), [])
   const onTime = (t) => {
