@@ -8,7 +8,8 @@
     "build": "vite build",
     "preview": "vite preview",
     "lint": "eslint .",
-    "test": "vitest run"
+    "test": "vitest run",
+    "test:prompt-budget": "node --test tools/prompt-budget/optimize.nodetest.js"
   },
   "dependencies": {
     "lucide-react": "^1.47.0",
