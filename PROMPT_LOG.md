@@ -1099,3 +1099,45 @@ just at the end.
   confirmed zero "StaffXP" matches and the new "Staff Experience" text present on both. Zero console
   errors.
 
+## 2026-10-15 — new StaffXP screenshot: swapped in, re-measured, no new names (Bang Do + Claude)
+- Prompt: "image replace now", then (after I said no new file had reached the repo) "image is new
+  just the same name staffxp-dashboard".
+- Found it: `public/work/staffxp-dashboard.png`, dropped directly onto disk (not a chat attachment),
+  replacing the old `.webp` (which was gone). Read it before using it, per the project's screenshot
+  rule. Its app header now says "StaffExperience" (not "StaffXP") — the brand concern from the earlier
+  rename is now fixed at the pixel level too, not just in page text.
+- The new screenshot has named people visible: the greeting "Round two, Deborah," and a "Birthdays
+  this week" list with four names tagged "Year 4" (read as students). The project's standing rule is
+  to sanitize real names before a screenshot goes in — asked before committing it, rather than assume.
+  Bang Do confirmed it's seeded demo-account data, not real people; proceeded on that basis.
+  **Lesson: a filename staying the same ("staffxp-dashboard") says nothing about whether the pixels
+  changed, or by how much — checked the file's actual mtime (it had changed) and then actually looked
+  at the content (new layout entirely) before touching anything downstream.**
+- The new layout bears no resemblance to the old one (different panels, different grid), which meant
+  the existing `hotspots` array (% boxes measured against the old image) would misalign completely on
+  the new one — not a simple swap. Re-measured from scratch: loaded the image in a local HTML page
+  with a 5%-interval grid drawn over it via `<canvas>` (axis labels repeated on all four edges so any
+  cropped close-up is still self-contained), screenshotted it in quadrants and targeted boundary crops
+  with Playwright, and read the new eight panels' edges off the ruler directly rather than eyeballing
+  the original screenshot. Settled on 8 regions (the old had 6): Academic calendar, To-do list,
+  Birthdays this week, Notices, Open wellbeing tasks, Quick links, Today's pulse, AI assistant panel —
+  "Assignments to mark" no longer exists in this layout, so it's gone; the three new panels
+  (Birthdays, Today's pulse, Open wellbeing tasks) are genuinely new UI in the capture, not invented.
+  `site.js` `selectedWork.staffxp.hotspots`, `main.width`/`height` (1910x983, read from the PNG's own
+  header rather than assumed) and `main.alt` all updated to match.
+- Converted the delivered `.png` to `.webp` (installed `sharp` temporarily, same pattern as this
+  session's temporary Playwright installs — removed after) to match the other two screenshots'
+  format; deleted the `.png` so only one copy of the image exists in the repo.
+  Also checked the StaffXP sign-in screenshot while in the area: its UI already reads "Staff
+  Experience Place - SXP", never the literal "StaffXP", so it did not need replacing — noted in
+  `content/TODO.md` rather than left unexamined. The new dashboard capture also incidentally resolved
+  an older open item (`content/TODO.md`): the dev-environment test strings ("Test performance…",
+  "HIDE AND SEEK PART 2") from the previous screenshot are gone, replaced by plausible seeded content.
+- Verified: `npm test` (523/523, the existing hotspot tests only check unique ids/non-empty labels
+  and in-bounds boxes — no pixel-precision assertion exists, so this relied on the manual grid
+  measurement, not the test suite, for visual accuracy), `npm run lint` (clean), `npm run build`.
+  Playwright loaded the live Deployments viewer and confirmed: zero "StaffXP" matches, the card now
+  reads "STAFF EXPERIENCE", all 8 region buttons render with the expected labels, and — most
+  importantly, since this is the part no automated check covers — screenshotted the rendered page and
+  visually confirmed every hotspot box sits exactly over its real panel with no drift or overlap.
+

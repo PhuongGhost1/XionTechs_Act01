@@ -25,15 +25,16 @@ see unmarked (open any build with `?review` to see the Draft markers). Resolve e
       is no longer shown as a product name anywhere in the page text — a teammate flagged it as
       another company's ("Gems") copyright, so the page now calls it "Staff Experience" throughout
       (`site.js` `selectedWork.staffxp.name`).
-- [ ] **StaffXP screenshots still show the real brand**: the dashboard and sign-in screenshots in
-      `public/work/` (`staffxp-dashboard.webp`, `staffxp-sign-in.webp`) have "StaffXP" baked into the
-      UI pixels themselves (app header/logo), so the copyright concern above isn't fully resolved by
-      the text rename alone. 2026-10-15: a teammate said a replacement screenshot is coming; swap it
-      in (same sanitizing steps as before: crop chrome, replace names/ids/school names with sample
-      values) once it's actually provided — it hasn't reached this repo yet.
-- [ ] **Test data on the StaffXP dashboard**: calendar items ("Test performance…", "HIDE AND SEEK
-      PART 2") and notices ("Test", "test x") are the dev environment's test records. Consider a
-      screenshot of a seeded demo account instead.
+- [x] ~~**StaffXP dashboard screenshot still showed the real brand**~~: 2026-10-15, replaced with a
+      new capture (`public/work/staffxp-dashboard.webp`, 1910x983) whose UI itself now reads
+      "StaffExperience", not "StaffXP" — confirmed with the team as a seeded demo account, not real
+      staff/students, before committing. Hotspot boxes (`site.js` `selectedWork.staffxp.hotspots`)
+      re-measured against the new layout. The sign-in screenshot (`staffxp-sign-in.webp`) was already
+      fine: its UI shows "Staff Experience Place - SXP", not "StaffXP" — no replacement needed there.
+- [x] ~~**Test data on the StaffXP dashboard**~~: resolved by the same 2026-10-15 screenshot swap —
+      the new capture is a seeded demo account with plausible content (e.g. "Leadership Development
+      Camp"), not the dev environment's literal test records ("Test performance…", "HIDE AND SEEK
+      PART 2") that the old screenshot showed.
 - [ ] **Story tags**: confirm the four StaffXP tags with the project owner (plan §7).
 
 ## Draft copy to sign off

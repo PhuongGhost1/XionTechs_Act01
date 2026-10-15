@@ -195,10 +195,13 @@ export const selectedWork = {
     desc: 'A staff experience platform bringing everyday activities, notices, wellbeing, tasks, and operational information into one workspace.',
     tags: ['Staff experience', 'Business workflow', 'Role-based platform', 'Integrated operations'],
     main: {
+      // 2026-10-15: replaced with a new capture that no longer shows the "StaffXP" brand in the UI
+      // itself (the app header now reads "StaffExperience") — see PROMPT_LOG.md. Still a seeded demo
+      // account, not a real staff/student roster (confirmed with the team before committing).
       src: '/work/staffxp-dashboard.webp',
-      alt: 'Staff Experience dashboard with academic calendar, to-do list, notices, quick links, assignments to mark and an AI assistant panel. Sample data.',
-      width: 1869,
-      height: 958,
+      alt: "Staff Experience dashboard with academic calendar, to-do list, birthdays this week, notices, open wellbeing tasks, quick links, today's pulse and an AI assistant panel. Sample data.",
+      width: 1910,
+      height: 983,
     },
     secondary: {
       src: '/work/staffxp-sign-in.webp',
@@ -208,14 +211,17 @@ export const selectedWork = {
     },
     // DRAFT: heading for the list of annotated regions under the screens.
     hotspotsTitle: 'On this screen',
-    // MOTION §13: only UI visible in the screenshot is annotated.
+    // MOTION §13: only UI visible in the screenshot is annotated. Boxes measured 2026-10-15 against
+    // the new 1910x983 capture (replaces the previous screenshot's layout and hotspots).
     hotspots: [
-      { id: 'calendar', label: 'Academic calendar', box: { x: 0.7, y: 34.4, w: 19.1, h: 61.1 } },
-      { id: 'tasks', label: 'To-do list, linked to Microsoft To Do', box: { x: 21.5, y: 34.4, w: 38.2, h: 32.4 } },
-      { id: 'notices', label: 'Notices', box: { x: 21.5, y: 69.4, w: 38.2, h: 30.6 } },
-      { id: 'links', label: 'Quick links, including employee self-service', box: { x: 61.4, y: 34.4, w: 19.1, h: 22.2 } },
-      { id: 'marking', label: 'Assignments to mark', box: { x: 61.4, y: 59.3, w: 19.1, h: 34.1 } },
-      { id: 'assistant', label: 'AI assistant panel', box: { x: 81.9, y: 5.7, w: 17.8, h: 93.5 } },
+      { id: 'calendar', label: 'Academic calendar', box: { x: 2.4, y: 29.5, w: 19.6, h: 35.1 } },
+      { id: 'tasks', label: 'To-do list, linked to Microsoft To Do', box: { x: 24, y: 29.5, w: 37, h: 33.5 } },
+      { id: 'birthdays', label: 'Birthdays this week', box: { x: 2.4, y: 67.6, w: 19.6, h: 29.4 } },
+      { id: 'notices', label: 'Notices', box: { x: 24, y: 66.6, w: 37, h: 18.4 } },
+      { id: 'wellbeing', label: 'Open wellbeing tasks', box: { x: 24, y: 89, w: 37, h: 10.5 } },
+      { id: 'links', label: 'Quick links, including employee self-service', box: { x: 62.5, y: 29.5, w: 21, h: 18.3 } },
+      { id: 'pulse', label: "Today's pulse, a school-wide snapshot", box: { x: 62.5, y: 53.4, w: 21, h: 29.6 } },
+      { id: 'assistant', label: 'AI assistant panel', box: { x: 84.5, y: 6, w: 15.5, h: 94 } },
     ],
   },
   ess: {
