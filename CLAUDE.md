@@ -171,7 +171,7 @@ content. If you add a new section, follow the same pattern.
 - Concept 01 section 05 is the **smart campus**. As of `feat/promote-command-to-homepage`
   (2026-10-13) it lives at `src/components/campus/` (Command's own, not the concept's — it moved
   with the rest of Command's source when Command became the homepage). It replaced the flight
-  plan, and — since 2026-10-13 — the Selected Work "Smart campus" card (`src/components/content.js`
+  plan, and — since 2026-10-13 — the Selected Work "Smart school campus" card (`src/components/content.js`
   `deployments.records`, id `campus`) also points to it directly (`href: '#campus'`, a same-page
   anchor), not to a standalone Agent Demo section: that section only still exists on the archived
   page at `/concepts/command/`. Content in `src/components/campusData.js`: the campus is

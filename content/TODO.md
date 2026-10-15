@@ -85,7 +85,7 @@ for the homepage, carried over from when this was still a concept:
 - [ ] **Module names**: the brief mixes `AI / Code / Data / Cloud` (scroll sequence) with Software engineering /
       AI systems / Cloud & platform / Product development (modules). The concept uses the second set.
 
-### Smart campus (Concept 01, section 05)
+### Smart school campus (Concept 01, section 05)
 
 - [ ] **Service list**: the ten services on the model and the nine more in `campusData.js` (`slice: false`) are
       AI-drafted examples of school IoT. Confirm which XionTechs delivers, then drop the "pending team

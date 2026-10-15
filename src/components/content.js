@@ -40,7 +40,7 @@ export const sections = [
   { id: 'modules', build: '002', label: 'Modules' },
   { id: 'process', build: '003', label: 'Pipeline' },
   { id: 'deployments', build: '004', label: 'Deployments' },
-  { id: 'campus', build: '005', label: 'Smart campus' },
+  { id: 'campus', build: '005', label: 'Smart school campus' },
   { id: 'signals', build: '006', label: 'Signals' },
   { id: 'contact', build: '007', label: 'Deploy' },
 ]
@@ -200,7 +200,7 @@ export const deployments = {
     {
       id: 'campus',
       code: 'Project 003',
-      name: 'Smart campus', // matches campus.label below
+      name: 'Smart school campus', // matches campus.label below
       kind: 'AI and automation',
       // DRAFT: a short version of the campus section's own intro (content.js `campus.intro`),
       // written for the card format. 2026-10-13: this slot used to describe a standalone
@@ -224,7 +224,7 @@ export const deployments = {
 // the team confirms it. The wording below is DRAFT, pending sign-off.
 export const campus = {
   index: '05',
-  label: 'Smart campus',
+  label: 'Smart school campus',
   title: 'A school that knows how it is doing.',
   intro:
     'Walk an example campus. Every room carries the sensors and services we connect for schools: climate, air, occupancy, energy, security and anonymous classroom analytics. Scrub through the day to watch it change.',

@@ -3,7 +3,7 @@ import { useInView } from '../../hooks/useInView'
 import { campus } from '../content'
 import { Reveal, SectionHead } from '../ui'
 
-// Section 05, "Smart campus": the frame the page counts and links to (id `campus`). Only the heading and a
+// Section 05, "Smart school campus": the frame the page counts and links to (id `campus`). Only the heading and a
 // reserved box live in the page's main chunk. The model, the panel and the simulation are one lazy chunk
 // (CampusTwin.jsx) requested once the section is within a screen or two of the viewport. If that request
 // fails (offline, a blocked file) the section says so instead of unmounting the page.

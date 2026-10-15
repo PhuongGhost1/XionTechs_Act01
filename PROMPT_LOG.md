@@ -777,3 +777,58 @@ just at the end.
   the displayed time over 3 real seconds — perfectly stable (10:27 -> 10:27) where it had been
   advancing before selection. Zero console errors.
 
+## 2026-10-15 — three teammate review comments (Bang Do + Claude)
+- Prompt: screenshots of design-review comments from teammates (Vietnamese). Three asks:
+  (1) campus building/room labels disappear after a theme switch, (2) rename "Smart Campus" to
+  "Smart School Campus" everywhere, (3, Phuong Hoang) add scroll-to-stop / timed scroll stop so
+  the page scrolls smoother, "like the XionTechs web."
+- **Label bug, root cause**: this was a regression from an earlier session's own fix (2026-10-13,
+  `d3aaed7`), not a pre-existing bug — worth recording as a place the AI's own prior fix had a gap.
+  That fix keyed `<CampusCanvas>` by `theme` so switching themes remounts the three.js engine and
+  re-bakes material colours from fresh `getComputedStyle` reads. But `CampusTwin.jsx`'s
+  `setLabelsEnabled(three)` effect only re-runs when the *value* of `three` (`canvasOn && ready`)
+  changes — and `ready` was already `true` from the previous engine instance, so after a remount
+  `three` stays `true` throughout and that effect never re-fires for the brand-new engine. The new
+  engine's internal `labelsOn` flag starts `false` and nothing ever flips it; the label elements
+  are still in the DOM (React never stopped rendering their text), they just never get positioned
+  or shown. Fix: call `apiRef.current?.setLabelsEnabled(true)` directly inside `onReady`
+  (`CampusTwin.jsx`) — the engine's own "first frame drawn" callback, which fires fresh for every
+  engine instance including remounts, regardless of whether `three`'s value happened to change.
+  The existing `[three]`-dependent effect is untouched; it still correctly handles *disabling*
+  labels (scrolling away, a tier downgrade).
+  **Lesson: `key={...}`-forced remounts reset a child component's internal state, but any parent
+  state gating that child only re-syncs to it through a `useEffect` dependency — if the dependency's
+  *value* doesn't change across the remount, the effect silently doesn't re-fire for the new
+  instance. Prefer wiring directly into the child's own lifecycle callback (`onReady`) when one
+  exists, rather than inferring "is it ready" from parent state that may already be stale-true.**
+- **Rename**: "Smart campus" -> "Smart school campus" in `content.js` (the sidebar `sections` tag,
+  the Selected Work "Project 003" card, and the `campus` section object's own `label`), plus
+  matching comments in `CampusTwin.jsx`, `CampusSection.jsx`, `campusData.js`, `CLAUDE.md` and
+  `content/TODO.md`'s heading. No test asserted the old string, so `npm test` alone wouldn't have
+  caught a missed spot — checked with Playwright that all three visible locations (sidebar tag,
+  card, section eyebrow) actually render the new text, not just that content.js changed.
+- **Scroll-to-stop**: CSS-only, matching the MOTION brief (no motion library). Added
+  `scroll-snap-type: y proximity` to the existing `html` rule in `index.css` and a new
+  `[data-cmd-section] { scroll-snap-align: start; }` rule, reusing the `data-cmd-section` attribute
+  already on all seven top-level sections (the same attribute `BuildHud.jsx` already queries for its
+  active-section tracking — no new convention introduced). Chose `proximity` over `mandatory`:
+  these sections each run well past one screen, so a mandatory snap would fight a visitor scrolling
+  *through* the middle of a section, not just *to* one; proximity only pulls in once a scroll ends
+  near a boundary. `scroll-padding-top` (already set, for anchor links) keeps a snapped section clear
+  of the fixed header. The existing `prefers-reduced-motion` block already sets `scroll-behavior: auto`
+  — confirmed this still applies under snap (the settle becomes instant instead of gliding; nothing
+  further needed there).
+  Verified the mechanism is live (computed `scroll-snap-type`/`scroll-snap-align` present; forcing
+  `mandatory` via an injected stylesheet visibly pulled the scroll position beyond a raw wheel delta,
+  confirming Chromium is actually invoking snap, not just accepting the CSS), but did not chase exact
+  landing pixels under `proximity` — Chromium's proximity implementation is intentionally soft/subtle
+  by design (that's why it was chosen over `mandatory` here), and automated pixel-matching against it
+  proved unreliable given the page's own lazy-loaded sections shifting document height during the
+  test. Visual/manual confirmation of "feel" is the honest remaining check, not something a script
+  can assert.
+- Verified: `npm test` (526/526), `npm run lint` (clean), `npm run build`. Playwright confirmed, in
+  one pass: campus labels ("Teaching block", "Library", …) stay `visibility: visible` with live
+  position transforms after switching theme (navy -> dark via the header's Theme menu); "Smart
+  school campus" renders in the sidebar tag, the Selected Work card and the campus section eyebrow;
+  `scroll-snap-type`/`scroll-snap-align` are applied and actively engaged. Zero console errors.
+

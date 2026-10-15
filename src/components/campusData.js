@@ -2,7 +2,7 @@
 // Sources, as in content.js:
 //   ILLUSTRATIVE  the campus itself: an example school, not a client site. Always labelled on the page.
 //   PLACEHOLDER   the service list: school IoT is a real XionTechs offering, but which services and devices
-//                 we deliver is pending team confirmation (content/TODO.md, "Smart campus").
+//                 we deliver is pending team confirmation (content/TODO.md, "Smart school campus").
 // Text values stay free of digits (src/concepts/command/campus/campusData.test.js): every number the page
 // shows is a simulated reading from campus/simulate.js and carries a "Simulated" tag.
 //

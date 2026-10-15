@@ -17,7 +17,7 @@ import { ROOT, breadcrumb, levelOf, pick, up } from './navigation'
 import { campusTier } from './tier'
 import './Campus.css'
 
-// The body of section 05, "Smart campus" (the frame and heading are CampusSection.jsx; this file is the lazy
+// The body of section 05, "Smart school campus" (the frame and heading are CampusSection.jsx; this file is the lazy
 // chunk behind it). An illustrative school campus as a 3D maquette: buildings open into rooms, rooms show
 // their IoT devices and simulated readings, and a day scrubber moves time (docs/superpowers/specs/
 // 2026-10-06-smart-campus-design.md).
@@ -59,7 +59,19 @@ export default function CampusTwin() {
   useEffect(() => {
     if (!canvasOn) setReady(false)
   }, [canvasOn])
-  const onReady = useCallback(() => setReady(true), [])
+  // Also enables labels directly on whichever engine just became ready, not just via the
+  // [three]-dependent effect below: a theme switch remounts CampusCanvas (key={theme}, so its
+  // colours stay correct — see campusScene.js), creating a brand-new engine instance, but `ready`
+  // was already true from the previous one, so `three` never actually changes value and that
+  // effect never re-fires for the new instance. Its own labelsOn starts false and stays false —
+  // the labels' text is still there (React never stopped rendering it), they just never get
+  // positioned or made visible. onReady (the engine's own "first frame drawn" signal) fires fresh
+  // for every engine, remount included, so enabling here is correct regardless of why `ready` did
+  // or didn't change.
+  const onReady = useCallback(() => {
+    setReady(true)
+    apiRef.current?.setLabelsEnabled(true)
+  }, [])
   const onLost = useCallback(() => setLost(true), [])
 
   const [sel, setSel] = useState(ROOT)

@@ -91,11 +91,25 @@
 
 html {
   scroll-behavior: smooth;
-  /* Keeps anchor targets clear of the fixed header. */
+  /* Keeps anchor targets (and snap stops, below) clear of the fixed header. */
   scroll-padding-top: 4.5rem;
   background: rgb(var(--c-bg));
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
+  /* Scroll-to-stop: gently settles on the nearest section boundary once a scroll ends, rather
+     than free-scrolling to an arbitrary mid-section stop. `proximity`, not `mandatory` — these
+     sections are tall (more than one screen each), so a hard mandatory snap would fight a visitor
+     scrolling *through* a section instead of *to* one; proximity only pulls in near a boundary.
+     scroll-behavior: smooth (above) makes that final settle glide instead of jump; the reduced-
+     motion override further down switches it to an instant snap instead. */
+  scroll-snap-type: y proximity;
+}
+
+/* Every top-level page section is a snap stop — [data-cmd-section] is already the page's own
+   "this is a section" marker (BuildHud.jsx queries the same attribute for its scan-line/active-
+   section effects), so this reuses it instead of adding a parallel convention. */
+[data-cmd-section] {
+  scroll-snap-align: start;
 }
 
 body {
