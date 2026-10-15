@@ -864,3 +864,37 @@ just at the end.
   section's scroll range, and the X-Core animation's step-phase clusters are not overlapping or
   lopsided. Zero console errors.
 
+## 2026-10-15 — Selected Work: drop the record sheet, declutter the campus card (Bang Do + Claude)
+- Prompt (3 Teams screenshots, red boxes): remove the highlighted block (Sector / Seen in the
+  product / Stack / Status / tags) from the StaffXP, ESS and Smart school campus viewers; for
+  campus specifically, also remove "Illustrative · demo data" and "Draft copy".
+- Checked the honesty rule first (`CLAUDE.md`: never delete a PLACEHOLDER/ILLUSTRATIVE label
+  without replacing it with verified real content, and it must stay visible for every visitor) before
+  touching anything, since campus is invented demo content. Traced every place "Illustrative · demo
+  data" and "Draft copy" render for the campus record: (1) the ledger sidebar card's own badge
+  (`Deployments.jsx` `LedgerRow`, `record.illustrative && <IllustrativeTag/>`) — always on screen,
+  independent of which record is selected; (2) the viewer's record sheet, inside the highlighted
+  box, already going away with that block; (3) `ProductViewer.jsx`'s `FallbackPanel` (campus's
+  screenshot-less panel) had its own `<IllustrativeTag/>` and a `<DraftMark draft={record.
+  summaryDraft}/>` on the summary text — outside the highlighted box, the two the prompt's "also
+  remove" line must mean. Removing (2) and (3) still leaves (1) on the page, plus the summary copy
+  itself already says "illustrative" and "it's a demo, not a client project" in plain English — the
+  disclosure survives, just without three redundant copies of it. Also noted `DraftMark` only
+  renders in `npm run dev` / `?review` builds already (`SHOW_DRAFTS`), so "Draft copy" was never
+  visible to a production visitor regardless.
+  **Lesson: before deleting a label the brief calls non-negotiable, count every place it appears on
+  the page, not just the one in the screenshot — the fix was "remove the duplicates," not "remove
+  the disclosure."**
+- Fix: `ProductViewer.jsx` — deleted `RecordSheet`/`SheetRow` entirely (the Sector/Seen/Stack/Status
+  block, used by all three records) and the `IllustrativeTag`/`DraftMark` calls inside
+  `FallbackPanel` (campus only, since it's the only record without a real screenshot). Removed the
+  now-unused `deployments`, `DraftMark`, `IllustrativeTag`, `PendingTag` imports. Left `content.js`'s
+  `stack`/`status`/`summaryDraft`/`tagsDraft`/`fields` data alone — unused by the UI now, but
+  harmless, and keeping them avoids a drive-by data-model edit beyond what was asked.
+- Verified: `npm test` (526/526), `npm run lint` (clean, confirming the removed imports really were
+  dead), `npm run build` (main chunk gzip dropped slightly, 21.65 -> 21.22 kB). Playwright clicked
+  through all three ledger records and confirmed, per record: no "Sector" row, no "Pending
+  confirmation" text, zero "Illustrative"/"Draft copy" matches inside the viewer panel for StaffXP
+  and ESS, and for campus specifically: zero "Draft copy" matches, one "Illustrative" match (the
+  summary prose, not a badge), and the sidebar ledger badge still present. Zero console errors.
+

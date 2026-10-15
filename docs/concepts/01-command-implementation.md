@@ -209,10 +209,9 @@ timeline below. Each step has `anchorProps(step.anchor)` above or beside it hold
 (`xcore-fallback`: a small chain). Below: a ledger (left, 4 of 12 columns) of the three records, then the viewer
 (right, 8 of 12). The viewer is a monitor frame (corner ticks) showing the record's real screenshot with
 `width`/`height` set, with its regions outlined in yellow and labelled. Selecting a record plays M10.
-Under the frame: the region list (hover, focus or tap highlights the region), then a record sheet:
-Sector, Seen in the product (region labels), Stack and Status as `PendingTag` (never "production"), tags
-(`tagsDraft` → `DraftMark`). The Agent demo record has no screenshot: it shows an illustrative panel with the
-`IllustrativeTag` and a link to `/#ai-agents`. ESS is a wide screen: let it scroll sideways inside the frame on
+Under the frame: the region list (hover, focus or tap highlights the region). The campus record has no
+screenshot: it shows an illustrative panel (`FallbackPanel`) with the record's summary and a link to the live
+campus section (`#campus`) instead. ESS is a wide screen: let it scroll sideways inside the frame on
 phones, with `scrollHint`. Not a three-card grid.
 
 **Signals** (`id="signals"`, `data-band="paper"`, opaque). `SectionHead`; a data sheet of four tiles divided by

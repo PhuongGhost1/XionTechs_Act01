@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useReducer, useRef, useState } from 'react'
 import { MoveHorizontal } from 'lucide-react'
 import { useReducedMotion } from '../hooks/useReducedMotion'
-import { deployments } from './content'
 import {
   activeRegion,
   boxStyle,
@@ -13,7 +12,7 @@ import {
   scrollTargetLeft,
 } from './regions'
 import { buildXGraph, projectToBox } from './scene/graph'
-import { DraftMark, IllustrativeTag, PendingTag, SignalButton } from './ui'
+import { SignalButton } from './ui'
 import { useOverflowX } from './useOverflowX'
 import './Deployments.css'
 
@@ -63,11 +62,7 @@ function FallbackPanel({ record }) {
       <span aria-hidden="true" className="cmd-grid absolute inset-0" />
       <FallbackX />
       <div className="relative max-w-[24rem] md:max-w-[46%]">
-        <IllustrativeTag />
-        <p className="mt-4 text-lg text-cmd-text">
-          {record.summary}
-          <DraftMark draft={record.summaryDraft} />
-        </p>
+        <p className="text-lg text-cmd-text">{record.summary}</p>
         <div className="mt-6">
           <SignalButton href={record.link.href}>{record.link.label}</SignalButton>
         </div>
@@ -76,59 +71,8 @@ function FallbackPanel({ record }) {
   )
 }
 
-// One row of the record sheet. Stacks on a phone, label beside value from sm.
-function SheetRow({ label, children }) {
-  return (
-    <div className="grid gap-1.5 px-5 py-4 sm:grid-cols-[11rem_minmax(0,1fr)] sm:gap-6 sm:px-6">
-      <dt className="cmd-label pt-0.5 text-cmd-faint">{label}</dt>
-      <dd className="m-0 min-w-0 text-cmd-text">{children}</dd>
-    </div>
-  )
-}
-
-function RecordSheet({ record, regions }) {
-  const f = deployments.fields
-  return (
-    <div className="cmd-ticks mt-10 border border-cmd-line bg-cmd-surface">
-      {!record.illustrative && <p className="max-w-prose px-5 py-5 text-base text-cmd-muted sm:px-6">{record.summary}</p>}
-      <dl className={`divide-y divide-cmd-line ${record.illustrative ? '' : 'border-t border-cmd-line'}`}>
-        <SheetRow label={f.sector}>{record.kind}</SheetRow>
-        {regions.length > 0 && (
-          <SheetRow label={f.seen}>
-            <ul className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-cmd-muted">
-              {regions.map((r) => (
-                <li
-                  key={r.id}
-                  className="before:mr-3 before:inline-block before:h-1 before:w-1 before:bg-cmd-faint before:align-middle before:content-[''] first:before:hidden"
-                >
-                  {r.label}
-                </li>
-              ))}
-            </ul>
-          </SheetRow>
-        )}
-        {/* Stack and status are not confirmed (content/TODO.md): a labelled gap, never "production". */}
-        <SheetRow label={f.stack}>{record.stack ?? <PendingTag />}</SheetRow>
-        <SheetRow label={f.status}>{record.status ?? (record.illustrative ? <IllustrativeTag /> : <PendingTag />)}</SheetRow>
-      </dl>
-      {record.tags.length > 0 && (
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-2 border-t border-cmd-line px-5 py-4 sm:px-6">
-          <ul className="flex flex-wrap gap-2">
-            {record.tags.map((tag) => (
-              <li key={tag} className="cmd-label border border-cmd-line px-2.5 py-1.5 text-cmd-muted">
-                {tag}
-              </li>
-            ))}
-          </ul>
-          <DraftMark draft={record.tagsDraft} />
-        </div>
-      )}
-    </div>
-  )
-}
-
 // The deployment viewer: a monitor frame showing the record's real screenshot, the regions of the
-// product outlined over it, the region list under it, then the record sheet. Mount it with
+// product outlined over it, and the region list under it. Mount it with
 // `key={record.id}` so selecting a record replays M10 (docs/concepts/01-command-implementation.md §6):
 // a scan reveals the screen, then the regions light in turn and settle to a quiet outline.
 // `play` is true once the section is on screen; the scan also waits for the image to load.
@@ -296,8 +240,6 @@ export default function ProductViewer({ record, play }) {
           </ul>
         </div>
       )}
-
-      <RecordSheet record={record} regions={regions} />
     </div>
   )
 }
