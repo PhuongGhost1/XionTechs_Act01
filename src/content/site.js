@@ -8,11 +8,11 @@
 // Open items live in content/TODO.md.
 
 export const company = {
-  name: 'XionTechs',
+  name: 'XionTech',
   legalName: 'XionTech Joint Stock Company', // LIVE; spelling to verify (content/TODO.md)
-  logo: { src: '/XionTechs-Logo_s.png', width: 250, height: 46 },
+  logo: { src: '/XionTechs-Logo_s.png', width: 240, height: 46 },
   // PLAN §0 core positioning.
-  positioning: 'XionTechs builds AI-enabled software and provides the engineering capability to get real business work done.',
+  positioning: 'XionTech builds AI-enabled software and provides the engineering capability to get real business work done.',
 }
 
 // Source: redesign plan v3 §2. Anchor navigation; the demo is a capability, not a product page.
@@ -40,7 +40,7 @@ export const hero = {
   headline: 'AI agents and software engineering for the work that matters.',
   headlineAccent: 'the work that matters',
   intro:
-    'XionTechs helps businesses turn ideas, workflows and operational problems into production-ready software, from AI agents to complete engineering teams.',
+    'XionTech helps businesses turn ideas, workflows and operational problems into production-ready software, from AI agents to complete engineering teams.',
   primary: { label: 'See What We Build', href: '#work' },
   secondary: { label: 'Talk to Us', href: '#contact' },
   system: [
@@ -179,7 +179,7 @@ export const selectedWork = {
     'Selected product experiences from the kinds of systems we build. Names and identifying details in the screenshots are replaced with sample values.',
   pendingNote: 'Screenshot pending privacy review. The layout is shown as an outline.',
   proofs: [
-    { id: 'staffxp', label: 'Product engineering', name: 'StaffXP', href: '#work-staffxp' },
+    { id: 'staffxp', label: 'Product engineering', name: 'Staff Experience', href: '#work-staffxp' },
     { id: 'ess', label: 'Enterprise workflow', name: 'ESS', href: '#work-ess' },
     { id: 'agents', label: 'AI and automation', name: 'Agent demo', href: '#ai-agents', note: 'Illustrative' },
   ],
@@ -187,33 +187,46 @@ export const selectedWork = {
   agentsLink: { label: 'See an Agent Work', href: '#ai-agents' },
   staffxp: {
     id: 'work-staffxp',
-    name: 'StaffXP',
+    // 2026-10-15 (team): shown as "Staff Experience", not the product's real name "StaffXP" — a
+    // teammate flagged the real name as another company's ("Gems") copyright. See PROMPT_LOG.md.
+    name: 'Staff Experience',
     eyebrow: 'Education / staff experience',
     title: 'A connected workspace for school staff.',
     desc: 'A staff experience platform bringing everyday activities, notices, wellbeing, tasks, and operational information into one workspace.',
     tags: ['Staff experience', 'Business workflow', 'Role-based platform', 'Integrated operations'],
     main: {
+      // 2026-10-15: replaced with a new capture that no longer shows the "StaffXP" brand in the UI
+      // itself (the app header now reads "StaffExperience") — see PROMPT_LOG.md. Still a seeded demo
+      // account, not a real staff/student roster (confirmed with the team before committing).
       src: '/work/staffxp-dashboard.webp',
-      alt: 'StaffXP staff dashboard with academic calendar, to-do list, notices, quick links, assignments to mark and an AI assistant panel. Sample data.',
-      width: 1869,
-      height: 958,
+      alt: "Staff Experience dashboard with academic calendar, to-do list, birthdays this week, notices, open wellbeing tasks, quick links, today's pulse and an AI assistant panel. Sample data.",
+      width: 1910,
+      height: 983,
     },
     secondary: {
       src: '/work/staffxp-sign-in.webp',
-      alt: 'StaffXP sign-in screen with a Sign in with Microsoft button.',
+      alt: 'Staff Experience sign-in screen with a Sign in with Microsoft button.',
       width: 1874,
       height: 954,
     },
     // DRAFT: heading for the list of annotated regions under the screens.
     hotspotsTitle: 'On this screen',
-    // MOTION §13: only UI visible in the screenshot is annotated.
+    // MOTION §13: only UI visible in the screenshot is annotated. Boxes measured 2026-10-15 against
+    // the new 1910x983 capture (replaces the previous screenshot's layout and hotspots). `box.y`
+    // is NOT just the card's own edge: the chip (ProductViewer.jsx `dv-chip`) straddles the box's top
+    // border and is a fixed 16px tall regardless of how small the image renders at — at this viewer's
+    // typical ~770px display width that is roughly 2% of the image's height. A card whose header sits
+    // less than ~3-4% below the card's true edge (birthdays, wellbeing) needs its box.y pulled up past
+    // the card's edge, into the gap above it, or the chip covers the header text.
     hotspots: [
-      { id: 'calendar', label: 'Academic calendar', box: { x: 0.7, y: 34.4, w: 19.1, h: 61.1 } },
-      { id: 'tasks', label: 'To-do list, linked to Microsoft To Do', box: { x: 21.5, y: 34.4, w: 38.2, h: 32.4 } },
-      { id: 'notices', label: 'Notices', box: { x: 21.5, y: 69.4, w: 38.2, h: 30.6 } },
-      { id: 'links', label: 'Quick links, including employee self-service', box: { x: 61.4, y: 34.4, w: 19.1, h: 22.2 } },
-      { id: 'marking', label: 'Assignments to mark', box: { x: 61.4, y: 59.3, w: 19.1, h: 34.1 } },
-      { id: 'assistant', label: 'AI assistant panel', box: { x: 81.9, y: 5.7, w: 17.8, h: 93.5 } },
+      { id: 'calendar', label: 'Academic calendar', box: { x: 2.4, y: 29.5, w: 19.6, h: 35.1 } },
+      { id: 'tasks', label: 'To-do list, linked to Microsoft To Do', box: { x: 24, y: 29.5, w: 37, h: 38.5 } },
+      { id: 'birthdays', label: 'Birthdays this week', box: { x: 2.4, y: 65, w: 19.6, h: 32 } },
+      { id: 'notices', label: 'Notices', box: { x: 24, y: 72, w: 37, h: 15 } },
+      { id: 'wellbeing', label: 'Open wellbeing tasks', box: { x: 24, y: 88, w: 37, h: 11.5 } },
+      { id: 'links', label: 'Quick links, including employee self-service', box: { x: 62.5, y: 30, w: 21, h: 20 } },
+      { id: 'pulse', label: "Today's pulse, a school-wide snapshot", box: { x: 62.5, y: 54, w: 21, h: 30 } },
+      { id: 'assistant', label: 'AI assistant panel', box: { x: 84.5, y: 6, w: 15.5, h: 94 } },
     ],
   },
   ess: {
@@ -310,8 +323,8 @@ export const engineering = {
     { id: 'cloud', label: 'Cloud / Integration', items: 'Azure, AWS, GCP' },
     { id: 'ai', label: 'AI / Automation', items: 'Power Platform, Make, n8n, Retool, Bubble' },
   ],
-  result: 'XionTechs engineering team',
-  equation: ['Your idea', 'XionTechs engineering', 'Production software'],
+  result: 'XionTech engineering team',
+  equation: ['Your idea', 'XionTech engineering', 'Production software'],
 }
 
 // MOTION §18 stage copy. No durations, cadences or prices: none of them are confirmed.
@@ -329,11 +342,11 @@ export const howWeWork = {
 // MOTION §19. Evidence-oriented pillars replace the live site's generic values.
 export const whyUs = {
   eyebrow: 'Why us',
-  title: 'Why XionTechs',
+  title: 'Why XionTech',
   pillars: [
     { title: 'Engineering mindset', icon: 'Wrench', desc: 'We build around workflows, products, and real operating needs.' },
     { title: 'AI where it helps', icon: 'Sparkles', desc: 'We use AI agents and automation where they create meaningful leverage.' },
-    { title: 'Flexible delivery', icon: 'Users', desc: 'Work with XionTechs for a focused build, complete product development, or additional engineering capacity.' },
+    { title: 'Flexible delivery', icon: 'Users', desc: 'Work with XionTech for a focused build, complete product development, or additional engineering capacity.' },
     { title: 'Integration-first', icon: 'Cable', desc: 'Connect new systems to the software and workflows already used by the business.' },
   ],
 }
@@ -361,7 +374,7 @@ export const faq = {
   draft: true,
   items: [
     {
-      q: 'What kinds of AI agents can XionTechs build?',
+      q: 'What kinds of AI agents can XionTech build?',
       a: 'Agents that take a request, work out what it needs, and act on it through your systems: triaging support requests, preparing reorders for approval, or scheduling maintenance. Each agent is built around one workflow rather than a general chatbot.',
     },
     {
@@ -370,7 +383,7 @@ export const faq = {
     },
     {
       q: 'Do you also provide traditional software engineering?',
-      a: 'Yes. Alongside AI work, XionTechs builds business software: product engineering, custom applications, cloud and integration work, and dedicated engineering capacity for your team.',
+      a: 'Yes. Alongside AI work, XionTech builds business software: product engineering, custom applications, cloud and integration work, and dedicated engineering capacity for your team.',
     },
     {
       q: 'Can we start with a small pilot?',
@@ -382,7 +395,7 @@ export const faq = {
     },
     {
       q: 'Can you work with an existing engineering team?',
-      a: 'Yes. XionTechs can add engineers to your team, take ownership of one part of the product, or build alongside your developers.',
+      a: 'Yes. XionTech can add engineers to your team, take ownership of one part of the product, or build alongside your developers.',
     },
   ],
 }

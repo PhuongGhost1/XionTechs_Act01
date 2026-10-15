@@ -1,0 +1,49 @@
+/* Hero slogan (MOTION §6): GET → IT → DONE plays once as the page opens. Each word steps in,
+   the connector to the next word draws, and DONE is checked off. --i is the word's position. */
+.hero-slogan-word,
+.hero-slogan-link,
+.hero-slogan-check {
+  animation-duration: 380ms;
+  animation-timing-function: var(--ease-brand);
+  animation-fill-mode: backwards;
+}
+.hero-slogan-word {
+  animation-name: hero-slogan-word;
+  animation-delay: calc(200ms + var(--i) * 340ms);
+}
+.hero-slogan-link {
+  transform-origin: left center;
+  animation-name: hero-slogan-link;
+  animation-duration: 240ms;
+  animation-delay: calc(200ms + var(--i) * 340ms - 200ms);
+}
+.hero-slogan-check {
+  animation-name: hero-slogan-check;
+  animation-duration: 450ms;
+  animation-timing-function: var(--ease-spring);
+  animation-delay: calc(200ms + var(--i) * 340ms - 120ms);
+}
+@keyframes hero-slogan-word {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+@keyframes hero-slogan-link {
+  from {
+    transform: scaleX(0);
+  }
+}
+@keyframes hero-slogan-check {
+  from {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-slogan-word,
+  .hero-slogan-link,
+  .hero-slogan-check {
+    animation: none;
+  }
+}

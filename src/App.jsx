@@ -1,41 +1,89 @@
-import { lazy, Suspense, useEffect } from 'react'
+import { lazy, Suspense, useEffect, useState, useSyncExternalStore } from 'react'
+import { useReducedMotion } from './hooks/useReducedMotion'
 import Nav from './components/Nav'
+import BuildHud from './components/BuildHud'
 import Hero from './components/Hero'
-import Solutions from './components/Solutions'
-import AiAgents from './components/AiAgents'
+import Modules from './components/Modules'
+import Process from './components/Process'
+import Deployments from './components/Deployments'
+import CampusSection from './components/campus/CampusSection'
+import Signals from './components/Signals'
+import FinalCta from './components/FinalCta'
 import Footer from './components/Footer'
-import SectionErrorBoundary from './components/SectionErrorBoundary'
-import { notePendingHashTarget } from './components/sectionsReady'
+import { detectQuality, readEnvironment, sceneState } from './components/scene/store'
+import { getThemeId, subscribe as subscribeTheme } from './components/theme'
 
-// Selected Work through Contact load as one chunk right after the first screen (BelowFold.jsx).
-const BelowFold = lazy(() => import('./components/BelowFold'))
+// The WebGL data core is an enhancement: it loads after the first screen has painted, only when
+// the device and the visitor's motion settings allow it. Every section carries its own static
+// visual, so the page looks finished without it (docs/concepts/01-command-implementation.md §5).
+// If the chunk cannot load (offline, a blocked request), the canvas is simply absent. Without the catch a
+// rejected import would unmount the whole page.
+const XCoreCanvas = lazy(() => import('./components/scene/XCoreCanvas').catch(() => ({ default: () => null })))
 
-// Section order and light/dark rhythm follow the redesign plan v3 (§1, §17).
-export default function App() {
-  // After the first screen renders, before the lower half exists: note a #fragment the browser
-  // could not reach, so BelowFold can scroll to it once it mounts.
+export default function CommandApp() {
+  const reducedMotion = useReducedMotion()
+  const [quality, setQuality] = useState('pending')
+  // The X core bakes its colours into materials once at creation (scene/render.js reads --c-*
+  // tokens via getComputedStyle, not per frame), so it is keyed by theme below to force a fresh
+  // mount — and a fresh colour read — when the visitor switches themes.
+  const theme = useSyncExternalStore(subscribeTheme, getThemeId, () => 'navy')
+
+  // Decide once the first screen exists, and again if the visitor changes their motion setting.
   useEffect(() => {
-    notePendingHashTarget()
+    const decide = () => {
+      const next = detectQuality(readEnvironment())
+      sceneState.quality = next
+      setQuality(next)
+    }
+    if ('requestIdleCallback' in window) {
+      const id = window.requestIdleCallback(decide, { timeout: 1200 })
+      return () => window.cancelIdleCallback(id)
+    }
+    const id = window.setTimeout(decide, 400)
+    return () => window.clearTimeout(id)
+  }, [reducedMotion])
+
+  // The page is drawn by script, after the browser has already tried to scroll to a #fragment and found
+  // nothing there: do it once the sections exist. Reloads and back/forward keep their own scroll position.
+  useEffect(() => {
+    const type = performance.getEntriesByType?.('navigation')[0]?.type
+    if (type === 'reload' || type === 'back_forward') return
+    let id = window.location.hash.slice(1)
+    try {
+      id = decodeURIComponent(id)
+    } catch {
+      // a malformed escape such as "#100%": use it as written
+    }
+    if (id) document.getElementById(id)?.scrollIntoView({ block: 'start', behavior: 'instant' })
   }, [])
 
+  const showCore = quality === 'high' || quality === 'low'
+
   return (
-    <div className="min-h-screen">
+    <div className="cmd-root relative isolate min-h-screen bg-cmd-bg text-cmd-text">
       <a
         href="#main"
-        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[60] focus:rounded-full focus:bg-primary focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-primaryInk"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[70] focus:bg-cmd-signal focus:px-4 focus:py-2 focus:font-cmd-mono focus:text-xs focus:uppercase focus:tracking-widest focus:text-cmd-signal-ink"
       >
         Skip to content
       </a>
       <Nav />
-      <main id="main">
+      {showCore && (
+        <Suspense fallback={null}>
+          <XCoreCanvas key={theme} quality={quality} />
+        </Suspense>
+      )}
+      <BuildHud />
+      {/* Sections are transparent (the fixed canvas shows through) except `campus` (the smart campus, with
+          its own canvas) and `signals`, the opaque bands that cover it. */}
+      <main id="main" className="relative z-10">
         <Hero />
-        <Solutions />
-        <AiAgents />
-        <SectionErrorBoundary message="This part of the page couldn’t load. Reload the page to try again.">
-          <Suspense fallback={<div aria-busy="true" className="min-h-screen" />}>
-            <BelowFold />
-          </Suspense>
-        </SectionErrorBoundary>
+        <Modules />
+        <Process />
+        <Deployments />
+        <CampusSection />
+        <Signals />
+        <FinalCta />
       </main>
       <Footer />
     </div>

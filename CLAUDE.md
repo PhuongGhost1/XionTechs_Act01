@@ -4,6 +4,55 @@
 Rebuild of https://xiontechs.com/ for the internal AI build challenge. Team of 3,
 git history must show all three contributing, AI must do substantial work.
 
+**2026-10-13 (`feat/promote-command-to-homepage`):** the X / Command design (originally
+a concept at `/concepts/command/`, see "X / Command — now the homepage" in
+`content/TODO.md`) is now the live homepage. The previous design described throughout
+most of this file — plan v3, the light navy/gold page, Agent Demo, smart campus is
+unchanged in content but has moved to `/concepts/command/` (same URL slug, swapped
+content — see `PROMPT_LOG.md`). Concretely: `src/App.jsx`, `src/main.jsx`,
+`src/index.css` and `src/components/` are now Command's; the previous design's
+equivalents live at `src/concepts/command/App.jsx`, `main.jsx`, `index.css` and
+`components/`. `tailwind.config.js` now styles the archived page at
+`/concepts/command/`; `tailwind.command.config.js` now styles the homepage. Shared
+infrastructure (`src/hooks/`, `src/content/site.js`, `src/workflow/`) did not move —
+both designs still reach it via relative imports, just at different depths than
+before. The rest of this file's "Page rhythm", "Working conventions" and "Motion"
+sections describe the design now archived at `/concepts/command/`, not the homepage,
+until they are rewritten for Command.
+
+**2026-10-13, same branch:** the homepage has a 4-theme selector (2 dark, 2 light —
+`THEMES` in `src/components/theme.js`; `ThemeSwitcher.jsx` in the header). Every color
+is a `--c-*` custom property in `src/index.css`, switched by `<html data-theme="...">`;
+never hardcode a color in a Command component, use the `cmd-*` Tailwind names so new UI
+picks up all four themes automatically. The one exception: `scene/render.js` (X-Core)
+and `campus/campusScene.js` (the 3D twin) read those tokens once via `getComputedStyle`
+at WebGL scene creation and bake them into materials — any new WebGL/canvas drawing
+needs the same `key={theme}`-forces-remount treatment already on `<XCoreCanvas>` and
+`<CampusCanvas>`, or it will go stale on a theme switch.
+
+**2026-10-15 (team review, see PROMPT_LOG.md):** on the homepage only, the team made an explicit,
+informed decision to stop showing `ILLUSTRATIVE`/`PLACEHOLDER`/`DRAFT`/"to confirm" labels on
+screen — an intentional exception to the "Challenge rules" bullet below, raised and confirmed with
+the team before each change, not an oversight. The hero status panel's simulated readout, the
+Smart school campus demo, and the Engineering signals tiles no longer carry a visible disclosure;
+`content.js`'s `illustrative`/`placeholder`/`draft`/`confirm` flags are kept as internal
+bookkeeping only. The archived page at `/concepts/command/` (`src/content/site.js`) is untouched
+and still follows the rule as written. Two of the four Engineering signals figures that were
+PLACEHOLDER (Projects delivered, Engineers on the team) are now real: Bang Do confirmed the counts
+directly (4 and 25) on 2026-10-15, logged as `source: 'TEAM'` in `content.js`.
+
+**2026-10-15, later the same day (team review, see PROMPT_LOG.md):** removed several more decorative/
+chrome elements from the homepage on teammate request: the hero's SYS/LAT corner labels and SYS/LAT/LON/
+NODE ruler (`hero.telemetry`, content.js — now unused), the nav's `System / 2026` status indicator
+(`nav.indicator` — now unused), the vertical `BUILD nnn / nnn` readout in the left margin (`BuildHud.jsx`
+— the pure `readout`/`toCapabilityMap`-style logic in `sectionTracking.js` stays, tested, just unrendered),
+and — raised and confirmed explicitly, not a silent removal — the nav's `PauseMotion` button, the page's
+only *global* Pause Motion control (WCAG 2.2.2). `setPaused`/`sceneState.paused` is still reachable from
+the Smart school campus section's own pause button (`CampusControls.jsx`), so motion can still be stopped
+once a visitor reaches that section, but there is no longer any way to pause the hero/nav/BuildHud loops
+before scrolling that far — a known, deliberate gap against the Motion brief's pause-control rule, not an
+oversight. `docs/concepts/01-command-implementation.md` §6/§7/§10 record the same decision.
+
 ## Challenge rules that constrain every change
 - No Lorem Ipsum, no invented testimonials/stats. Anything not verified real must be
   wrapped and clearly labeled as a placeholder (see `src/content/site.js` and
@@ -49,7 +98,10 @@ content. If you add a new section, follow the same pattern.
 - Real client testimonials (the original site's testimonials are unedited
   WordPress theme-demo content, not real clients — do not port them over)
 - Case study details (metrics, client names)
-- StaffXP and ESS screenshots (sanitized, approved) and permission to name both products
+- StaffXP and ESS screenshots (sanitized, approved); the StaffXP screenshots still need a new
+  capture that doesn't show the "StaffXP" brand in the UI itself (2026-10-15, copyright concern —
+  see PROMPT_LOG.md; the project's display name is "Staff Experience" everywhere else, text already
+  renamed). Permission to name ESS is still open.
 - DRAFT copy: AI callouts, team body, FAQ answers; `.NET` / `React` in the engineering strip
 
 ## Environment gotchas
@@ -134,12 +186,27 @@ content. If you add a new section, follow the same pattern.
 
 
 ## Concept pages (`/concepts/<name>/`)
-- Design explorations from `docs/idea/0n-*.md` live as separate Vite pages, so the main page is untouched. Concept 01 (X / Command): spec in `docs/concepts/01-command-implementation.md`, code in `src/concepts/command/`, its own Tailwind config `tailwind.command.config.js` (loaded by `command.css` with `@config`; the main config excludes `src/concepts`). Open items: `content/TODO.md`, "Concept 01".
+- Design explorations from `docs/idea/0n-*.md` live as separate Vite pages, so the main page is untouched.
+  As of `feat/promote-command-to-homepage` (2026-10-13), `/concepts/command/` holds the *previous* main
+  design (plan v3, archived, `noindex`'d) rather than the X / Command concept — Command was promoted to the
+  homepage instead. Its code lives at `src/concepts/command/` (own `App.jsx`, `main.jsx`, `index.css`,
+  `components/`); its Tailwind config is now `tailwind.config.js` (the file name is a holdover from when it
+  styled the main page — still correct, just not renamed). Open items: `content/TODO.md`, "X / Command — now
+  the homepage".
 - The motion rule above (CSS 3D and SVG only, no WebGL) applies to the main page. A concept page may use `three`, but only in a lazy chunk, with a static fallback for reduced motion and no WebGL, and the same honesty rules (illustrative and pending values are labelled).
-- Concept 01 section 05 is the **smart campus** (`src/concepts/command/campus/`, spec
-  `docs/superpowers/specs/2026-10-06-smart-campus-design.md`); it replaced the flight plan (the agent demo
-  links go to the main page, `/#ai-agents`). Content in `src/concepts/command/campusData.js`: the campus is
-  ILLUSTRATIVE, the service list PLACEHOLDER until the team confirms it, and both badges stay visible. Content
+- Concept 01 section 05 is the **smart campus**. As of `feat/promote-command-to-homepage`
+  (2026-10-13) it lives at `src/components/campus/` (Command's own, not the concept's — it moved
+  with the rest of Command's source when Command became the homepage). It replaced the flight
+  plan, and — since 2026-10-13 — the Selected Work "Smart school campus" card (`src/components/content.js`
+  `deployments.records`, id `campus`) also points to it directly (`href: '#campus'`, a same-page
+  anchor), not to a standalone Agent Demo section: that section only still exists on the archived
+  page at `/concepts/command/`. Content in `src/components/campusData.js`: the campus is
+  ILLUSTRATIVE and the service list PLACEHOLDER until the team confirms it. 2026-10-15 (team review):
+  the "Illustrative campus · simulated readings" / "Services shown are examples pending team
+  confirmation" chips at the top of the model, and the dev-only "Draft copy" tag on the section intro,
+  were removed as visual clutter (`content.js` `campus.badge`/`campus.servicesNote` are kept, unused, for
+  reference); what's left disclosing the demo is the per-reading "Simulated" tag inside the model and the
+  Selected Work ledger card's "Illustrative" badge. Content
   text has no digits; every number comes from `campus/simulate.js` (pure, deterministic) and sits under a
   "Simulated" tag. Classroom engagement analytics is anonymous and class-level only: shares of the class, no
   per-seat or per-student state, no faces or names, abstract camera-wall feeds (tests in

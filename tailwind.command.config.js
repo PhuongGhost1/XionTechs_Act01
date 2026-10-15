@@ -1,11 +1,12 @@
 /** @type {import('tailwindcss').Config} */
-// Tailwind config for Concept 01, X / Command (src/concepts/command/command.css loads it with
-// @config). It is separate from tailwind.config.js so the concept's utilities do not end up in
-// the main page's stylesheet, and the main page's do not end up in the concept's.
+// Tailwind config for the Command design (src/index.css loads it with @config). Command is now
+// the homepage (feat/promote-command-to-homepage), so this scans the whole src tree like
+// tailwind.config.js used to, excluding the previous design now kept at /concepts/command/.
+// Separate from tailwind.config.js so each design's utilities stay out of the other's stylesheet.
 const cmd = (name) => `rgb(var(--c-${name}) / <alpha-value>)`
 
 export default {
-  content: ['./concepts/command/**/*.html', './src/concepts/command/**/*.{js,jsx}'],
+  content: ['./index.html', './src/**/*.{js,jsx}', '!./src/concepts/**'],
   theme: {
     extend: {
       colors: {
