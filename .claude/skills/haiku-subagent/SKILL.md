@@ -45,6 +45,14 @@ Do not paste the user's raw text and stop there; turn it into a clear brief. Kee
 
 ## After they finish
 
-Synthesize one answer for the user: what each agent found, deduplicated and ordered by importance, plus anything that disagreed between agents. Say plainly if an agent failed or returned nothing useful. Do not re-do the agents' work yourself.
+First, if `tools/prompt-budget/report.js` exists in this project, run it so the user can see what this batch actually cost (the prompt-budget hooks log every subagent run):
+
+1. `node tools/prompt-budget/report.js --text` — read the rows for the agents you just spawned (the newest ones) and quote them: tokens before/after compaction, usage, cost, `applied`.
+2. `node tools/prompt-budget/report.js` — writes `.claude/prompt-budget/report.html` and opens it in the browser. Tell the user the path.
+3. If the newest rows show `-` for usage or `applied` is `unknown`, the stop events may not have landed yet: wait a few seconds and run the text report once more. If they are still missing, say so instead of guessing.
+
+If the file does not exist, skip this step silently.
+
+Then synthesize one answer for the user: what each agent found, deduplicated and ordered by importance, plus anything that disagreed between agents. Say plainly if an agent failed or returned nothing useful. Do not re-do the agents' work yourself.
 
 If `$ARGUMENTS` is empty, ask the user in one short line what they want the Haiku agents to do.
