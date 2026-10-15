@@ -5,7 +5,7 @@ import { deployments } from './content'
 import ProductViewer from './ProductViewer'
 import { nextTabIndex } from './regions'
 import { anchorProps } from './scene/store'
-import { IllustrativeTag, Reveal, SectionHead } from './ui'
+import { Reveal, SectionHead } from './ui'
 import './Deployments.css'
 
 const tabId = (id) => `deploy-tab-${id}`
@@ -75,7 +75,6 @@ function LedgerRow({ record, selected, onSelect, tabRef }) {
           {record.name}
         </span>
         <span className="cmd-label mt-1.5 block text-cmd-muted">{record.kind}</span>
-        {record.illustrative && <IllustrativeTag className="mt-3" />}
       </span>
       {/* Points at the viewer: to the right beside it on lg, down at it when the viewer is below. */}
       <ArrowRight

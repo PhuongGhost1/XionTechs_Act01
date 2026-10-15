@@ -30,6 +30,17 @@ at WebGL scene creation and bake them into materials — any new WebGL/canvas dr
 needs the same `key={theme}`-forces-remount treatment already on `<XCoreCanvas>` and
 `<CampusCanvas>`, or it will go stale on a theme switch.
 
+**2026-10-15 (team review, see PROMPT_LOG.md):** on the homepage only, the team made an explicit,
+informed decision to stop showing `ILLUSTRATIVE`/`PLACEHOLDER`/`DRAFT`/"to confirm" labels on
+screen — an intentional exception to the "Challenge rules" bullet below, raised and confirmed with
+the team before each change, not an oversight. The hero status panel's simulated readout, the
+Smart school campus demo, and the Engineering signals tiles no longer carry a visible disclosure;
+`content.js`'s `illustrative`/`placeholder`/`draft`/`confirm` flags are kept as internal
+bookkeeping only. The archived page at `/concepts/command/` (`src/content/site.js`) is untouched
+and still follows the rule as written. Two of the four Engineering signals figures that were
+PLACEHOLDER (Projects delivered, Engineers on the team) are now real: Bang Do confirmed the counts
+directly (4 and 25) on 2026-10-15, logged as `source: 'TEAM'` in `content.js`.
+
 ## Challenge rules that constrain every change
 - No Lorem Ipsum, no invented testimonials/stats. Anything not verified real must be
   wrapped and clearly labeled as a placeholder (see `src/content/site.js` and

@@ -28,13 +28,10 @@ describe('countValue', () => {
 })
 
 describe('signals (content.js)', () => {
-  it('shows a number only for figures the live site states', () => {
+  it('gives every figure a real number and a named, known source', () => {
     for (const m of signals.metrics) {
-      if (m.placeholder) expect(m.value).toBeUndefined()
-      else {
-        expect(typeof m.value).toBe('number')
-        expect(m.source).toBe('LIVE')
-      }
+      expect(typeof m.value).toBe('number')
+      expect(['LIVE', 'TEAM']).toContain(m.source)
     }
   })
   it('matches the figures in the shared site content', () => {
@@ -42,12 +39,6 @@ describe('signals (content.js)', () => {
     const offices = signals.metrics.find((m) => m.id === 'offices')
     expect(team.facts[0].value).toBe(years.value + '+')
     expect(team.facts[1].value).toBe(String(offices.value))
-  })
-  it('flags the offices figure for confirmation, because the addresses on file disagree', () => {
-    expect(signals.metrics.find((m) => m.id === 'offices').confirm).toBe(true)
-  })
-  it('keeps at least one placeholder tile for the figures that do not exist yet', () => {
-    expect(signals.metrics.some((m) => m.placeholder)).toBe(true)
   })
   it('splits each layer into technology chips', () => {
     const map = toCapabilityMap([

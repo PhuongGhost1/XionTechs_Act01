@@ -2,8 +2,14 @@
 //   CONCEPT §n    docs/idea/01-X-Command.md (the team's art direction for this concept)
 //   SITE          reused from src/content/site.js, so it matches the main page
 //   LIVE          the live xiontechs.com site, captured 2026-09-22
+//   TEAM          confirmed directly by a teammate in this session, not on the public site —
+//                 see PROMPT_LOG.md for the date and who
 //   DRAFT         written for this concept, pending team sign-off; flagged `draft: true`
-//   ILLUSTRATIVE / PLACEHOLDER   not real; always labelled on the page for every visitor
+//   ILLUSTRATIVE / PLACEHOLDER   not real
+// 2026-10-15 (team review, see PROMPT_LOG.md): the homepage no longer shows ILLUSTRATIVE/PLACEHOLDER
+// labels on screen (an explicit, deliberate exception to CLAUDE.md's normal "always labelled" rule,
+// made after the tradeoff was raised) — the `illustrative`/`placeholder`/`draft`/`confirm` flags
+// below are kept as internal bookkeeping only; nothing renders them anymore.
 // Open items live in content/TODO.md ("Concept 01: X / Command").
 
 import { company, contact, engineering, finalCta, selectedWork } from '../content/site'
@@ -303,13 +309,14 @@ export const campus = {
   pauseMotion: { pause: 'Pause Motion', play: 'Play Motion' },
 }
 
-// CONCEPT §7 / 05. Engineering signals. Only figures the live site states are shown as numbers
-// (SITE team.facts). Figures that do not exist yet are PLACEHOLDER tiles, never invented numbers.
+// CONCEPT §7 / 05. Engineering signals: the figures we state as fact. `leadership`/`offices` are
+// LIVE (the public site's own numbers); `delivered`/`engineers` were PLACEHOLDER tiles until
+// 2026-10-15, when Bang Do confirmed the real counts directly (source: TEAM) — see PROMPT_LOG.md.
 export const signals = {
   index: '06',
   label: 'Engineering signals',
   title: 'What the system is made of.',
-  intro: 'The figures we can stand behind today, and the numbers still to come.',
+  intro: 'The figures we can stand behind today.',
   metrics: [
     { id: 'leadership', value: 25, suffix: '+', label: 'Years of leadership experience', note: 'Across our leadership team', source: 'LIVE' },
     {
@@ -318,13 +325,13 @@ export const signals = {
       label: 'Offices',
       note: 'Dallas, Ho Chi Minh City and Da Nang',
       source: 'LIVE',
-      confirm: true, // the two street addresses on file are both in Ho Chi Minh City (content/TODO.md)
+      // 2026-10-15: the "to confirm" tag that used to sit here was removed on team review; the
+      // underlying issue (both street addresses on file are in Ho Chi Minh City) is still open,
+      // see content/TODO.md.
     },
-    { id: 'delivered', placeholder: true, label: 'Projects delivered', note: 'The real count goes here' },
-    { id: 'engineers', placeholder: true, label: 'Engineers on the team', note: 'The real count goes here' },
+    { id: 'delivered', value: 4, label: 'Projects delivered', note: 'Shipped to date', source: 'TEAM' },
+    { id: 'engineers', value: 25, label: 'Engineers on the team', note: 'Across the team', source: 'TEAM' },
   ],
-  confirmLabel: 'To confirm',
-  placeholderLabel: 'Placeholder',
   // 2026-10-15 (team review): the capability map that used these is no longer rendered
   // (Signals.jsx); kept here, unused, in case the team wants the stack listed again later.
   stackTitle: 'Capability map',

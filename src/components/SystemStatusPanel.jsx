@@ -2,12 +2,13 @@ import { useEffect, useRef } from 'react'
 import { useInView } from '../hooks/useInView'
 import { useReducedMotion } from '../hooks/useReducedMotion'
 import { systemStatus } from './content'
-import { IllustrativeTag, StatusDot } from './ui'
+import { StatusDot } from './ui'
 import './SystemStatusPanel.css'
 
-// The hero's status panel (CONCEPT §5). Every value is an interface mock-up, so the panel carries
-// the visible illustrative label at all times. Four rows, a deployment bar that fills once (M3) and
-// a build line with the one terminal cursor on the page's first screen.
+// The hero's status panel (CONCEPT §5). Every value is an interface mock-up (content.js
+// systemStatus.illustrative, no longer shown on screen since 2026-10-15 team review). Four rows, a
+// deployment bar that fills once (M3) and a build line with the one terminal cursor on the page's
+// first screen.
 
 const COUNT_MS = 1500
 const START_DELAY_MS = 500 // lets the panel's own reveal land before the bar starts to fill
@@ -109,10 +110,6 @@ export default function SystemStatusPanel({ className = '' }) {
           {build.result}
           <span aria-hidden="true" className="cmd-cursor" />
         </p>
-      </div>
-
-      <div className="border-t border-cmd-line px-4 py-2">
-        <IllustrativeTag />
       </div>
     </div>
   )

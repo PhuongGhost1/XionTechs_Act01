@@ -952,3 +952,56 @@ just at the end.
   confirmed zero "Capability map" matches in `#signals`, the four tiles still render, and the section
   ends cleanly right after them with no leftover gap. Zero console errors.
 
+## 2026-10-15 — remove all remaining placeholder/illustrative labels, confirm two real figures (Bang Do + Claude)
+- Prompt (screenshot of the Signals tiles): "Remove all placeholder text (to confirm, placeholder,
+  etc) this part and everywhere else in the page. For projects delivered put 4, for engineers put
+  25."
+- This was the broadest honesty-rule conflict of the day, covering the whole homepage rather than
+  one section, and it included a request to show two numbers as fact. Asked two clarifying
+  questions before touching anything: (1) whether 4/25 were real team-confirmed counts or just
+  filler, since CLAUDE.md bars presenting an unverified guess as a real stat; (2) whether "everywhere
+  else" meant only the Signals tiles in the screenshot, or also the two other disclosure labels still
+  left on the homepage after today's earlier changes — the Hero status panel's "Illustrative" tag and
+  the Selected Work ledger's "Illustrative · demo data" badge on the campus card (the last copy of
+  that disclosure left on the page, since an earlier fix today had already removed the other two).
+  Bang Do confirmed: the counts are real, and yes, remove everything including Hero and the campus
+  badge. Proceeded on that explicit basis.
+  **Lesson: when a request's honesty tradeoff compounds across several same-day changes (this was
+  the third placeholder-removal request of the day, and the first two had each left a different
+  "last remaining copy" of a disclosure standing), re-survey what's actually left on the page before
+  asking — naming the specific two remaining instances made the question answerable in one pass
+  instead of needing another round-trip per instance.**
+- Fix:
+  - `content.js` `signals.metrics`: `delivered`/`engineers` changed from `{ placeholder: true, note:
+    'The real count goes here' }` to real values (`value: 4` / `value: 25`, `source: 'TEAM'` — a new
+    source category added to the file's legend comment, since these came from a teammate directly in
+    this session rather than the public site, logged here for the paper trail). Dropped `offices`'s
+    `confirm: true` flag (the underlying issue — both street addresses on file are in Ho Chi Minh
+    City — is still open in `content/TODO.md`, only the on-screen flag is gone).
+  - `Signals.jsx`: since every metric now has a real value, simplified `Tile` to always render
+    `CountedValue` (deleted the now-unreachable `EmptyValue`/placeholder branch and the `PendingTag`
+    "To confirm"/"Placeholder" rendering) rather than leave dead conditional paths that could never
+    fire again.
+  - `SystemStatusPanel.jsx`: removed the Hero panel's `<IllustrativeTag />` footer and the now-unused
+    import.
+  - `Deployments.jsx`: removed the campus ledger row's `<IllustrativeTag>` badge and the now-unused
+    import — this was the one remaining on-page indicator that the campus 3D demo isn't a real client
+    project; `record.illustrative` stays `true` in `content.js` as inert bookkeeping.
+  - `signals.test.js`: removed the two tests whose asserted behaviour was deliberately reversed
+    (`'flags the offices figure for confirmation'`, `'keeps at least one placeholder tile'`) and
+    broadened the figures test to accept `source: 'TEAM'` alongside `'LIVE'`.
+  - `CLAUDE.md`: added a dated, prominent note (right above the "Challenge rules" section, since this
+    is now a page-wide exception to its first bullet) recording that this was a deliberate, raised,
+    confirmed team decision for the homepage only — the archived `/concepts/command/` page
+    (`site.js`) is untouched and still follows the rule as written.
+  - `content/TODO.md`: ticked off the Engineering signals item (now resolved with real figures);
+    updated the Status panel item to say the label was removed but the panel itself is still
+    simulated, so the item stays open; fixed a line that had gone stale in an earlier fix today
+    (StaffXP's "shows stack and status as 'Pending confirmation'" — that sheet was removed hours
+    earlier and the line never got updated until now).
+- Verified: `npm test` (523/523), `npm run lint` (clean), `npm run build` (main chunk gzip dropped
+  further, 20.66 -> 20.39 kB). Playwright swept the whole page (hero, signals, deployments, campus
+  all loaded) for "To confirm", "Pending confirmation", "Placeholder", "Illustrative" and "Draft
+  copy" — zero matches anywhere — and confirmed the four Signals tiles read 25+, 3, 4, 25 with no
+  tags. Zero console errors.
+

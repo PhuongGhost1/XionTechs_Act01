@@ -77,10 +77,15 @@ for the homepage, carried over from when this was still a concept:
       data saver).
 - [ ] **StaffXP status and stack**: the brief's example says "Production" and ".NET / React / AI / Cloud".
       Neither is confirmed. The concept reuses the real screenshots already in `public/work/` (team said to
-      use them for now) and shows stack and status as "Pending confirmation".
-- [ ] **Engineering signals**: only `25+` years of leadership and `3` offices (see the offices item above)
-      are stated on the live site. Real counts for projects delivered and engineers are placeholders.
-- [ ] **Status panel**: the hero panel (98 %, build `#4821`, Online) is an illustrative interface and is labelled.
+      use them for now). 2026-10-15: the "Pending confirmation" sheet that used to show stack/status under
+      the viewer was removed (team review, not a resolution) — the values are simply not shown anywhere now.
+- [x] ~~**Engineering signals**~~: `25+` years of leadership and `3` offices are stated on the live site.
+      Projects delivered and Engineers on the team were placeholders; Bang Do confirmed the real counts
+      (4 and 25) on 2026-10-15 — `content.js` `signals.metrics`, `source: 'TEAM'`.
+- [ ] **Status panel**: the hero panel (98 %, build `#4821`, Online) is still an illustrative interface, not
+      live monitoring — nothing about it is real. 2026-10-15: the on-screen "Illustrative" label that used to
+      mark this was removed on team review (CLAUDE.md, 2026-10-15 note); flagging this item as still open
+      since the simulated panel itself wasn't replaced with anything real, only its disclosure was dropped.
 - [x] ~~Lab page~~: skipped for now (no such page exists); the link is left out of the navigation.
 - [ ] **Module names**: the brief mixes `AI / Code / Data / Cloud` (scroll sequence) with Software engineering /
       AI systems / Cloud & platform / Product development (modules). The concept uses the second set.
