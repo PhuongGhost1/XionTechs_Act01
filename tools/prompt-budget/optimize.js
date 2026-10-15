@@ -22,13 +22,14 @@ export const DEFAULTS = {
 
 // Conservative: ~3 chars/token over the JSON form (overcounts a little on purpose).
 export const estimateTokens = (payload) =>
-  Math.ceil(JSON.stringify({ system: payload.system, messages: payload.messages }).length / 3);
+  Math.ceil(JSON.stringify({ system: payload.system, messages: payload.messages, tools: payload.tools }).length / 3);
 
 export async function countTokens(payload, { model, apiKey, warn }) {
   if (apiKey) {
     try {
       const body = { model, messages: payload.messages };
       if (payload.system) body.system = payload.system;
+      if (payload.tools) body.tools = payload.tools; // tool schemas count towards the limit
       const res = await fetch(`${API}/count_tokens`, {
         method: 'POST',
         headers: HEADERS(apiKey),
@@ -51,7 +52,7 @@ function cleanSegment(s, isCode) {
       .replace(/[ \t]+$/gm, '')
       .replace(/(\S)[ \t]{2,}/g, '$1 ')
       .replace(/^\s*([-*_])\1{2,}\s*$/gm, '') // horizontal rules
-      .replace(/\*\*(.+?)\*\*/g, '$1'); // bold markers
+      .replace(/\*\*(?=\S)(.+?)(?<=\S)\*\*/g, '$1'); // bold markers (not the `2 ** 10` operator)
   }
   return s.replace(/\n{3,}/g, '\n\n');
 }
@@ -65,7 +66,7 @@ function dedupeLines(s) {
     while (j + 1 < lines.length && lines[j + 1] === lines[i]) j++;
     const n = j - i + 1;
     out.push(lines[i]);
-    if (n >= 3 && lines[i].trim()) out.push(`[... previous line repeated ${n - 1} more times]`);
+    if (n >= 3 && lines[i].trim().length >= 8) out.push(`[... previous line repeated ${n - 1} more times]`);
     else for (let k = 1; k < n; k++) out.push(lines[i]);
     i = j + 1;
   }
@@ -144,7 +145,7 @@ function prependToFirstUser(messages, summary) {
 // ---------- Step 3: cache structure ----------
 
 function withCache(payload) {
-  if (!payload.system) return payload;
+  if (!payload.system || (Array.isArray(payload.system) && !payload.system.length)) return payload;
   const blocks = typeof payload.system === 'string' ? [{ type: 'text', text: payload.system }] : payload.system.map((b) => ({ ...b }));
   blocks[blocks.length - 1].cache_control = { type: 'ephemeral' };
   return { ...payload, system: blocks };
@@ -153,7 +154,9 @@ function withCache(payload) {
 // ---------- main ----------
 
 export async function optimize(input, options = {}) {
-  const o = { ...DEFAULTS, apiKey: process.env.ANTHROPIC_API_KEY, summarize: true, ...options };
+  const o = { ...DEFAULTS, apiKey: process.env.ANTHROPIC_API_KEY, summarize: true, ...(input.model && { model: input.model }), ...options };
+  // Everything except system/messages (tools, max_tokens, ...) must survive untouched.
+  const { system: _s, messages: _m, ...passThrough } = input;
   const warnings = [];
   const warn = (m) => warnings.push(m);
   const count = (p) => countTokens(p, { model: o.model, apiKey: o.apiKey, warn });
@@ -164,12 +167,12 @@ export async function optimize(input, options = {}) {
     savings_multiplier: original > o.tier2Threshold && final <= o.tier2Threshold ? '5x_saved' : '1x',
     ...(warnings.length && { warnings }),
     ...extra,
-    payload: { ...(input.model && { model: input.model }), ...payload },
+    payload: { ...passThrough, ...payload },
   });
 
-  let payload = { system: input.system, messages: input.messages ?? [] };
+  let payload = { ...passThrough, system: input.system, messages: input.messages ?? [] };
   const original = (await count(payload)).tokens;
-  if (original <= o.limit) return done('passthrough', original, { system: input.system, messages: input.messages }, original);
+  if (original <= o.limit) return done('passthrough', original, { system: input.system, messages: input.messages }, original); // untouched
 
   // Tier A
   payload = tierA(payload);
@@ -185,13 +188,13 @@ export async function optimize(input, options = {}) {
     let factor = cur.tokens / Math.max(1, estimateTokens(payload)); // calibrate local estimate to real counter
     for (let pass = 0; pass < 4; pass++) {
       let k = 0;
-      while (k < floor && estimateTokens({ system: payload.system, messages: payload.messages.slice(starts[k] ?? 0) }) * factor > target) k++;
+      while (k < floor && estimateTokens({ ...payload, messages: payload.messages.slice(starts[k] ?? 0) }) * factor > target) k++;
       cut = k < floor ? starts[k] : starts[floor] ?? 0;
       if (k === 0) cut = 0;
-      const test = { system: payload.system, messages: payload.messages.slice(cut) };
+      const test = { ...payload, messages: payload.messages.slice(cut) };
       cur = await count(test);
       if (cur.tokens <= target || cut >= (starts[floor] ?? 0)) break;
-      factor *= cur.tokens / Math.max(1, estimateTokens(test)) ; // recalibrate and retry
+      factor = cur.tokens / Math.max(1, estimateTokens(test)); // recalibrate on the kept part and retry
     }
     dropped = payload.messages.slice(0, cut);
     payload = { ...payload, messages: payload.messages.slice(cut) };
@@ -204,7 +207,7 @@ export async function optimize(input, options = {}) {
       } catch (e) {
         warn(`LLM summary failed (${e.message}); used extractive summary.`);
       }
-      summary ??= extractiveSummary(dropped, maxTokens * 3);
+      if (!summary?.trim()) summary = extractiveSummary(dropped, maxTokens * 3);
       payload = { ...payload, messages: prependToFirstUser(payload.messages, summary) };
     }
     cur = await count(payload);

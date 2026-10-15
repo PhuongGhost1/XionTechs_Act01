@@ -35,3 +35,21 @@ test('tier A collapses repeated log lines without dropping turns', async () => {
   assert.equal(r.dropped_messages ?? 0, 0);
   assert.match(JSON.stringify(r.payload.messages), /repeated 2999 more times/);
 });
+
+test('keeps tools/max_tokens and survives an empty system array', async () => {
+  const messages = Array.from({ length: 8 }, (_, i) => turn(i, 150)).flat();
+  const input = { model: 'claude-haiku-5-5', max_tokens: 123, tools: [{ name: 't', input_schema: { type: 'object' } }], system: [], messages };
+  const r = await optimize(input, opts);
+  assert.equal(r.status, 'optimized');
+  assert.equal(r.payload.max_tokens, 123);
+  assert.deepEqual(r.payload.tools, input.tools);
+  assert.equal(r.payload.model, 'claude-haiku-5-5');
+});
+
+test('tier A leaves the ** operator and short repeated code lines alone', async () => {
+  const text = 'Use 2 ** 10 and 3 ** 4\n```\n}\n}\n}\n}\n```\n' + 'x '.repeat(20_000);
+  const r = await optimize({ messages: [{ role: 'user', content: text }] }, opts);
+  const out = JSON.stringify(r.payload.messages);
+  assert.match(out, /2 \*\* 10 and 3 \*\* 4/);
+  assert.doesNotMatch(out, /repeated/);
+});

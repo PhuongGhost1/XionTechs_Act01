@@ -31,6 +31,7 @@ function readTranscript(path) {
     const sum = { input_tokens: 0, output_tokens: 0, cache_read_input_tokens: 0, cache_creation_input_tokens: 0 };
     for (const u of byMsg.values()) for (const k of Object.keys(sum)) sum[k] += u[k] ?? 0;
     out.usage = sum;
+    out.requests = byMsg.size; // report.js prices the tier per request (average), not on the run total
   }
   return out;
 }

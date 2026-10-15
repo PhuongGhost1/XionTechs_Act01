@@ -2,8 +2,9 @@
 import { appendFileSync, mkdirSync } from 'node:fs';
 import { join } from 'node:path';
 
-export const logPath = (projectDir = process.env.CLAUDE_PROJECT_DIR ?? process.cwd()) =>
-  join(projectDir, '.claude', 'prompt-budget', 'runs.jsonl');
+// CLAUDE_PROJECT_DIR wins over the hook's cwd, which drifts after the agent `cd`s into a subfolder.
+export const logPath = (projectDir) =>
+  join(process.env.CLAUDE_PROJECT_DIR ?? projectDir ?? process.cwd(), '.claude', 'prompt-budget', 'runs.jsonl');
 
 export function logEvent(obj, projectDir) {
   try {
