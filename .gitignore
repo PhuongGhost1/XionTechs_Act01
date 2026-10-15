@@ -6,3 +6,6 @@ dist-ssr
 .DS_Store
 yarn.lock
 .vercel/*
+
+# prompt-budget run log
+.claude/prompt-budget/
