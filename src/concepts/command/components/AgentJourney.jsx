@@ -78,7 +78,7 @@ function JourneyWindow({ journey, state }) {
          <g style={{ transform: `translateY(${p.y}px)`, transition: 'transform 250ms ease 225ms' }}>
           <rect x={-PILL.w / 2} y={-PILL.h / 2} width={PILL.w} height={PILL.h} rx={PILL.h / 2} className="fill-ink" />
           <Bot x={-PILL.w / 2 + 12} y={-8} width="16" height="16" strokeWidth={1.75} className="text-paper" />
-          <text x={-PILL.w / 2 + 34} y="5" className="fill-paper text-sm font-semibold">XionTechs agent</text>
+          <text x={-PILL.w / 2 + 34} y="5" className="fill-paper text-sm font-semibold">XionTech agent</text>
 
           <g transform={`translate(${-CHIP.w / 2}, ${CHIP.dy})`}>
             <rect width={CHIP.w} height={CHIP.h} rx={CHIP.h / 2} strokeWidth="1" className="fill-surface stroke-line" />

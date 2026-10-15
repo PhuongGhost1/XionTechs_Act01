@@ -20,8 +20,8 @@
 
 export const PHASES = 6
 export const ORBIT_SLOTS = 12 // 12 divides evenly into the 1 and 4 clusters a phase can have
-export const LOGO_NATURAL_WIDTH = 250 // the logo PNG's own width in px: it is shown at that size at most
-export const LOGO_ASPECT = 250 / 46
+export const LOGO_NATURAL_WIDTH = 240 // the logo PNG's own width in px: it is shown at that size at most
+export const LOGO_ASPECT = 240 / 46
 export const STEP_COUNT = 4
 
 // Scalars every phase carries; blended linearly.

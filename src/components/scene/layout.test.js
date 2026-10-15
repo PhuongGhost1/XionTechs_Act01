@@ -42,7 +42,7 @@ const nodeAt = (L, p, i) => {
 
 // A fake logo: three points across the middle, one of them yellow.
 const logo = {
-  aspect: 250 / 46,
+  aspect: 240 / 46,
   points: [
     { x: -0.4, y: 0.02, yellow: true },
     { x: 0, y: 0, yellow: false },
@@ -73,7 +73,7 @@ describe('resolveAnchor and fallbackAnchor', () => {
   })
 
   it('accepts a Map', () => {
-    resolveAnchor(new Map([['final', { cx: 640, cy: 700, w: 250, h: 46 }]]), 'final', viewport, box)
+    resolveAnchor(new Map([['final', { cx: 640, cy: 700, w: 240, h: 46 }]]), 'final', viewport, box)
     expect(box.y).toBe(-300)
     expect(box.fallback).toBe(false)
   })

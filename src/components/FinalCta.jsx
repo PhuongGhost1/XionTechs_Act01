@@ -14,7 +14,7 @@ export default function FinalCta() {
   // M11 plays once, when the staircase is a fifth of the way up the viewport.
   const playing = useInView(stairsRef, { once: true, rootMargin: '0px 0px -20% 0px' })
   const last = finale.slogan.length - 1
-  const logo = useThemeMode() === 'light' ? brand.logoLight : brand.logo
+  const logo = useThemeMode() === 'light' ? brand.finalLogoLight : brand.finalLogo
 
   return (
     <section

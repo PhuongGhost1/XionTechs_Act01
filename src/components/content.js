@@ -25,6 +25,9 @@ export const brand = {
   // theme tokens, not the source image, so a second variant would be redundant there.
   logo: { src: '/concepts/command/logo-reversed.png', width: company.logo.width, height: company.logo.height },
   logoLight: { src: company.logo.src, width: company.logo.width, height: company.logo.height },
+  // Sharper 4x renders of the same two colourways, used only by FinalCta where the logo is shown largest.
+  finalLogo: { src: '/logo-final-dark@4x.png', width: company.logo.width, height: company.logo.height },
+  finalLogoLight: { src: '/logo-final-light@4x.png', width: company.logo.width, height: company.logo.height },
 }
 
 // CONCEPT §6: compact, technical navigation. The "Lab" link is left out: there is no Lab page.
@@ -53,7 +56,7 @@ export const sections = [
 
 // CONCEPT §5.
 export const hero = {
-  eyebrow: 'XionTechs / X-Core',
+  eyebrow: 'XionTech / X-Core',
   headline: ['Engineering', 'that gets', 'IT done.'],
   headlineAccent: 'IT done.', // the line the yellow highlight sweeps behind
   headlineLabel: 'Engineering that gets IT done.',
@@ -374,6 +377,6 @@ export const footer = {
   addresses: contact.addresses,
   social: contact.social,
   positioning: company.positioning,
-  note: 'Concept 01 of the XionTechs design exploration.',
+  note: 'Concept 01 of the XionTech design exploration.',
   copyright: `© ${new Date().getFullYear()} ${company.name}`, // the legal name is still to be verified
 }

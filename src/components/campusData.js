@@ -1,7 +1,7 @@
 // The smart campus of section 05 (docs/superpowers/specs/2026-10-06-smart-campus-design.md).
 // Sources, as in content.js:
 //   ILLUSTRATIVE  the campus itself: an example school, not a client site. Always labelled on the page.
-//   PLACEHOLDER   the service list: school IoT is a real XionTechs offering, but which services and devices
+//   PLACEHOLDER   the service list: school IoT is a real XionTech offering, but which services and devices
 //                 we deliver is pending team confirmation (content/TODO.md, "Smart school campus").
 // Text values stay free of digits (src/concepts/command/campus/campusData.test.js): every number the page
 // shows is a simulated reading from campus/simulate.js and carries a "Simulated" tag.
@@ -21,7 +21,7 @@ export const layers = [
   { id: 'analytics', label: 'Analytics' },
 ]
 
-// PLACEHOLDER: the services XionTechs offers for a school, pending confirmation. `slice: false` services are
+// PLACEHOLDER: the services XionTech offers for a school, pending confirmation. `slice: false` services are
 // not on the model yet; adding them is content only (a device kind and a room that lists it).
 export const services = [
   { id: 'temp-humidity', layer: 'climate', slice: true, name: 'Temperature and humidity', desc: 'Every room reports how warm and how humid it is, so comfort problems show up before anyone complains.' },

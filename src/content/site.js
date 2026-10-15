@@ -8,11 +8,11 @@
 // Open items live in content/TODO.md.
 
 export const company = {
-  name: 'XionTechs',
+  name: 'XionTech',
   legalName: 'XionTech Joint Stock Company', // LIVE; spelling to verify (content/TODO.md)
-  logo: { src: '/XionTechs-Logo_s.png', width: 250, height: 46 },
+  logo: { src: '/XionTechs-Logo_s.png', width: 240, height: 46 },
   // PLAN §0 core positioning.
-  positioning: 'XionTechs builds AI-enabled software and provides the engineering capability to get real business work done.',
+  positioning: 'XionTech builds AI-enabled software and provides the engineering capability to get real business work done.',
 }
 
 // Source: redesign plan v3 §2. Anchor navigation; the demo is a capability, not a product page.
@@ -40,7 +40,7 @@ export const hero = {
   headline: 'AI agents and software engineering for the work that matters.',
   headlineAccent: 'the work that matters',
   intro:
-    'XionTechs helps businesses turn ideas, workflows and operational problems into production-ready software, from AI agents to complete engineering teams.',
+    'XionTech helps businesses turn ideas, workflows and operational problems into production-ready software, from AI agents to complete engineering teams.',
   primary: { label: 'See What We Build', href: '#work' },
   secondary: { label: 'Talk to Us', href: '#contact' },
   system: [
@@ -323,8 +323,8 @@ export const engineering = {
     { id: 'cloud', label: 'Cloud / Integration', items: 'Azure, AWS, GCP' },
     { id: 'ai', label: 'AI / Automation', items: 'Power Platform, Make, n8n, Retool, Bubble' },
   ],
-  result: 'XionTechs engineering team',
-  equation: ['Your idea', 'XionTechs engineering', 'Production software'],
+  result: 'XionTech engineering team',
+  equation: ['Your idea', 'XionTech engineering', 'Production software'],
 }
 
 // MOTION §18 stage copy. No durations, cadences or prices: none of them are confirmed.
@@ -342,11 +342,11 @@ export const howWeWork = {
 // MOTION §19. Evidence-oriented pillars replace the live site's generic values.
 export const whyUs = {
   eyebrow: 'Why us',
-  title: 'Why XionTechs',
+  title: 'Why XionTech',
   pillars: [
     { title: 'Engineering mindset', icon: 'Wrench', desc: 'We build around workflows, products, and real operating needs.' },
     { title: 'AI where it helps', icon: 'Sparkles', desc: 'We use AI agents and automation where they create meaningful leverage.' },
-    { title: 'Flexible delivery', icon: 'Users', desc: 'Work with XionTechs for a focused build, complete product development, or additional engineering capacity.' },
+    { title: 'Flexible delivery', icon: 'Users', desc: 'Work with XionTech for a focused build, complete product development, or additional engineering capacity.' },
     { title: 'Integration-first', icon: 'Cable', desc: 'Connect new systems to the software and workflows already used by the business.' },
   ],
 }
@@ -374,7 +374,7 @@ export const faq = {
   draft: true,
   items: [
     {
-      q: 'What kinds of AI agents can XionTechs build?',
+      q: 'What kinds of AI agents can XionTech build?',
       a: 'Agents that take a request, work out what it needs, and act on it through your systems: triaging support requests, preparing reorders for approval, or scheduling maintenance. Each agent is built around one workflow rather than a general chatbot.',
     },
     {
@@ -383,7 +383,7 @@ export const faq = {
     },
     {
       q: 'Do you also provide traditional software engineering?',
-      a: 'Yes. Alongside AI work, XionTechs builds business software: product engineering, custom applications, cloud and integration work, and dedicated engineering capacity for your team.',
+      a: 'Yes. Alongside AI work, XionTech builds business software: product engineering, custom applications, cloud and integration work, and dedicated engineering capacity for your team.',
     },
     {
       q: 'Can we start with a small pilot?',
@@ -395,7 +395,7 @@ export const faq = {
     },
     {
       q: 'Can you work with an existing engineering team?',
-      a: 'Yes. XionTechs can add engineers to your team, take ownership of one part of the product, or build alongside your developers.',
+      a: 'Yes. XionTech can add engineers to your team, take ownership of one part of the product, or build alongside your developers.',
     },
   ],
 }

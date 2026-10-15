@@ -200,15 +200,15 @@ describe('createXCore frame loop', () => {
 
   it('gathers the orbit particles onto the logo at the end', () => {
     const core = createXCore({ container: container(), quality: 'high' })
-    core.setLogo([{ x: -0.2, y: 0, yellow: true }, { x: 0.2, y: 0, yellow: false }], 250 / 46)
+    core.setLogo([{ x: -0.2, y: 0, yellow: true }, { x: 0.2, y: 0, yellow: false }], 240 / 46)
     scrollY = 5300 - VH / 2 + 40 // the contact section holds the centre line
     listeners['window:scroll']?.()
     runFrames(200)
     const scene = renders[renders.length - 1]
     const orbit = attributes(scene).find((a) => a.name === 'position' && a.array.length === 360 * 3).array
-    // Final box centre: x = 480 + 160 = 640, which is world x 0; logo width = min(320, 80 * 5.43, 250) = 250.
+    // Final box centre: x = 480 + 160 = 640, which is world x 0; logo width = min(320, 80 * 5.22, 240) = 240.
     let near = 0
-    for (let j = 0; j < 360; j++) if (Math.abs(Math.abs(orbit[j * 3]) - 50) < 1) near++
+    for (let j = 0; j < 360; j++) if (Math.abs(Math.abs(orbit[j * 3]) - 48) < 1) near++
     expect(near).toBeGreaterThan(300)
     core.dispose()
   })

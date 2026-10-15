@@ -7,7 +7,7 @@ import WhyUs from './WhyUs'
 import Contact from './Contact'
 import { contact, engineering, finalCta, howWeWork, team, whyUs } from '../../../content/site'
 
-// Smoke test for the lower page (engineering, How We Work, Why XionTechs, final CTA): each section
+// Smoke test for the lower page (engineering, How We Work, Why XionTech, final CTA): each section
 // renders, keeps its anchors, and has all of its text in the markup before any animation runs,
 // so nothing depends on motion (MOTION §25–26).
 const html = (C) => renderToStaticMarkup(createElement(C))
