@@ -4,7 +4,6 @@ import { useReducedMotion } from '../hooks/useReducedMotion'
 import { hero } from './content'
 import { anchorProps } from './scene/store'
 import { Reveal, SignalButton } from './ui'
-import SystemStatusPanel from './SystemStatusPanel'
 import XCoreFallback from './XCoreFallback'
 import './Hero.css'
 
@@ -103,29 +102,12 @@ export default function Hero() {
               </SignalButton>
             </Reveal>
 
-            {/* A ruler of coordinates: decorative, so it is hidden from assistive technology. */}
-            <Reveal delay={360} className="relative mt-12 max-w-md">
-              <span aria-hidden="true" className="absolute -top-px left-0 h-px w-8 bg-cmd-signal" />
-              <dl aria-hidden="true" className="grid grid-cols-4 border-t border-cmd-line">
-                {hero.telemetry.map(({ k, v }, i) => (
-                  <div key={k} className={`py-3 ${i ? 'border-l border-cmd-line pl-3' : ''}`}>
-                    <dt className="cmd-label text-[10px] text-cmd-faint">{k}</dt>
-                    <dd className="cmd-label mt-1 tabular-nums text-cmd-text">{v}</dd>
-                  </div>
-                ))}
-              </dl>
-            </Reveal>
           </div>
 
-          {/* Desktop: the status panel overlaps the lower right of the X core. Tablet: side by side,
-              below the headline. Phones: stacked, the panel as a 2 x 2 grid of modules. */}
-          <div className="relative z-10 grid gap-6 md:grid-cols-2 md:items-center lg:col-span-5 lg:block">
+          <div className="relative z-10 lg:col-span-5">
             <div {...anchorProps('hero')} aria-hidden="true" className="hero-core cmd-ticks">
               <XCoreFallback />
             </div>
-            <Reveal delay={320} className="relative z-10 mx-auto w-full max-w-[26rem] md:max-w-none lg:-mt-16 lg:ml-auto lg:mr-0 lg:w-80">
-              <SystemStatusPanel />
-            </Reveal>
           </div>
         </div>
       </div>

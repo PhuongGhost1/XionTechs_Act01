@@ -1005,3 +1005,27 @@ just at the end.
   copy" — zero matches anywhere — and confirmed the four Signals tiles read 25+, 3, 4, 25 with no
   tags. Zero console errors.
 
+## 2026-10-15 — remove the hero telemetry ruler and the status panel (Bang Do + Claude)
+- Prompt (screenshot, two red boxes): remove the "SYS 0412 / LAT 10.77 / LON 106.70 / NODE 014"
+  coordinate ruler under the hero CTAs, and the whole "System status" panel next to the X core
+  (not just its "Illustrative" tag, which an earlier fix today had already dropped — this request
+  was for the panel itself). Pure UI removal, no honesty-rule conflict: nothing here claimed a fact,
+  so there was nothing to weigh against CLAUDE.md, unlike the three removals earlier today.
+- Fix: `Hero.jsx` — deleted the `dl` ruler block and the `<SystemStatusPanel />` usage (plus its
+  now-unused import); simplified the right-column wrapper, which used to be a `grid md:grid-cols-2`
+  arrangement to seat the X core and the panel side by side on tablet — with only the X core left,
+  that grid had no second cell to arrange, so simplified it to a plain wrapper rather than leave an
+  inert `md:grid-cols-2` with one child. Deleted `SystemStatusPanel.jsx`/`.css` outright (the only
+  consumer of both); kept `content.js` `systemStatus`, unused, per this session's usual precedent.
+  `hero.telemetry` (the SYS/LAT/LON/NODE data) stays — `HeroBackdrop`'s tiny corner labels in the
+  grid background still read the first two entries from the same array; only the larger, fully
+  visible `dl` version of it is gone. Updated `Hero.css`'s comment referencing the now-gone panel's
+  overlap, and swept `docs/concepts/01-command-implementation.md` (component table, Hero section
+  brief, and §9 "Content honesty", which was already stale from three earlier fixes today — the
+  capability map, the placeholder removals, and the StaffXP sheet removal never got written up there).
+- Verified: `npm test` (523/523), `npm run lint` (clean), `npm run build` (main chunk gzip dropped
+  again, 20.39 -> 19.50 kB). Playwright confirmed zero "System status" matches and zero "NODE" matches
+  (the ruler's last cell) at desktop width, with the small corner "0412"/"10.77" labels still present
+  as expected; screenshots at desktop, tablet (820px) and mobile (390px) all showed a clean layout
+  with no leftover gap where the panel used to overlap the X core. Zero console errors.
+

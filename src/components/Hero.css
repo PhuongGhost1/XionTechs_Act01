@@ -19,8 +19,8 @@
 }
 
 /* The box the X core lives in (and the canvas is anchored to). Square. On phones it is capped
-   and centred; on tablets it fills its grid cell; on desktop it fits the viewport height so the
-   status panel overlapping its lower edge is still on the first screen. */
+   and centred; on tablets it fills its grid cell; on desktop it fits the viewport height, leaving
+   margin below so the box stays inside the first screen. */
 .hero-core {
   width: 100%;
   max-width: 26rem;

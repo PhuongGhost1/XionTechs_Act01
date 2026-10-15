@@ -71,7 +71,9 @@ export const hero = {
 }
 
 // CONCEPT §5 example panel. ILLUSTRATIVE: an interface mock-up with demo values, not live
-// monitoring and not a claim about any client system. The panel carries the label on screen.
+// monitoring and not a claim about any client system.
+// 2026-10-15 (team review): the panel that rendered this (SystemStatusPanel.jsx) was removed from
+// the hero entirely, not just its label — kept here, unused, in case the team wants it back.
 export const systemStatus = {
   title: 'System status',
   illustrative: true,

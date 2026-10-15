@@ -157,7 +157,6 @@ FinalCta.jsx (+ .css)     frame    closing statement, M11, logo
 Footer.jsx                frame    footer
 
 Hero.jsx (+ .css)         hero     headline, M2, CTAs, telemetry grid
-SystemStatusPanel.jsx     hero     the illustrative status panel
 XCoreFallback.jsx         hero     static SVG X core (from graph.js), M7 packets in CSS
 
 scene/XCoreCanvas.jsx     scene    React wrapper: mount, resize, cleanup, data-xcore
@@ -184,13 +183,13 @@ focus returns to the button. A hairline brightens after the first scroll.
 
 **Hero** (`id="top"`, `min-h-[100svh]`). Left (7 of 12 columns): eyebrow; three-line h1 (`hero.headline`;
 accessible name `hero.headlineLabel`), yellow sweep behind the accent line; intro; primary CTA with
-`flow` and secondary; a row of telemetry labels. Right (5 of 12, 40 to 45 % width): a square box with
-`anchorProps('hero')`, the static X core inside it, and `SystemStatusPanel` overlapping its lower right.
-Background: `cmd-grid` telemetry grid with tiny coordinate labels in the corners and an occasional yellow
-pulse along a grid line (slow, CSS only). `SystemStatusPanel`: corner ticks, "System status", four
-rows with a pulsing dot and `Online`, a deployment bar that fills to the value once (M3), a build row,
-and the visible `IllustrativeTag`. Tablet: panel moves below the headline. Mobile: panel becomes a 2 × 2 grid of
-modules; headline stays large and readable; no horizontal overflow.
+`flow` and secondary. Right (5 of 12, 40 to 45 % width): a square box with `anchorProps('hero')`, the
+static X core inside it. Background: `cmd-grid` telemetry grid with tiny coordinate labels in the
+corners and an occasional yellow pulse along a grid line (slow, CSS only).
+2026-10-15 (team review): removed the telemetry ruler (`hero.telemetry` as a `dl` of SYS/LAT/LON/NODE
+below the CTAs) and `SystemStatusPanel` (the "System status" mock-up that used to overlap the X core's
+lower right) from the page entirely — see §9. `hero.telemetry` is still used by the background's tiny
+corner labels, just not by the removed ruler.
 
 **Modules** (`id="modules"`). `SectionHead`, then an `<ol>` of four rows separated by hairlines (not cards).
 A row: index and short label, h3 title, description, three points, a status chip (`● Available`, shown
@@ -236,11 +235,20 @@ links (new tab, with a visually hidden "opens in a new tab"), copyright, the con
 ## 9. Content honesty (challenge rules)
 
 - No Lorem Ipsum, no invented testimonials or statistics. Real or labelled (CLAUDE.md "Content rules").
-- The status panel (98 %, build `#4821`, `Online`) is **illustrative**: it carries a visible label.
-- Numbers: only `25+` (LIVE) and `3` offices (LIVE, `To confirm`). Everything else numeric is a placeholder tile.
-- StaffXP/ESS: only the team's sanitized screenshots and only UI visible in them is annotated. Stack and status are
-  pending. Do not write "production", ".NET", "React" or "MySQL" as facts for a project.
-- The Agent demo is an illustrative scenario, not a client project. Never add an invented third case study.
+- 2026-10-15 (team review, see CLAUDE.md and PROMPT_LOG.md): on the homepage, the team made an explicit,
+  raised-and-confirmed exception to "labelled" — illustrative/placeholder content no longer carries an
+  on-screen label. The data itself still follows the honesty rule (nothing fabricated is presented as a
+  confirmed fact); only the visible disclosure badges were dropped. Lines below describe what that left:
+  - The status panel (the hero's "System status" mock-up) was removed from the page entirely, not just its
+    label (`SystemStatusPanel.jsx` deleted; `content.js` `systemStatus` kept, unused).
+  - Numbers: `25+` years and `3` offices are LIVE (the public site's own figures); `4` projects delivered and
+    `25` engineers were placeholder tiles until Bang Do confirmed them directly (`source: 'TEAM'`
+    in `content.js`). None are placeholder tiles any more.
+- StaffXP/ESS: only the team's sanitized screenshots and only UI visible in them is annotated. Stack and status
+  are still not confirmed (content/TODO.md); the "Pending confirmation" sheet that used to say so under the
+  viewer was removed on the same review — the values just aren't shown anywhere now.
+- The Smart school campus demo is an illustrative scenario, not a client project (its on-screen label was also
+  removed in the same review). Never add an invented third case study.
 - The reversed logo is a temporary derivative of the supplied PNG.
 
 ## 10. Accessibility, performance, responsive
