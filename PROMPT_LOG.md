@@ -1141,3 +1141,31 @@ just at the end.
   importantly, since this is the part no automated check covers — screenshotted the rendered page and
   visually confirmed every hotspot box sits exactly over its real panel with no drift or overlap.
 
+## 2026-10-15 — StaffXP hotspots: a second, more precise pass (Bang Do + Claude)
+- Prompt (screenshot of the live page at a wide viewport): "the yellow frames still look a little bit
+  off." My own verification for the previous commit had been a full-page screenshot at 1910px — visibly
+  correct at a glance, but not precise enough to catch a few-percent error on individual edges.
+  **This was a real miss, not a false alarm**: three of the eight boxes had genuine errors once checked
+  rigorously — "Open in Microsoft To Do" (part of the to-do list card) and "View all notices" (part of
+  the Notices card) were both landing just *outside* their own hotspot box, in the gap before the next
+  card, because I'd measured those two boxes' bottom edges a few percent short.
+  **Lesson: "the full page screenshot looks right" and "every edge is within a percent of correct" are
+  different bars. For a precision-dependent overlay, verify by diffing the actual box coordinates
+  against the image (draw them on it, see where they land), not by eyeballing a scaled-down render of
+  the whole page.**
+- Method, more rigorous than the first pass: built a small HTML page that draws the *current*
+  `site.js` box coordinates as labelled outlines directly on top of the real screenshot (not a separate
+  measuring grid), so misalignment is visible directly as a gap or overlap between the drawn line and
+  the real card edge. Where that showed a problem, cross-checked with a fine 1%-interval ruler overlay
+  (labels tiled every 100px so any cropped close-up stays self-contained) to read the correct edge
+  position, then re-drew the corrected box and confirmed the gap closed before moving to site.js.
+- Fix (`site.js` `selectedWork.staffxp.hotspots`): `tasks` bottom 63% -> 68% (now includes the Microsoft
+  To Do link), `notices` moved down 66.6% -> 72% top / adds to 87% bottom (no longer includes the empty
+  gap above the card), `wellbeing` top 89% -> 91%, `links` and `pulse` both nudged down and taller
+  (30-50% and 54-84% respectively, matching the real card bottoms). `calendar`, `birthdays` and
+  `assistant` were already accurate and are unchanged.
+- Verified: `npm test` (523/523), `npm run lint` (clean), `npm run build`. Re-ran the draw-the-boxes-on-
+  the-real-image check after the fix and confirmed every edge now sits flush with its card (including
+  the two links that had been floating outside their boxes), then loaded the live page in a dark theme
+  at the same ~1920px width as the report and visually confirmed the match. Zero console errors.
+

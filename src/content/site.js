@@ -215,12 +215,12 @@ export const selectedWork = {
     // the new 1910x983 capture (replaces the previous screenshot's layout and hotspots).
     hotspots: [
       { id: 'calendar', label: 'Academic calendar', box: { x: 2.4, y: 29.5, w: 19.6, h: 35.1 } },
-      { id: 'tasks', label: 'To-do list, linked to Microsoft To Do', box: { x: 24, y: 29.5, w: 37, h: 33.5 } },
-      { id: 'birthdays', label: 'Birthdays this week', box: { x: 2.4, y: 67.6, w: 19.6, h: 29.4 } },
-      { id: 'notices', label: 'Notices', box: { x: 24, y: 66.6, w: 37, h: 18.4 } },
-      { id: 'wellbeing', label: 'Open wellbeing tasks', box: { x: 24, y: 89, w: 37, h: 10.5 } },
-      { id: 'links', label: 'Quick links, including employee self-service', box: { x: 62.5, y: 29.5, w: 21, h: 18.3 } },
-      { id: 'pulse', label: "Today's pulse, a school-wide snapshot", box: { x: 62.5, y: 53.4, w: 21, h: 29.6 } },
+      { id: 'tasks', label: 'To-do list, linked to Microsoft To Do', box: { x: 24, y: 29.5, w: 37, h: 38.5 } },
+      { id: 'birthdays', label: 'Birthdays this week', box: { x: 2.4, y: 68, w: 19.6, h: 29 } },
+      { id: 'notices', label: 'Notices', box: { x: 24, y: 72, w: 37, h: 15 } },
+      { id: 'wellbeing', label: 'Open wellbeing tasks', box: { x: 24, y: 91, w: 37, h: 8.5 } },
+      { id: 'links', label: 'Quick links, including employee self-service', box: { x: 62.5, y: 30, w: 21, h: 20 } },
+      { id: 'pulse', label: "Today's pulse, a school-wide snapshot", box: { x: 62.5, y: 54, w: 21, h: 30 } },
       { id: 'assistant', label: 'AI assistant panel', box: { x: 84.5, y: 6, w: 15.5, h: 94 } },
     ],
   },
