@@ -35,7 +35,7 @@ export const nav = {
     { label: 'Work', href: '#deployments' },
     { label: 'About', href: '#signals' },
   ],
-  indicator: 'System / 2026',
+  indicator: 'System / 2026', // 2026-10-15 (team review): no longer rendered (Nav.jsx); kept, unused.
   cta: { label: 'Start a Project', href: finalCta.primary.href }, // SITE: opens an email
 }
 
@@ -62,6 +62,8 @@ export const hero = {
   primary: { label: 'Start a Project', href: finalCta.primary.href },
   secondary: { label: 'Explore Our Work', href: '#deployments' },
   // CONCEPT §14 hero background: decorative coordinate labels, not claims. LAT/LON is Ho Chi Minh City.
+  // 2026-10-15 (team review): no longer rendered anywhere (the ruler under the CTAs and the
+  // background's corner labels were both removed); kept here, unused, in case the team wants it back.
   telemetry: [
     { k: 'SYS', v: '0412' },
     { k: 'LAT', v: '10.77' },

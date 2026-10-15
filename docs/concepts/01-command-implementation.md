@@ -142,7 +142,12 @@ Rules: tokens `--dur-micro` (160 ms), `--dur-base` (420), `--dur-section` (800),
 bounce, no `transition: all`; animate `transform` and `opacity` only; scroll and pointer handlers write CSS
 variables or the store, never React state per frame; stop off screen (`useInView`);
 **reduced motion shows every final state with no information lost**; any loop longer than 5 s is covered
-by the Pause Motion control (BuildHud, `setPaused`); effects never make text hard to read.
+by the Pause Motion control (`setPaused`, `scene/store.js`); effects never make text hard to read.
+2026-10-15 (team review, see CLAUDE.md and PROMPT_LOG.md): the nav's `PauseMotion` button — the page's
+only *global* pause control — was removed on team review, after the WCAG 2.2.2 tradeoff was raised and
+confirmed. `setPaused`/`sceneState.paused` is still reachable from the campus section's own pause button
+(`CampusControls.jsx` `StageButtons`), so a visitor who reaches that section can still stop motion, but
+there is no longer any way to pause the hero/nav/BuildHud loops before scrolling that far.
 
 ## 7. Components and ownership
 
@@ -151,8 +156,7 @@ CommandApp.jsx            lead     composition, lazy canvas, quality decision
 ui.jsx command.css content.js  scene/store.js scene/graph.js     lead (shared, read-only for others)
 
 Nav.jsx                   frame    fixed header, active section, mobile menu
-BuildHud.jsx              frame    section tracking, build counter (vertical, left margin), M4, M5, M8
-PauseMotion.jsx           frame    Pause Motion button, rendered in the header (Nav)
+BuildHud.jsx              frame    section tracking, M4, M5, M8
 FinalCta.jsx (+ .css)     frame    closing statement, M11, logo
 Footer.jsx                frame    footer
 
@@ -177,15 +181,17 @@ local constant marked `// NEEDS content.js` and say so in your report.
 
 **Nav** (fixed, 56 px, hairline bottom, solid navy at 92% alpha, no blur). Logo left (`brand.logo`,
 explicit width/height). Links in mono uppercase; the active one gets a yellow underline (via
-`subscribe`). Right: `System / 2026` with a pulsing dot (lg and up), then the CTA as a square button
-with a `→`. Below `lg`: a menu button (`aria-expanded`, `aria-controls`), a full-width panel, Esc closes,
-focus returns to the button. A hairline brightens after the first scroll.
+`subscribe`), then the CTA as a square button with a `→`. Below `lg`: a menu button (`aria-expanded`,
+`aria-controls`), a full-width panel, Esc closes, focus returns to the button. A hairline brightens
+after the first scroll. 2026-10-15 (team review): dropped the `System / 2026` status indicator (`nav.
+indicator`, content.js) and the Pause Motion button — see §6 above.
 
 **Hero** (`id="top"`, `min-h-[100svh]`). Left (7 of 12 columns): eyebrow; three-line h1 (`hero.headline`;
 accessible name `hero.headlineLabel`), yellow sweep behind the accent line; intro; primary CTA with
 `flow` and secondary. Right (5 of 12, 40 to 45 % width): a square box with `anchorProps('hero')`, the
-static X core inside it. Background: `cmd-grid` telemetry grid with tiny coordinate labels in the
-corners and an occasional yellow pulse along a grid line (slow, CSS only).
+static X core inside it. Background: `cmd-grid` telemetry grid and an occasional yellow pulse along a
+grid line (slow, CSS only). 2026-10-15 (team review): dropped the tiny SYS/LAT coordinate labels that
+used to sit in the background's corners (`hero.telemetry`, content.js).
 2026-10-15 (team review): removed the telemetry ruler (`hero.telemetry` as a `dl` of SYS/LAT/LON/NODE
 below the CTAs) and `SystemStatusPanel` (the "System status" mock-up that used to overlap the X core's
 lower right) from the page entirely — see §9. `hero.telemetry` is still used by the background's tiny
@@ -224,10 +230,12 @@ chips) was removed on team review; `toCapabilityMap`/`capabilityMap` stay in `co
 holding the logo (`xcore-fallback`); primary mailto CTA with `flow`, secondary ghost link, `primaryNote`. M11 plays once on
 entering view. Reduced motion shows the finished state.
 
-**BuildHud** (the Pause Motion button moved into the header, where it never covers content, and the counter stands on its end in the left margin from lg up). Tracks the active section (the `[data-cmd-section]` holding 45 % of the viewport height) and calls
-`setActiveSection`; writes `--cmd-scroll` on `.cmd-root` (rAF-throttled); shows `BUILD 003 · PIPELINE` bottom
-in the left margin (`aria-hidden`, mono, a digit roll, large screens only); M4 on modules, process, deployments and contact; M5 on each change (skip the first,
-skip when reduced or paused); the Pause Motion button bottom right (`aria-pressed`, 44 px target, calls `setPaused`).
+**BuildHud**. Tracks the active section (the `[data-cmd-section]` holding 45 % of the viewport height) and
+calls `setActiveSection`; writes `--cmd-scroll` on `.cmd-root` (rAF-throttled); M4 on modules, process,
+deployments and contact; M5 on each change (skip the first, skip when reduced or paused).
+2026-10-15 (team review): dropped the vertical `BUILD 003 / 007 · PIPELINE` build-counter readout that
+used to stand in the left margin (`Odometer`, `sectionTracking.js` `readout` — the pure function is kept,
+tested, just no longer rendered) and the Pause Motion button entirely — see §6 above.
 
 **Footer**. Logo, positioning line, real contact details (`mailto:`, `tel:` links), the two addresses, social
 links (new tab, with a visually hidden "opens in a new tab"), copyright, the concept note and a back-to-top link.
@@ -256,7 +264,9 @@ links (new tab, with a visually hidden "opens in a new tab"), copyright, the con
 - Semantic landmarks, one `h1`, ordered headings, `aria-labelledby` per section, visible focus (`:focus-visible`
   is set globally), 44 px touch targets, no information carried by colour alone, contrast per §3.
 - Decorative layers (`canvas`, grid, scan, HUD) are `aria-hidden`; they never receive pointer events.
-- Respect `prefers-reduced-motion` (§6). Provide Pause Motion for loops over 5 s.
+- Respect `prefers-reduced-motion` (§6). Loops over 5 s should have a Pause Motion control; the page's
+  global one was removed 2026-10-15 on team review (§6, §7) — a known gap against this rule, not an
+  oversight. `CampusControls.jsx`'s pause button still covers the campus section's own loop.
 - Images: explicit `width` and `height`, `loading="lazy"` below the fold, meaningful `alt`.
 - `three` is only imported inside the lazy canvas chunk. Keep this page's first-load JS light; the canvas
   chunk may be larger. Do not import a library for something CSS can do.

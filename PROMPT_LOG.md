@@ -1029,3 +1029,44 @@ just at the end.
   as expected; screenshots at desktop, tablet (820px) and mobile (390px) all showed a clean layout
   with no leftover gap where the panel used to overlap the X core. Zero console errors.
 
+## 2026-10-15 — remove the last nav/hero chrome, including the global Pause Motion control (Bang Do + Claude)
+- Prompt (screenshot, five red boxes on the nav bar and hero): remove the SYS 0412/LAT 10.77 corner
+  labels, the "System / 2026" status indicator, "Pause Motion", and the vertical "Build 001/007" tag.
+- Four of the five were plain decoration, same category as earlier removals today. "Pause Motion" was
+  different: its own code comment names it the page's WCAG 2.2.2 control, and it's the *only* global
+  one — everything else (X-Core idle rotation, the hero grid pulse, BuildHud's section-change flashes)
+  has no other way to stop. Asked before touching it, naming exactly what would be lost; Bang Do
+  confirmed removal, explicitly, after seeing the tradeoff.
+  **Lesson: a "remove this UI" request can bundle a pure styling choice with a genuine accessibility
+  control that happens to render the same way (a small header button). Reading each highlighted
+  element's own code comment before removing it — not just its appearance in the screenshot — is what
+  surfaced the WCAG angle here; the screenshot alone gave no reason to treat it differently from the
+  corner labels next to it.**
+- Fix:
+  - `Hero.jsx`: dropped `HeroBackdrop`'s corner telemetry labels (the last on-page use of `hero.
+    telemetry`, already stripped of its visible ruler in an earlier fix today).
+  - `Nav.jsx`: dropped `nav.indicator` ("System / 2026") and both `PauseMotion` instances (desktop and
+    mobile menu). Deleted `PauseMotion.jsx` outright — zero remaining importers — but left
+    `setPaused`/`sceneState.paused` in `scene/store.js` untouched: `CampusControls.jsx`'s own pause
+    button (on the campus 3D stage) still calls it, so the state isn't fully orphaned, just no longer
+    reachable from outside that one section.
+  - `BuildHud.jsx`: dropped the vertical "Build nnn / nnn · <section>" readout block and its `Odometer`
+    sub-component; kept the M4 signal line and M5 scan line (not circled, a different motion
+    choreography, not simple decorative text). `sectionTracking.js`'s `readout` function stays — it has
+    its own direct test coverage, so it's not dead, just unrendered now, same treatment as
+    `toCapabilityMap` and the other kept-but-unused logic from earlier today.
+  - `BuildHud.css`: removed the now-orphaned odometer/readout/label rules; kept the signal/scan rules
+    and their reduced-motion and `data-motion="paused"` overrides.
+  - `content.js`: annotated `hero.telemetry` and `nav.indicator` as unused, consistent with this
+    session's running practice of keeping removed content.js data as documented, inert bookkeeping.
+  - `CLAUDE.md`: added a dated note recording the Pause Motion decision specifically, separate from the
+    general placeholder-removal note from earlier today, since this is an accessibility tradeoff rather
+    than a content-honesty one. `content/TODO.md`: added a release-checklist item flagging it for a
+    final team decision before hand-in. `docs/concepts/01-command-implementation.md`: updated §6
+    (motion rules), §7 (component table), and the Nav/Hero/BuildHud section briefs, and §10
+    (accessibility checklist) — all were asserting the removed elements still existed.
+- Verified: `npm test` (523/523), `npm run lint` (clean), `npm run build` (main chunk gzip dropped
+  again, 19.50 -> 18.81 kB). Playwright confirmed zero matches anywhere for "System / 2026", "Pause
+  Motion", "NODE", "0412" or "10.77", and zero "BUILD" readout text, at both desktop and mobile widths
+  (including the mobile menu panel); screenshots showed no leftover gaps. Zero console errors.
+

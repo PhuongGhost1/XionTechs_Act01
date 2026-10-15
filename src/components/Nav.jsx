@@ -1,12 +1,10 @@
 import { useEffect, useRef, useState } from 'react'
 import { ArrowRight } from 'lucide-react'
 import { brand, nav } from './content'
-import PauseMotion from './PauseMotion'
 import ThemeSwitcher from './ThemeSwitcher'
 import { FLOW_FAST, FLOW_IDLE, setFlowTarget } from './scene/store'
 import { isActiveHref } from './sectionTracking'
 import { useThemeMode } from './theme'
-import { StatusDot } from './ui'
 import { useActiveSection } from './useActiveSection'
 import './Nav.css'
 
@@ -106,12 +104,7 @@ export default function Nav() {
           </ul>
         </nav>
 
-        <p className="cmd-label ml-auto hidden items-center gap-2.5 text-cmd-faint xl:flex">
-          <StatusDot />
-          {nav.indicator}
-        </p>
-        <ThemeSwitcher className="ml-auto hidden lg:flex xl:ml-0" />
-        <PauseMotion className="hidden lg:flex" />
+        <ThemeSwitcher className="ml-auto hidden lg:flex" />
         <span aria-hidden="true" className="hidden h-5 w-px bg-cmd-line lg:block" />
         <a
           href={nav.cta.href}
@@ -123,7 +116,6 @@ export default function Nav() {
         </a>
 
         <ThemeSwitcher className="ml-auto lg:hidden" />
-        <PauseMotion className="lg:hidden" />
         <button
           ref={buttonRef}
           type="button"
@@ -170,10 +162,6 @@ export default function Nav() {
             <span>{nav.cta.label}</span>
             <ArrowRight aria-hidden="true" className={ctaArrow} />
           </a>
-          <p className="cmd-label mt-5 flex items-center gap-2.5 text-cmd-faint">
-            <StatusDot />
-            {nav.indicator}
-          </p>
         </div>
       </div>
     </header>

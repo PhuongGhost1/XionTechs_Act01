@@ -54,6 +54,12 @@ see unmarked (open any build with `?review` to see the Draft markers). Resolve e
 - [ ] Booking flow: "Talk to Us" opens an email. Add a booking URL only if one exists.
 - [ ] Workflow capability labels in the demo ("AI model", "Integration", …) stay generic
       until the team confirms the real services per step.
+- [ ] **Pause Motion**: removed from the homepage nav on 2026-10-15 team review (CLAUDE.md), along with
+      other decorative chrome. It was the page's only *global* control for the long-running ambient
+      loops (X-Core idle rotation, hero grid pulse, BuildHud's section-change flashes) — WCAG 2.2.2
+      asks for one. The campus section still has its own pause button, but nothing covers the rest of
+      the page before a visitor scrolls that far. Worth a final decision before hand-in: leave it, or
+      reintroduce a lighter-weight pause affordance somewhere.
 
 ## X / Command — now the homepage (`feat/promote-command-to-homepage`, 2026-10-13)
 

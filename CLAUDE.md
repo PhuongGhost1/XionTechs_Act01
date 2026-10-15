@@ -41,6 +41,18 @@ and still follows the rule as written. Two of the four Engineering signals figur
 PLACEHOLDER (Projects delivered, Engineers on the team) are now real: Bang Do confirmed the counts
 directly (4 and 25) on 2026-10-15, logged as `source: 'TEAM'` in `content.js`.
 
+**2026-10-15, later the same day (team review, see PROMPT_LOG.md):** removed several more decorative/
+chrome elements from the homepage on teammate request: the hero's SYS/LAT corner labels and SYS/LAT/LON/
+NODE ruler (`hero.telemetry`, content.js — now unused), the nav's `System / 2026` status indicator
+(`nav.indicator` — now unused), the vertical `BUILD nnn / nnn` readout in the left margin (`BuildHud.jsx`
+— the pure `readout`/`toCapabilityMap`-style logic in `sectionTracking.js` stays, tested, just unrendered),
+and — raised and confirmed explicitly, not a silent removal — the nav's `PauseMotion` button, the page's
+only *global* Pause Motion control (WCAG 2.2.2). `setPaused`/`sceneState.paused` is still reachable from
+the Smart school campus section's own pause button (`CampusControls.jsx`), so motion can still be stopped
+once a visitor reaches that section, but there is no longer any way to pause the hero/nav/BuildHud loops
+before scrolling that far — a known, deliberate gap against the Motion brief's pause-control rule, not an
+oversight. `docs/concepts/01-command-implementation.md` §6/§7/§10 record the same decision.
+
 ## Challenge rules that constrain every change
 - No Lorem Ipsum, no invented testimonials/stats. Anything not verified real must be
   wrapped and clearly labeled as a placeholder (see `src/content/site.js` and

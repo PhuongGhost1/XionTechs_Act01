@@ -1,5 +1,5 @@
-/* BuildHud (spec §8): the signal line (M4), the scan line (M5) and the build counter.
-   Overlay layers only; none of them take pointer events. Only transform and opacity move. */
+/* BuildHud (spec §8): the signal line (M4) and the scan line (M5).
+   Overlay layers only; neither takes pointer events. Only transform and opacity move. */
 
 /* M4: a yellow line sweeps across the viewport, just under the 56 px header. Keyframes are in command.css. */
 .cmd-hud__signal {
@@ -43,51 +43,6 @@
   }
 }
 
-/* Build counter: each digit is a strip of 0 to 9 that slides to the current number, like an odometer. */
-.cmd-hud__odo {
-  display: inline-flex;
-}
-.cmd-hud__digit {
-  display: block;
-  width: 1ch;
-  height: 1.4em;
-  margin-right: 0.12em; /* the label's letter-spacing, which the clipped box would otherwise lose */
-  overflow: hidden;
-}
-.cmd-hud__strip {
-  display: block;
-  transform: translate3d(0, calc(var(--d) * -1.4em), 0);
-  transition: transform var(--dur-base) var(--cmd-ease);
-}
-.cmd-hud__strip > span {
-  display: block;
-  height: 1.4em;
-}
-
-/* The section name fades up when it changes (the element is re-keyed per section). */
-.cmd-hud__label {
-  display: inline-block;
-  min-width: 12ch;
-  animation: cmd-hud-label var(--dur-micro) var(--cmd-ease) both;
-}
-@keyframes cmd-hud-label {
-  from {
-    opacity: 0;
-    transform: translate3d(0, 4px, 0);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
-
-/* The readout stands on its end in the left margin: rotated about its bottom-left corner it reads
-   bottom to top and grows upward. */
-.cmd-hud__readout {
-  transform-origin: left bottom;
-  transform: rotate(-90deg);
-}
-
 /* While the visitor has paused motion, a transient effect that is still mid-flight is hidden. */
 [data-motion='paused'] .cmd-hud__signal,
 [data-motion='paused'] .cmd-hud__scan {
@@ -98,11 +53,5 @@
   .cmd-hud__signal,
   .cmd-hud__scan {
     display: none;
-  }
-  .cmd-hud__strip {
-    transition: none;
-  }
-  .cmd-hud__label {
-    animation: none;
   }
 }

@@ -7,15 +7,10 @@ import { Reveal, SignalButton } from './ui'
 import XCoreFallback from './XCoreFallback'
 import './Hero.css'
 
-// Where each telemetry label sits: the top corners of the hero (the bottom ones are left clear for the
-// build counter and the end of the first screen).
-const CORNER_POSITIONS = [
-  'left-5 top-[4.5rem] sm:left-8 lg:left-12',
-  'right-5 top-[4.5rem] text-right sm:right-8 lg:right-12',
-]
-
-// The hero's background: the telemetry grid, one slow pulse on a grid line, and tiny coordinate
-// labels in the corners. Purely decorative, and it never takes pointer events.
+// The hero's background: the telemetry grid and one slow pulse on a grid line. Purely decorative,
+// and it never takes pointer events.
+// 2026-10-15 (team review): dropped the tiny SYS/LAT coordinate labels that used to sit in the top
+// corners here (hero.telemetry, content.js) — the last visible use of that data on the page.
 function HeroBackdrop({ live }) {
   return (
     <div aria-hidden="true" data-live={live ? 'true' : 'false'} className="pointer-events-none absolute inset-0 overflow-hidden">
@@ -25,11 +20,6 @@ function HeroBackdrop({ live }) {
           <line x1="0.5" y1="0" x2="0.5" y2="100%" pathLength="100" />
         </svg>
       </div>
-      {hero.telemetry.slice(0, CORNER_POSITIONS.length).map(({ k, v }, i) => (
-        <p key={k} className={`cmd-label absolute text-[10px] ${CORNER_POSITIONS[i]}`}>
-          <span className="text-cmd-faint">{k}</span> <span className="text-cmd-muted/70">{v}</span>
-        </p>
-      ))}
     </div>
   )
 }
