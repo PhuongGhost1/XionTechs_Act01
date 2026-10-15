@@ -138,20 +138,20 @@ export const modules = {
   ],
 }
 
-// CONCEPT §7 / 03. The six-step operational flow. Step text reuses MOTION §18 wording where it
+// CONCEPT §7 / 03. The four-step operational flow. Step text reuses MOTION §18 wording where it
 // exists (via SITE) and is DRAFT otherwise. No durations or cadences: none are confirmed.
+// Team review (2026-10-15, Phuong Hoang): dropped Request and Architecture to tighten the pipeline
+// to four steps; the title follows the new first/last step, same as before.
 export const process = {
   index: '03',
   label: 'How we work',
-  title: 'Request in. Production out.',
+  title: 'Discovery in. Scale out.',
   intro: 'One pipeline from the first conversation to a system that is running and growing.',
   steps: [
-    { id: 'request', index: '01', anchor: 'process-1', title: 'Request', desc: 'Bring the workflow, product, or engineering gap you need solved.', draft: true },
-    { id: 'discovery', index: '02', anchor: 'process-2', title: 'Discovery', desc: 'Find the workflow, product, or engineering opportunity worth solving.' },
-    { id: 'architecture', index: '03', anchor: 'process-3', title: 'Architecture', desc: 'Shape the system: services, data, integrations, and where AI helps.', draft: true },
-    { id: 'build', index: '04', anchor: 'process-4', title: 'Build', desc: 'Turn the idea into a working pilot or product increment.' },
-    { id: 'deploy', index: '05', anchor: 'process-5', title: 'Deploy', desc: 'Connect systems, users, data, and operational workflows, then release.' },
-    { id: 'scale', index: '06', anchor: 'process-6', title: 'Scale', desc: 'Expand capability, automation, and engineering capacity.' },
+    { id: 'discovery', index: '01', anchor: 'process-1', title: 'Discovery', desc: 'Find the workflow, product, or engineering opportunity worth solving.' },
+    { id: 'build', index: '02', anchor: 'process-2', title: 'Build', desc: 'Turn the idea into a working pilot or product increment.' },
+    { id: 'deploy', index: '03', anchor: 'process-3', title: 'Deploy', desc: 'Connect systems, users, data, and operational workflows, then release.' },
+    { id: 'scale', index: '04', anchor: 'process-4', title: 'Scale', desc: 'Expand capability, automation, and engineering capacity.' },
   ],
 }
 

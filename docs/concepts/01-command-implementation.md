@@ -84,7 +84,7 @@ Use uppercase technical labels sparingly (brief §9).
   `setActiveSection`, `setPaused`, `subscribe`, `detectQuality`, `readEnvironment`, `anchorProps`.
 - **Anchors.** An element with `data-xcore-anchor="<id>"` (use `{...anchorProps('hero')}`) is a
   place the canvas arranges the core around. The scene measures them; sections never import the scene.
-  `hero`, `module-1…4`, `process-1…6`, `deploy`, `final`.
+  `hero`, `module-1…4`, `process-1…4`, `deploy`, `final`.
 - **Section ids (DOM):** `top, modules, process, deployments, signals, contact`, each rendered as
   `<section id="…" data-cmd-section …>`. Sections are transparent (the fixed canvas shows through)
   except `signals`, which is an opaque paper band.
@@ -97,7 +97,7 @@ Use uppercase technical labels sparingly (brief §9).
 - **Phases** by what is on screen (the section holding the viewport's centre line, blended by
   smoothstep across the gap to the next):
   `0 hero X` → `1 four module clusters (each arm travels to its module anchor)` →
-  `2 pipeline (arms merge into six step clusters, packets travel the chain)` →
+  `2 pipeline (arms merge into four step clusters, packets travel the chain)` →
   `3 compact chain at the deploy anchor, dimmed` → `4 signals (covered by the paper band: stop drawing)` →
   `5 converge into the logo at the final anchor`.
 - **Visual language.** Thin additive lines; small node points with soft halos; a few yellow
@@ -199,11 +199,11 @@ on hover/focus on desktop, always on touch), an optional link, and a right-hand 
 diagram by `kind` (code: lines compiling; ai: decision nodes; cloud: stacked layers; product: modules
 snapping together). Hover/focus runs M6: a few particles drift inside the row.
 
-**Process** (`id="process"`). `SectionHead`, then six steps in one pipeline: horizontal on `lg` and up, a vertical
+**Process** (`id="process"`). `SectionHead`, then four steps in one pipeline: horizontal on `lg` and up, a vertical
 timeline below. Each step has `anchorProps(step.anchor)` above or beside it holding a small node
 (`xcore-fallback`), the index, title and description. A line fills as the section scrolls (M9,
 `useScrollProgress` writing `--p`), steps turn yellow as it passes, a packet travels the line. A small
-`Step 03 / 06` readout updates. Without motion the line is full and all steps are on.
+`Step 02 / 04` readout updates. Without motion the line is full and all steps are on.
 
 **Deployments** (`id="deployments"`, headed "Selected work": its status is pending, so it never says "shipped" or "deployed"). `SectionHead` with an `anchorProps('deploy')` box at its right
 (`xcore-fallback`: a small chain). Below: a ledger (left, 4 of 12 columns) of the three records, then the viewer

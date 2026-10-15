@@ -8,7 +8,7 @@ import { DraftMark, Reveal, SectionHead } from './ui'
 import { activeStep, pipelineProgress, stepReadout, stepState } from './processProgress'
 import './Process.css'
 
-// NEEDS content.js: the readout's label, "Step 03 / 06" in docs/concepts/01-command-implementation.md §8.
+// NEEDS content.js: the readout's label, "Step 02 / 04" in docs/concepts/01-command-implementation.md §8.
 // Interface chrome, not marketing copy.
 const READOUT_LABEL = 'Step'
 
@@ -36,7 +36,7 @@ function StepNode() {
   )
 }
 
-// Section 03. The six steps as one pipeline (M9). As the page scrolls, a fill runs along the track
+// Section 03. The four steps as one pipeline (M9). As the page scrolls, a fill runs along the track
 // and each step lights as the fill reaches its node. The fill is a CSS variable written straight to the
 // DOM, never React state per frame; React only hears about the step index, and only when it changes.
 // Without motion the track is full and every step is on. Geometry and the packet are in Process.css.

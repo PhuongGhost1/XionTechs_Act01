@@ -79,7 +79,8 @@ describe('resolveAnchor and fallbackAnchor', () => {
   })
 
   it('falls back for a missing, empty or broken anchor, for every known id', () => {
-    const ids = ['hero', 'deploy', 'final', 'unknown', ...[1, 2, 3, 4].map((n) => `module-${n}`), ...[1, 2, 3, 4, 5, 6].map((n) => `process-${n}`)]
+    const processIds = Array.from({ length: STEP_COUNT }, (_, i) => `process-${i + 1}`)
+    const ids = ['hero', 'deploy', 'final', 'unknown', ...[1, 2, 3, 4].map((n) => `module-${n}`), ...processIds]
     for (const size of [{ width: 1280, height: 800 }, { width: 375, height: 700 }]) {
       for (const id of ids) {
         for (const anchors of [undefined, {}, { [id]: { cx: NaN, cy: 0, w: 10, h: 10 } }, { [id]: { cx: 5, cy: 5, w: 0, h: 10 } }]) {
@@ -94,13 +95,14 @@ describe('resolveAnchor and fallbackAnchor', () => {
   })
 
   it('places fallback boxes inside the viewport and process steps in order', () => {
-    const steps = [1, 2, 3, 4, 5, 6].map((n) => fallbackAnchor(`process-${n}`, viewport))
+    const ns = Array.from({ length: STEP_COUNT }, (_, i) => i + 1)
+    const steps = ns.map((n) => fallbackAnchor(`process-${n}`, viewport))
     for (let i = 1; i < steps.length; i++) expect(steps[i].cx).toBeGreaterThan(steps[i - 1].cx)
     for (const s of steps) {
       expect(s.cx).toBeGreaterThan(0)
       expect(s.cx).toBeLessThan(viewport.width)
     }
-    const narrow = [1, 2, 3, 4, 5, 6].map((n) => fallbackAnchor(`process-${n}`, { width: 375, height: 700 }))
+    const narrow = ns.map((n) => fallbackAnchor(`process-${n}`, { width: 375, height: 700 }))
     for (let i = 1; i < narrow.length; i++) expect(narrow[i].cy).toBeGreaterThan(narrow[i - 1].cy)
   })
 })
@@ -153,7 +155,7 @@ describe('computeLayout', () => {
     for (let e = 0; e < L.E; e++) if (L.isRing[e]) expect(L.edgeVis[L.E + e]).toBe(0)
   })
 
-  it('phase 2: six clusters of six arm nodes at the process anchors, in order', () => {
+  it(`phase 2: ${STEP_COUNT} clusters of evenly-split arm nodes at the process anchors, in order`, () => {
     const counts = new Array(STEP_COUNT).fill(0)
     for (const n of graph.nodes) {
       if (n.arm < 0) continue
@@ -163,7 +165,8 @@ describe('computeLayout', () => {
       const p = nodeAt(L, 2, n.id)
       expect(Math.hypot(p.x - c.x, p.y - c.y)).toBeLessThanOrEqual(26)
     }
-    expect(counts).toEqual([6, 6, 6, 6, 6, 6])
+    const armNodeCount = graph.nodes.filter((n) => n.arm >= 0).length
+    expect(counts).toEqual(new Array(STEP_COUNT).fill(armNodeCount / STEP_COUNT))
     // Inner levels land in the early steps, the tips in the last one.
     expect(L.stepOf[1]).toBe(0)
     expect(L.stepOf[graph.perArm]).toBe(STEP_COUNT - 1)
@@ -254,7 +257,7 @@ describe('computeLayout', () => {
     const tally = (p) => Object.values(slots(p).reduce((m, k) => ({ ...m, [k]: (m[k] || 0) + 1 }), {}))
     expect(tally(0)).toEqual([12])
     expect(tally(1)).toEqual([3, 3, 3, 3])
-    expect(tally(2)).toEqual([2, 2, 2, 2, 2, 2])
+    expect(tally(2)).toEqual(new Array(STEP_COUNT).fill(ORBIT_SLOTS / STEP_COUNT))
     expect(tally(5)).toEqual([12])
   })
 })

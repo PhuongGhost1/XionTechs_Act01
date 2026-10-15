@@ -7,8 +7,8 @@
 //
 //   0 hero        the X fitted to the `hero` box
 //   1 modules     each arm travels to its `module-n` box, shrunk into a compact cluster; the hub fades
-//   2 process     the 36 arm nodes regroup into six step clusters at `process-1..6`
-//   3 deployments the same six clusters as a small, dim chain inside the `deploy` box
+//   2 process     the 36 arm nodes regroup into four step clusters at `process-1..4`
+//   3 deployments the same four clusters as a small, dim chain inside the `deploy` box
 //   4 signals     the chain parked mid-screen (the paper band covers the canvas here)
 //   5 contact     everything converges into the logo at the `final` box (the generic X if there is
 //                 no logo)
@@ -19,10 +19,10 @@
 // `domToWorld` is the only place DOM pixels become world units.
 
 export const PHASES = 6
-export const ORBIT_SLOTS = 12 // 12 divides evenly into the 1, 4 and 6 clusters a phase can have
+export const ORBIT_SLOTS = 12 // 12 divides evenly into the 1 and 4 clusters a phase can have
 export const LOGO_NATURAL_WIDTH = 250 // the logo PNG's own width in px: it is shown at that size at most
 export const LOGO_ASPECT = 250 / 46
-export const STEP_COUNT = 6
+export const STEP_COUNT = 4
 
 // Scalars every phase carries; blended linearly.
 //   core          strength of the yellow energy core at the hub, 0..1
@@ -115,6 +115,8 @@ export function resolveAnchor(anchors, id, viewport, out) {
 export function createLayout(graph, { orbitCount = 360 } = {}) {
   const N = graph.nodes.length
   const E = graph.edges.length
+  // Every node but the hub is an arm node; it is dealt evenly across STEP_COUNT clusters below.
+  const stepGroupSize = (N - 1) / STEP_COUNT
   const stepOf = new Int8Array(N)
   const stagger = new Float32Array(N)
   const unit = new Float32Array(N * 3) // the X's own coordinates
@@ -141,11 +143,13 @@ export function createLayout(graph, { orbitCount = 360 } = {}) {
     armUnit[i * 3] = n.x - dx * 0.5 + (-dy * zig) / 1.4142
     armUnit[i * 3 + 1] = n.y - dy * 0.5 + (dx * zig) / 1.4142
     armUnit[i * 3 + 2] = n.z * 0.8
-    // Step clusters: the 36 arm nodes are dealt in order of level, then arm, six to a cluster, so
-    // inner nodes land in the first step and the tips in the last. Each cluster is a tiny X.
+    // Step clusters: the 36 arm nodes are dealt in order of level, then arm, evenly across
+    // STEP_COUNT clusters, so inner nodes land in the first step and the tips in the last. Each
+    // cluster is a tiny X.
     const idx = (n.level - 1) * 4 + n.arm
-    stepOf[i] = Math.min(STEP_COUNT - 1, Math.floor(idx / 6))
-    const rho = 0.4 + 0.12 * (idx % 6)
+    const within = idx % stepGroupSize
+    stepOf[i] = Math.min(STEP_COUNT - 1, Math.floor(idx / stepGroupSize))
+    const rho = 0.4 + (0.6 / (stepGroupSize - 1)) * within
     stepUnit[i * 3] = dx * 0.7071 * rho
     stepUnit[i * 3 + 1] = dy * 0.7071 * rho
     stepUnit[i * 3 + 2] = n.z * 0.9
@@ -242,7 +246,7 @@ function placeX(L, phase, cx, cy, size, vis) {
   return half
 }
 
-// The six step clusters from the centres and radii held in L.cx / L.cy / L.cr.
+// The STEP_COUNT step clusters from the centres and radii held in L.cx / L.cy / L.cr.
 function placeSteps(L, phase, vis) {
   for (let i = 0; i < L.N; i++) {
     const j = L.stepOf[i]
@@ -314,7 +318,7 @@ export function updateLayout(L, anchors, viewport, logo) {
   setScalars(L, 1, 0, heroSize * 0.2, 0.5, 0.8, 0.9, 0.6, 2, 0)
   setOrbit(L, 1, 4, 0.62)
 
-  // Phase 2: six step clusters at the process anchors.
+  // Phase 2: STEP_COUNT step clusters at the process anchors.
   for (let j = 0; j < STEP_COUNT; j++) {
     resolveAnchor(anchors, `process-${j + 1}`, viewport, box)
     L.cx[j] = box.x

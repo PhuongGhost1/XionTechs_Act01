@@ -73,7 +73,7 @@ describe('stepState', () => {
 describe('stepReadout', () => {
   it('counts from one and pads to two digits', () => {
     expect(stepReadout(2, 6)).toBe('Step 03 / 06')
-    expect(stepReadout(0, pipeline.steps.length)).toBe('Step 01 / 06')
+    expect(stepReadout(0, pipeline.steps.length)).toBe('Step 01 / 04')
     expect(stepReadout(11, 12)).toBe('Step 12 / 12')
   })
 

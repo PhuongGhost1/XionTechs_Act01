@@ -832,3 +832,35 @@ just at the end.
   school campus" renders in the sidebar tag, the Selected Work card and the campus section eyebrow;
   `scroll-snap-type`/`scroll-snap-align` are applied and actively engaged. Zero console errors.
 
+## 2026-10-15 — Process: drop Request and Architecture (Bang Do + Claude)
+- Prompt (Teams screenshot, Phuong Hoang tagging Bang Do): remove the Request and Architecture
+  steps from the 6-step process graphic ("REQUEST / DISCOVERY / ARCHITECTURE / BUILD / DEPLOY /
+  SCALE").
+- Looked like a content-only trim (delete 2 entries from `process.steps` in `content.js`), but the
+  Process section's step count is load-bearing for the X-Core 3D animation (`scene/layout.js`):
+  `STEP_COUNT = 6` groups the X's 36 arm nodes into exactly six 6-node clusters (`idx / 6`, `idx %
+  6`) that land on the `process-1..6` DOM anchors, and the same six clusters are reused, dimmed, as
+  a chain through the Deployments and Signals phases. Deleting content without touching this would
+  have left two now-nonexistent anchors (`process-5`, `process-6`) falling back to guessed
+  positions (`fallbackAnchor`) while the node-grouping math kept assuming six clusters of six —
+  visually, the last cluster would have silently absorbed the two orphaned groups instead of the
+  remaining four clusters regrouping evenly.
+  **Lesson: before trimming a content array that drives a numbered section, grep for the section's
+  id/count elsewhere in the codebase — "six" and "STEP_COUNT" turned up a whole parallel WebGL
+  layout system keyed to the old count that the content file gave no hint of.**
+- Fix, done as one change: `content.js` now lists four steps (discovery, build, deploy, scale),
+  renumbered `index`/`anchor` 01-04 / `process-1..4`; title changed from "Request in. Production
+  out." to "Discovery in. Scale out." (same pattern, new first/last step — not new copy). In
+  `scene/layout.js`: `STEP_COUNT` 6 -> 4; the node-grouping formula (`stepOf`, the in-cluster
+  spread `rho`) now derives its group size from `(N - 1) / STEP_COUNT` instead of a hardcoded `6`,
+  so it no longer silently desyncs if the step count changes again. Updated the comments in
+  `layout.js`, `Process.jsx` and `docs/concepts/01-command-implementation.md` that spelled out "six"
+  or showed a "Step 03 / 06" example. `layout.test.js` and `processProgress.test.js` had the same
+  assumption baked into literal `[1,2,3,4,5,6]` arrays and expected counts/readouts; generalized
+  those to read `STEP_COUNT` instead of re-hardcoding `4`.
+- Verified: `npm test` (526/526, including the regenerated `layout.test.js` assertions), `npm run
+  lint` (clean), `npm run build`. Playwright confirmed the rendered section shows exactly
+  Discovery/Build/Deploy/Scale, the readout moves "Step 01 / 04" -> "Step 04 / 04" across the
+  section's scroll range, and the X-Core animation's step-phase clusters are not overlapping or
+  lopsided. Zero console errors.
+
