@@ -26,7 +26,7 @@ export default function CampusSection() {
     <section ref={ref} id="campus" data-cmd-section aria-labelledby="campus-title" className="relative border-t border-cmd-line bg-cmd-bg py-24 lg:py-32">
       <div className="mx-auto max-w-[1440px] px-5 sm:px-8 lg:px-12">
         <Reveal>
-          <SectionHead index={campus.index} label={campus.label} title={campus.title} intro={campus.intro} titleId="campus-title" draft={campus.draft} />
+          <SectionHead index={campus.index} label={campus.label} title={campus.title} intro={campus.intro} titleId="campus-title" />
         </Reveal>
         <div className="mt-12 lg:mt-16">
           {near ? (

@@ -220,8 +220,14 @@ export const deployments = {
 
 // Section 05, the smart campus: a 3D model of an example school and the IoT services in each room
 // (docs/superpowers/specs/2026-10-06-smart-campus-design.md). The campus and its readings are ILLUSTRATIVE
-// (campusData.js, campus/simulate.js) and labelled for every visitor; the service list is PLACEHOLDER until
-// the team confirms it. The wording below is DRAFT, pending sign-off.
+// (campusData.js, campus/simulate.js); the service list is PLACEHOLDER until the team confirms it. The
+// wording below is DRAFT, pending sign-off.
+// Team review (2026-10-15, Phuong Ghost): the badge/servicesNote chips at the top of the model (and the
+// dev-only "Draft copy" tag on the intro) were removed from the page as visual clutter, against this
+// file's original "always visible" plan. `badge`/`servicesNote` are kept here, unused, in case the team
+// wants to reintroduce the disclosure in a lighter-weight form later; the per-reading "Simulated" tag
+// inside the model (campus.simulated) and the Selected Work ledger's "Illustrative" card badge are what's
+// left on the page saying this demo isn't real.
 export const campus = {
   index: '05',
   label: 'Smart school campus',
@@ -229,8 +235,8 @@ export const campus = {
   intro:
     'Walk an example campus. Every room carries the sensors and services we connect for schools: climate, air, occupancy, energy, security and anonymous classroom analytics. Scrub through the day to watch it change.',
   draft: true,
-  badge: 'Illustrative campus · simulated readings', // always visible
-  servicesNote: 'Services shown are examples pending team confirmation.', // always visible, beside the badge
+  badge: 'Illustrative campus · simulated readings', // no longer rendered, see note above
+  servicesNote: 'Services shown are examples pending team confirmation.', // no longer rendered, see note above
   stageLabel: 'Campus model',
   stageHint: 'Hover or tap a building. Drag or use the arrow keys to turn the model, Escape goes back.',
   fallbackNote: 'Flat site plan. The same campus, drawn without 3D.',

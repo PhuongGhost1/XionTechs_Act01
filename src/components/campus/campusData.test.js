@@ -64,11 +64,6 @@ describe('campus wording rules', () => {
   it('has no digits in any content text (numbers only come from the simulation)', () => {
     for (const t of texts()) expect(t, t).not.toMatch(/\d/)
   })
-  it('labels the section illustrative and the readings simulated for every visitor', () => {
-    expect(campus.badge).toMatch(/illustrative/i)
-    expect(campus.badge).toMatch(/simulated/i)
-    expect(campus.servicesNote).toMatch(/pending/i)
-  })
   it('describes engagement analytics as anonymous and class-level, never identifying anyone', () => {
     const e = services.find((s) => s.id === 'engagement')
     expect(e.desc).toMatch(/anonymous/i)

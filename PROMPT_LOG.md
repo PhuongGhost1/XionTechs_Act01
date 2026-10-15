@@ -898,3 +898,35 @@ just at the end.
   and ESS, and for campus specifically: zero "Draft copy" matches, one "Illustrative" match (the
   summary prose, not a badge), and the sidebar ledger badge still present. Zero console errors.
 
+## 2026-10-15 — campus badges removed over a flagged honesty-rule conflict (Bang Do + Claude)
+- Prompt (GitHub PR review comment, Phuong Ghost1, red highlight over the campus model's top bar):
+  "Remove highlight or replace with a better words", on the "Illustrative campus · simulated
+  readings" / "Services shown are examples pending team confirmation" chips and the "Draft copy"
+  tag on the section intro.
+- This one was different from the same day's Deployments-viewer cleanup: `CLAUDE.md` pins this
+  exact spot down explicitly — "the campus is ILLUSTRATIVE, the service list PLACEHOLDER until the
+  team confirms it, and both badges stay visible" — because it is the only disclosure a visitor
+  sees if they land on `#campus` directly (a shared link, not through Selected Work). Asked the
+  user to choose between rewording (keeps the disclosure, CLAUDE.md-compliant) or removing outright
+  (goes against the written rule); they chose removal, explicitly, after seeing the conflict stated.
+  **Lesson: a written project rule is a strong prior, not an unconditional veto — when a teammate's
+  live request conflicts with it, surface the conflict and let a human make the call rather than
+  either silently complying or silently refusing.**
+- Fix: removed the `IllustrativeTag`/`PendingTag` chips from `CampusTwin.jsx` (and the now-unused
+  imports; fixed the header row's flex layout, which had relied on a second flex child for
+  `justify-between` to push `LayerBar` right — switched to `justify-end` now that it's the only
+  child) and the `draft={campus.draft}` prop from `CampusSection.jsx`'s `SectionHead` (drops the
+  dev/review-only "Draft copy" tag). Kept `campus.badge`/`campus.servicesNote` in `content.js`,
+  unused, rather than deleting them, in case the team wants a lighter-weight version of the
+  disclosure later. Removed `campusData.test.js`'s `'labels the section illustrative... for every
+  visitor'` test, since the behaviour it asserted (the strings exist) no longer implies what its
+  name claimed (that they render) — a stale-but-passing test would have been worse than no test.
+  Updated `CLAUDE.md` and the `content.js` comment above `campus` to record the decision and what
+  disclosure remains: the per-reading "Simulated" tag inside the model, and the Selected Work
+  ledger's "Illustrative" card badge (added in the same day's earlier fix) for anyone who arrives
+  via Selected Work.
+- Verified: `npm test` (525/525, one fewer from the removed test), `npm run lint` (clean), `npm run
+  build`. Playwright confirmed zero matches for "Draft copy", "Illustrative campus" and "pending team
+  confirmation" inside `#campus`, and a screenshot confirmed the layer bar still sits top-right with
+  no layout regression from the removed flex sibling. Zero console errors.
+

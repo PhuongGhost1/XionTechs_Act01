@@ -5,7 +5,7 @@ import { DAY } from '../campusData'
 import { campus } from '../content'
 import { readEnvironment, sceneState, subscribe } from '../scene/store'
 import { getThemeId, subscribe as subscribeTheme } from '../theme'
-import { IllustrativeTag, PendingTag, Reveal } from '../ui'
+import { Reveal } from '../ui'
 import CampusLabels from './CampusLabels'
 import CampusPanel from './CampusPanel'
 import CampusSvg from './CampusSvg'
@@ -172,11 +172,7 @@ export default function CampusTwin() {
   return (
     <Reveal delay={120}>
       <div ref={rootRef} className="cmd-ticks border border-cmd-line bg-cmd-bg">
-        <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3 border-b border-cmd-line px-5 py-3">
-          <div className="flex min-w-0 flex-wrap items-center gap-2">
-            <IllustrativeTag>{campus.badge}</IllustrativeTag>
-            <PendingTag>{campus.servicesNote}</PendingTag>
-          </div>
+        <div className="flex flex-wrap items-center justify-end gap-x-6 gap-y-3 border-b border-cmd-line px-5 py-3">
           <LayerBar layer={layer} onChange={setLayer} />
         </div>
 

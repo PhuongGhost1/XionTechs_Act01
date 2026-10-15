@@ -175,7 +175,12 @@ content. If you add a new section, follow the same pattern.
   `deployments.records`, id `campus`) also points to it directly (`href: '#campus'`, a same-page
   anchor), not to a standalone Agent Demo section: that section only still exists on the archived
   page at `/concepts/command/`. Content in `src/components/campusData.js`: the campus is
-  ILLUSTRATIVE, the service list PLACEHOLDER until the team confirms it, and both badges stay visible. Content
+  ILLUSTRATIVE and the service list PLACEHOLDER until the team confirms it. 2026-10-15 (team review):
+  the "Illustrative campus · simulated readings" / "Services shown are examples pending team
+  confirmation" chips at the top of the model, and the dev-only "Draft copy" tag on the section intro,
+  were removed as visual clutter (`content.js` `campus.badge`/`campus.servicesNote` are kept, unused, for
+  reference); what's left disclosing the demo is the per-reading "Simulated" tag inside the model and the
+  Selected Work ledger card's "Illustrative" badge. Content
   text has no digits; every number comes from `campus/simulate.js` (pure, deterministic) and sits under a
   "Simulated" tag. Classroom engagement analytics is anonymous and class-level only: shares of the class, no
   per-seat or per-student state, no faces or names, abstract camera-wall feeds (tests in
