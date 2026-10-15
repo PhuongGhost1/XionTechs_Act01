@@ -21,7 +21,16 @@ see unmarked (open any build with `?review` to see the Draft markers). Resolve e
       employee names, the staff ID, class codes and the client's school and course-brand names
       replaced with sample values. Originals were never committed.
 - [ ] **Permission to publish**: confirm the project owners allow these sanitized screens, the
-      product names "StaffXP" and "ESS", and the visible product copy on the StaffXP sign-in.
+      product name "ESS", and the visible product copy on the sign-in screen. 2026-10-15: "StaffXP"
+      is no longer shown as a product name anywhere in the page text — a teammate flagged it as
+      another company's ("Gems") copyright, so the page now calls it "Staff Experience" throughout
+      (`site.js` `selectedWork.staffxp.name`).
+- [ ] **StaffXP screenshots still show the real brand**: the dashboard and sign-in screenshots in
+      `public/work/` (`staffxp-dashboard.webp`, `staffxp-sign-in.webp`) have "StaffXP" baked into the
+      UI pixels themselves (app header/logo), so the copyright concern above isn't fully resolved by
+      the text rename alone. 2026-10-15: a teammate said a replacement screenshot is coming; swap it
+      in (same sanitizing steps as before: crop chrome, replace names/ids/school names with sample
+      values) once it's actually provided — it hasn't reached this repo yet.
 - [ ] **Test data on the StaffXP dashboard**: calendar items ("Test performance…", "HIDE AND SEEK
       PART 2") and notices ("Test", "test x") are the dev environment's test records. Consider a
       screenshot of a seeded demo account instead.

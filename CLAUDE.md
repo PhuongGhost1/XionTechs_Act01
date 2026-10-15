@@ -98,7 +98,10 @@ content. If you add a new section, follow the same pattern.
 - Real client testimonials (the original site's testimonials are unedited
   WordPress theme-demo content, not real clients — do not port them over)
 - Case study details (metrics, client names)
-- StaffXP and ESS screenshots (sanitized, approved) and permission to name both products
+- StaffXP and ESS screenshots (sanitized, approved); the StaffXP screenshots still need a new
+  capture that doesn't show the "StaffXP" brand in the UI itself (2026-10-15, copyright concern —
+  see PROMPT_LOG.md; the project's display name is "Staff Experience" everywhere else, text already
+  renamed). Permission to name ESS is still open.
 - DRAFT copy: AI callouts, team body, FAQ answers; `.NET` / `React` in the engineering strip
 
 ## Environment gotchas

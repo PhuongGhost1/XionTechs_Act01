@@ -1070,3 +1070,32 @@ just at the end.
   Motion", "NODE", "0412" or "10.77", and zero "BUILD" readout text, at both desktop and mobile widths
   (including the mobile menu panel); screenshots showed no leftover gaps. Zero console errors.
 
+## 2026-10-15 — rename StaffXP to "Staff Experience" (copyright), new screenshot still pending (Bang Do + Claude)
+- Prompt (Teams screenshots, Phuong Hoang): the product name "StaffXP" should read "Staff Experience"
+  instead, because "StaffXP" is another company's ("Gems") branding and showing it by name risks a
+  copyright question. Separately: the product screenshots themselves also show "StaffXP" baked into
+  the UI (the dashboard's app header), and a replacement screenshot was said to be on its way,
+  with a request to swap it in and rebuild.
+- This resolved half of an item this project has flagged as open since its very first day
+  (`content/TODO.md`: "Permission to publish... the product names 'StaffXP' and 'ESS'") — renaming
+  sidesteps needing that permission for StaffXP specifically, rather than waiting on it.
+- Fix (text only): `site.js` `selectedWork.proofs[0].name`, `selectedWork.staffxp.name`, and both
+  screenshot `alt` texts changed from "StaffXP" to "Staff Experience". This file is shared between
+  the homepage and the archived `/concepts/command/` page, so one edit fixed the name on both. Left
+  the internal `id: 'staffxp'` / `href: '#work-staffxp'` / image filenames (`staffxp-dashboard.webp`
+  etc.) alone — lowercase developer slugs, never rendered as visible text, a different and much
+  larger refactor (renaming committed image files, anchors) for a concern that's specifically about
+  what a visitor reads on the page, not what's in a URL or a filename.
+  **Caught before claiming done: checked for the promised replacement screenshot before writing
+  anything about it being swapped in.** `public/work/staffxp-dashboard.webp` and
+  `-sign-in.webp` are both still the same files from 2026-10-13 — no new image has actually reached
+  this repo. The product name is fixed everywhere in text, but the "StaffXP" brand is still visible
+  inside the two screenshot images themselves; that half of the request is not done, and said so
+  rather than reporting the whole thing resolved. Logged as an open item in `content/TODO.md` with
+  exactly what's still needed (the new screenshot, sanitized the same way as the current ones) so it
+  isn't lost.
+- Verified (the text-rename half): `npm test` (523/523), `npm run lint` (clean), `npm run build`.
+  Playwright checked both the homepage and the archived concept page (they share `site.js`) and
+  confirmed zero "StaffXP" matches and the new "Staff Experience" text present on both. Zero console
+  errors.
+

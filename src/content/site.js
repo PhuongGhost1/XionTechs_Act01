@@ -179,7 +179,7 @@ export const selectedWork = {
     'Selected product experiences from the kinds of systems we build. Names and identifying details in the screenshots are replaced with sample values.',
   pendingNote: 'Screenshot pending privacy review. The layout is shown as an outline.',
   proofs: [
-    { id: 'staffxp', label: 'Product engineering', name: 'StaffXP', href: '#work-staffxp' },
+    { id: 'staffxp', label: 'Product engineering', name: 'Staff Experience', href: '#work-staffxp' },
     { id: 'ess', label: 'Enterprise workflow', name: 'ESS', href: '#work-ess' },
     { id: 'agents', label: 'AI and automation', name: 'Agent demo', href: '#ai-agents', note: 'Illustrative' },
   ],
@@ -187,20 +187,22 @@ export const selectedWork = {
   agentsLink: { label: 'See an Agent Work', href: '#ai-agents' },
   staffxp: {
     id: 'work-staffxp',
-    name: 'StaffXP',
+    // 2026-10-15 (team): shown as "Staff Experience", not the product's real name "StaffXP" — a
+    // teammate flagged the real name as another company's ("Gems") copyright. See PROMPT_LOG.md.
+    name: 'Staff Experience',
     eyebrow: 'Education / staff experience',
     title: 'A connected workspace for school staff.',
     desc: 'A staff experience platform bringing everyday activities, notices, wellbeing, tasks, and operational information into one workspace.',
     tags: ['Staff experience', 'Business workflow', 'Role-based platform', 'Integrated operations'],
     main: {
       src: '/work/staffxp-dashboard.webp',
-      alt: 'StaffXP staff dashboard with academic calendar, to-do list, notices, quick links, assignments to mark and an AI assistant panel. Sample data.',
+      alt: 'Staff Experience dashboard with academic calendar, to-do list, notices, quick links, assignments to mark and an AI assistant panel. Sample data.',
       width: 1869,
       height: 958,
     },
     secondary: {
       src: '/work/staffxp-sign-in.webp',
-      alt: 'StaffXP sign-in screen with a Sign in with Microsoft button.',
+      alt: 'Staff Experience sign-in screen with a Sign in with Microsoft button.',
       width: 1874,
       height: 954,
     },
