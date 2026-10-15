@@ -216,9 +216,9 @@ phones, with `scrollHint`. Not a three-card grid.
 
 **Signals** (`id="signals"`, `data-band="paper"`, opaque). `SectionHead`; a data sheet of four tiles divided by
 hairlines: real numbers count up (M3) with their source; `confirm` shows a `To confirm` tag; `placeholder`
-tiles show `—` and a `PendingTag`, never a number. Then the capability map: one row per engineering layer
-with its technology chips; rows marked `draft` carry `DraftMark`; lines draw in as the rows enter. No testimonials,
-no invented metrics, no magnitudes.
+tiles show `—` and a `PendingTag`, never a number. No testimonials, no invented metrics, no magnitudes.
+2026-10-15: the capability map that used to follow (one row per engineering layer with its technology
+chips) was removed on team review; `toCapabilityMap`/`capabilityMap` stay in `content.js`, unused.
 
 **FinalCta** (`id="contact"`). `finale.kicker` as the h2 (the accessible statement is `finale.title`);
 `GET / IT / DONE.` set huge as a staircase (each word indented further); an `anchorProps('final')` box

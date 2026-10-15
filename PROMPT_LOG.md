@@ -930,3 +930,25 @@ just at the end.
   confirmation" inside `#campus`, and a screenshot confirmed the layer bar still sits top-right with
   no layout regression from the removed flex sibling. Zero console errors.
 
+## 2026-10-15 — Signals: remove the capability map (Bang Do + Claude)
+- Prompt (PR review screenshot, Phuong Ghost1): "Remove this whole part (capability map)" — the
+  engineering-layer list (Product/Frontend/Backend/Data/Cloud/AI, with technology chips and "To
+  confirm" tags) that used to follow the four data-sheet tiles in the Engineering signals section.
+  No honesty-rule conflict this time: unlike the campus badges, nothing here was pinned as
+  "must stay visible" in `CLAUDE.md`, and the tiles above it (the real figures/placeholders) were
+  untouched by the request, so this was a straightforward removal.
+- Fix: `Signals.jsx` — deleted the `Layer` component and the whole capability-map block (the
+  "Capability map" heading, the `<ol>` of layer rows, and the stack note paragraph), the now-unused
+  `capabilityMap` import, and the `./Signals.css` import. Deleted `Signals.css` outright rather than
+  leaving it behind: every rule in it (`sg-spine`, `sg-row`, `sg-leader`, `sg-node`) existed only for
+  `Layer`'s connector-line animation, so unlike `content.js` data (kept per this session's usual
+  precedent, in case the team wants it back) there was nothing in the stylesheet worth preserving.
+  Reworded `signals.intro` (content.js) to drop its now-false "the technologies the live site names"
+  clause. Left `capabilityMap`/`toCapabilityMap`/`signals.stackTitle`/`stackNote` in `content.js`,
+  unused — `signals.test.js` still exercises `toCapabilityMap` directly, so removing the data would
+  have meant touching tests the prompt never asked about.
+- Verified: `npm test` (525/525), `npm run lint` (clean, confirming the removed imports/file really
+  were dead), `npm run build` (main chunk gzip dropped further, 21.22 -> 20.66 kB). Playwright
+  confirmed zero "Capability map" matches in `#signals`, the four tiles still render, and the section
+  ends cleanly right after them with no leftover gap. Zero console errors.
+

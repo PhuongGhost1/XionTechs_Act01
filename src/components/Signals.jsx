@@ -1,10 +1,9 @@
 import { useRef } from 'react'
 import { useInView } from '../hooks/useInView'
-import { capabilityMap, signals } from './content'
+import { signals } from './content'
 import { pad2 } from './regions'
 import { PendingTag, Reveal, SectionHead } from './ui'
 import { useCountUp } from './useCountUp'
-import './Signals.css'
 
 // A real figure, counted up from 0 once it is on screen (M3). The count is aria-hidden and the
 // final value is read out in full, so a screen reader never hears the digits climbing.
@@ -56,53 +55,17 @@ function Tile({ metric, index }) {
   )
 }
 
-// One engineering layer: a node on the spine, the layer's name, a leader line and its technologies. Only
-// technologies the live site names are listed. A layer whose technologies are not signed off (draft) shows a
-// visible "To confirm" tag for every visitor instead of a name that might not be true.
-function Layer({ layer, index, total }) {
-  const pos = total === 1 ? 'only' : index === 0 ? 'first' : index === total - 1 ? 'last' : 'mid'
-  const named = layer.chips.length > 0 && !layer.draft
-  return (
-    <Reveal as="li" delay={index * 70} data-pos={pos} className="sg-row relative border-t border-cmd-line py-5 pl-9 last:border-b">
-      <span aria-hidden="true" className="sg-spine" />
-      <span
-        aria-hidden="true"
-        className={`sg-node absolute left-0 top-[30px] h-[9px] w-[9px] border ${
-          named ? 'border-cmd-signal bg-cmd-signal' : 'border-cmd-faint bg-cmd-bg'
-        }`}
-      />
-      <div className="grid gap-x-6 gap-y-3 lg:grid-cols-[17rem_minmax(0,1fr)_auto] lg:items-center">
-        <p className="flex min-w-0 items-baseline gap-3">
-          <span aria-hidden="true" className="cmd-label tabular-nums text-cmd-faint">
-            {pad2(index + 1)}
-          </span>
-          <span className="font-cmd-display text-lg font-semibold uppercase leading-7 tracking-tight text-cmd-text">{layer.label}</span>
-        </p>
-        <span aria-hidden="true" className="sg-leader hidden lg:block" />
-        {named ? (
-          <ul className="flex flex-wrap gap-2 lg:max-w-[34rem] lg:justify-end">
-            {layer.chips.map((chip) => (
-              <li key={chip} className="border border-cmd-faint/60 bg-cmd-surface px-2.5 py-1.5 font-cmd-mono text-[12px] leading-none text-cmd-text">
-                {chip}
-              </li>
-            ))}
-          </ul>
-        ) : layer.draft ? (
-          <PendingTag>{signals.confirmLabel}</PendingTag>
-        ) : null}
-      </div>
-    </Reveal>
-  )
-}
-
 // Section 06. Opaque (bg-cmd-bg, not transparent like most sections), so it covers the fixed
 // WebGL canvas — this used to also force the light "paper" band regardless of the active theme
 // (back when the page had one dark theme and one light accent band for contrast); now that there
 // are four selectable themes, that forced override just meant this section stopped matching
 // whichever one the visitor picked, so it's gone — bg-cmd-bg/text-cmd-text already track the
 // active theme correctly like every other section. A data sheet of the figures we can stand
-// behind, with gaps shown as gaps, then the stack as a map. No testimonials, no invented numbers,
-// and nothing drawn to a length that implies a value.
+// behind, with gaps shown as gaps. No testimonials, no invented numbers, and nothing drawn to a
+// length that implies a value.
+// 2026-10-15 (team review): dropped the "Capability map" layer list that used to follow the
+// tiles (CLAUDE.md, signals section). toCapabilityMap/capabilityMap stay in content.js, unused,
+// in case the team wants the stack listed again later.
 export default function Signals() {
   return (
     <section
@@ -121,27 +84,6 @@ export default function Signals() {
             <Tile key={metric.id} metric={metric} index={i} />
           ))}
         </Reveal>
-
-        <div className="mt-20 grid gap-x-12 gap-y-8 lg:mt-28 lg:grid-cols-12">
-          <Reveal className="lg:col-span-3">
-            <h3
-              id="signals-map"
-              className="font-cmd-display text-2xl font-semibold uppercase tracking-tight text-cmd-text lg:sticky lg:top-24"
-            >
-              {signals.stackTitle}
-            </h3>
-          </Reveal>
-          <div className="min-w-0 lg:col-span-9">
-            <ol aria-labelledby="signals-map">
-              {capabilityMap.map((layer, i) => (
-                <Layer key={layer.id} layer={layer} index={i} total={capabilityMap.length} />
-              ))}
-            </ol>
-            <Reveal as="p" delay={capabilityMap.length * 70} className="mt-6 max-w-2xl text-sm text-cmd-muted">
-              {signals.stackNote}
-            </Reveal>
-          </div>
-        </div>
       </div>
     </section>
   )

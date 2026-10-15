@@ -309,7 +309,7 @@ export const signals = {
   index: '06',
   label: 'Engineering signals',
   title: 'What the system is made of.',
-  intro: 'The figures we can stand behind today, the technologies the live site names, and the numbers still to come.',
+  intro: 'The figures we can stand behind today, and the numbers still to come.',
   metrics: [
     { id: 'leadership', value: 25, suffix: '+', label: 'Years of leadership experience', note: 'Across our leadership team', source: 'LIVE' },
     {
@@ -325,12 +325,16 @@ export const signals = {
   ],
   confirmLabel: 'To confirm',
   placeholderLabel: 'Placeholder',
+  // 2026-10-15 (team review): the capability map that used these is no longer rendered
+  // (Signals.jsx); kept here, unused, in case the team wants the stack listed again later.
   stackTitle: 'Capability map',
   stackNote: 'Technologies named on xiontechs.com. A layer marked to confirm is waiting for the team to sign off its technologies.',
 }
 
 // Capability map rows come from SITE engineering.layers so both pages agree. A row's `items`
 // string ("Azure, AWS, GCP", ".NET and APIs") is split into chips; `draft` follows the layer.
+// 2026-10-15: no longer rendered on the page (see the note on `signals` above); still used by
+// signals.test.js and exported for the team to revisit later.
 export function toCapabilityMap(layers = engineering.layers) {
   return layers.map((layer) => ({
     id: layer.id,
