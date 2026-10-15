@@ -1169,3 +1169,37 @@ just at the end.
   the two links that had been floating outside their boxes), then loaded the live page in a dark theme
   at the same ~1920px width as the report and visually confirmed the match. Zero console errors.
 
+## 2026-10-15 — StaffXP hotspots: a third pass, a different bug this time (Bang Do + Claude)
+- Prompt: "still look wrong", same screenshot framing as before, no new detail.
+- The previous fix's own verification method was the blind spot. That pass checked box-edge-to-card-
+  edge alignment by overlaying plain bordered boxes on the raw image — accurate for that question, but
+  it never rendered the actual region label chip (`ProductViewer.jsx` `.dv-chip`, which straddles the
+  box's own top border and is a fixed 16px tall in real pixels). This time, inspected the live DOM
+  directly instead (box and chip `getBoundingClientRect()` on the real rendered page) and found the
+  actual bug: the viewer's image renders at roughly 770px wide in a normal desktop layout (capped by
+  the page's own max-width), so that fixed 16px chip covers about 2% of the image's displayed height —
+  enough to sit on top of a card's header text whenever the header starts less than ~3-4% below the
+  card's own edge. Two of the eight boxes hit exactly that: "Birthdays this week" and "Open wellbeing
+  tasks" both have their header close to the card top, so the "03"/"05" chips were covering the first
+  letter ("...irthdays", "...wellbeing"). Confirmed by zooming into each box's own corner on the live
+  page, not by reading the screenshot the teammate sent — six of eight were already clean (not
+  something visible in the chat screenshot at that resolution).
+  **Lesson, now twice in a row on the same feature: a synthetic stand-in for a real UI element (plain
+  bordered boxes, standing in for the actual chip-and-overlay component) answers a narrower question
+  than it looks like it does. The first pass's grid-ruler measured the image correctly; this pass's
+  overlay drew the boxes correctly; neither reproduced the one interactive element (the chip) whose
+  behavior was actually the bug. Once two "it still looks wrong" reports in a row trace back to the
+  verification method and not the underlying fix, that's the signal to stop re-measuring and go test
+  the real component's real DOM instead.**
+- Fix (`site.js` `selectedWork.staffxp.hotspots`): `birthdays` top 68% -> 65% (now extends slightly
+  into the gap above the card, trading geometric snugness for chip clearance), height 29 -> 32 to keep
+  the same bottom edge; `wellbeing` top 91% -> 88%, height 8.5 -> 11.5, same reasoning. `notices` (a
+  similar but smaller, ~2-3% gap) was confirmed clean in the live check and left alone rather than
+  changed on spec. Added a comment above the array explaining why `box.y` sometimes has to clear the
+  chip rather than match the card exactly, so a future re-measurement doesn't reintroduce this.
+- Verified: `npm test` (523/523), `npm run lint` (clean), `npm run build`. Re-inspected the live DOM
+  after the fix: both chips now sit fully above their header text with the full label readable
+  ("Birthdays this week", "Open wellbeing tasks"), confirmed with zoomed screenshots of each box's own
+  corner, and a full-section screenshot at the same dark theme and ~1920px width as the report. Zero
+  console errors.
+

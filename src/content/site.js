@@ -212,13 +212,18 @@ export const selectedWork = {
     // DRAFT: heading for the list of annotated regions under the screens.
     hotspotsTitle: 'On this screen',
     // MOTION §13: only UI visible in the screenshot is annotated. Boxes measured 2026-10-15 against
-    // the new 1910x983 capture (replaces the previous screenshot's layout and hotspots).
+    // the new 1910x983 capture (replaces the previous screenshot's layout and hotspots). `box.y`
+    // is NOT just the card's own edge: the chip (ProductViewer.jsx `dv-chip`) straddles the box's top
+    // border and is a fixed 16px tall regardless of how small the image renders at — at this viewer's
+    // typical ~770px display width that is roughly 2% of the image's height. A card whose header sits
+    // less than ~3-4% below the card's true edge (birthdays, wellbeing) needs its box.y pulled up past
+    // the card's edge, into the gap above it, or the chip covers the header text.
     hotspots: [
       { id: 'calendar', label: 'Academic calendar', box: { x: 2.4, y: 29.5, w: 19.6, h: 35.1 } },
       { id: 'tasks', label: 'To-do list, linked to Microsoft To Do', box: { x: 24, y: 29.5, w: 37, h: 38.5 } },
-      { id: 'birthdays', label: 'Birthdays this week', box: { x: 2.4, y: 68, w: 19.6, h: 29 } },
+      { id: 'birthdays', label: 'Birthdays this week', box: { x: 2.4, y: 65, w: 19.6, h: 32 } },
       { id: 'notices', label: 'Notices', box: { x: 24, y: 72, w: 37, h: 15 } },
-      { id: 'wellbeing', label: 'Open wellbeing tasks', box: { x: 24, y: 91, w: 37, h: 8.5 } },
+      { id: 'wellbeing', label: 'Open wellbeing tasks', box: { x: 24, y: 88, w: 37, h: 11.5 } },
       { id: 'links', label: 'Quick links, including employee self-service', box: { x: 62.5, y: 30, w: 21, h: 20 } },
       { id: 'pulse', label: "Today's pulse, a school-wide snapshot", box: { x: 62.5, y: 54, w: 21, h: 30 } },
       { id: 'assistant', label: 'AI assistant panel', box: { x: 84.5, y: 6, w: 15.5, h: 94 } },
